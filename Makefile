@@ -9,6 +9,6 @@ CFLAGS :=-std=c99 -pedantic -Wall -Wextra -fsanitize=address,undefined
 run: example
 	./$<
 
-example: example.c SHTK.h
+example: example.c CTK.h
 	$(CC) -o $@ $(CFLAGS) $$(pkg-config --cflags sdl3) \
 		$< $$(pkg-config --libs sdl3)

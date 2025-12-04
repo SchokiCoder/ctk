@@ -5,6 +5,7 @@
 
 # basic
 
+- [x] add proper project name, license document, and README
 - [ ] add font rendering
 - [ ] add `Menu_add_label` function
 - [ ] add `Menu_add_button` function

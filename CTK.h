@@ -2,75 +2,75 @@
  * Copyright (C) 2025  Andy Frank Schoknecht
  */
 
-#ifndef _SHTK_H
-#define _SHTK_H
+#ifndef _CTK_H
+#define _CTK_H
 
 #include <SDL3/SDL.h>
 #include <string.h>
 
-#ifndef SHTK_MAX_TEXTLEN
-#define SHTK_MAX_TEXTLEN 64
+#ifndef CTK_MAX_TEXTLEN
+#define CTK_MAX_TEXTLEN 64
 #endif
 
-#ifndef SHTK_MAX_WIDGETS
-#define SHTK_MAX_WIDGETS 64
+#ifndef CTK_MAX_WIDGETS
+#define CTK_MAX_WIDGETS 64
 #endif
 
-#ifndef SHTK_MAX_TICKRATE
-#define SHTK_MAX_TICKRATE 60
+#ifndef CTK_MAX_TICKRATE
+#define CTK_MAX_TICKRATE 60
 #endif
 
-#define SHTK_VERSION "0.0.0"
+#define CTK_VERSION "0.0.0"
 
-struct SHTK_Style {
+struct CTK_Style {
 	SDL_Color bg;
 	SDL_Color fg;
 };
 
-struct SHTK_Menu {
+struct CTK_Menu {
 	int                active;
 	SDL_Window        *win;
-	struct SHTK_Style  style;
+	struct CTK_Style  style;
 
-	void               (*on_quit)(struct SHTK_Menu*, void*);
+	void               (*on_quit)(struct CTK_Menu*, void*);
 	void              *on_quit_data;
 
 	int                 count;
-	int                 enabled[SHTK_MAX_WIDGETS];
-	char                text[SHTK_MAX_TEXTLEN][SHTK_MAX_WIDGETS];
-	int                 visible[SHTK_MAX_WIDGETS];
-	SDL_Rect            rect[SHTK_MAX_WIDGETS];
+	int                 enabled[CTK_MAX_WIDGETS];
+	char                text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
+	int                 visible[CTK_MAX_WIDGETS];
+	SDL_Rect            rect[CTK_MAX_WIDGETS];
 };
 
 int
-SHTK_Menu_new(struct SHTK_Menu *m,
-              const char *title,
-              const int winw,
-              const int winh,
-              const SDL_WindowFlags flags);
+CTK_Menu_new(struct CTK_Menu *m,
+             const char *title,
+             const int winw,
+             const int winh,
+             const SDL_WindowFlags flags);
 
 void
-SHTK_Menu_draw(struct SHTK_Menu *m);
+CTK_Menu_draw(struct CTK_Menu *m);
 
 void
-SHTK_Menu_tick(struct SHTK_Menu *m);
+CTK_Menu_tick(struct CTK_Menu *m);
 
 /* Alternatively, if more control is needed,
- * you can call SHTK_Menu_draw and SHTK_Menu_tick yourself.
+ * you can call CTK_Menu_draw and CTK_Menu_tick yourself.
  */
 void
-SHTK_Menu_mainloop(struct SHTK_Menu *m);
+CTK_Menu_mainloop(struct CTK_Menu *m);
 
 void
-SHTK_Menu_destroy(struct SHTK_Menu *m);
+CTK_Menu_destroy(struct CTK_Menu *m);
 
 int
-SHTK_Init();
+CTK_Init();
 
 void
-SHTK_Quit();
+CTK_Quit();
 
-const struct SHTK_Style SHTK_Theme_TclTk = {
+const struct CTK_Style CTK_Theme_TclTk = {
 	.bg.r = 0xda,
 	.bg.g = 0xda,
 	.bg.b = 0xda,
@@ -82,22 +82,22 @@ const struct SHTK_Style SHTK_Theme_TclTk = {
 	.fg.a = 0xff,
 };
 
-#define SHTK_DEFAULT_THEME SHTK_Theme_TclTk
+#define CTK_DEFAULT_THEME CTK_Theme_TclTk
 
-#ifdef SHTK_IMPL
+#ifdef CTK_IMPL
 
 int
-SHTK_Menu_new(struct SHTK_Menu *m,
-              const char *title,
-              const int winw,
-              const int winh,
-              const SDL_WindowFlags flags)
+CTK_Menu_new(struct CTK_Menu *m,
+             const char *title,
+             const int winw,
+             const int winh,
+             const SDL_WindowFlags flags)
 {
 	m->active = 1;
 	m->count = 0;
 	m->on_quit = NULL;
 	m->on_quit_data = NULL;
-	m->style = SHTK_DEFAULT_THEME;
+	m->style = CTK_DEFAULT_THEME;
 
 	m->win = SDL_CreateWindow(title, winw, winh, flags);
 	if (NULL == m->win) {
@@ -109,7 +109,7 @@ SHTK_Menu_new(struct SHTK_Menu *m,
 }
 
 int
-SHTK_Menu_add(struct SHTK_Menu *m)
+CTK_Menu_add(struct CTK_Menu *m)
 {
 	int ret = m->count;
 
@@ -126,7 +126,7 @@ SHTK_Menu_add(struct SHTK_Menu *m)
 }
 
 void
-SHTK_Menu_draw(struct SHTK_Menu *m)
+CTK_Menu_draw(struct CTK_Menu *m)
 {
 	int i;
 	SDL_Renderer *r;
@@ -150,7 +150,7 @@ SHTK_Menu_draw(struct SHTK_Menu *m)
 }
 
 void
-SHTK_Menu_tick(struct SHTK_Menu *m)
+CTK_Menu_tick(struct CTK_Menu *m)
 {
 	SDL_Event e;
 
@@ -166,7 +166,7 @@ SHTK_Menu_tick(struct SHTK_Menu *m)
 }
 
 void
-SHTK_Menu_mainloop(struct SHTK_Menu *m)
+CTK_Menu_mainloop(struct CTK_Menu *m)
 {
 	Uint64 now, last;
 
@@ -174,25 +174,25 @@ SHTK_Menu_mainloop(struct SHTK_Menu *m)
 		SDL_WaitEvent(NULL);
 
 		now = SDL_GetTicks();
-		if (now - last > 1000 / SHTK_MAX_TICKRATE) {
+		if (now - last > 1000 / CTK_MAX_TICKRATE) {
 			last = now;
 
-			SHTK_Menu_tick(m);
-			SHTK_Menu_draw(m);
+			CTK_Menu_tick(m);
+			CTK_Menu_draw(m);
 		}
 	}
 }
 
 void
-SHTK_Menu_destroy(struct SHTK_Menu *m)
+CTK_Menu_destroy(struct CTK_Menu *m)
 {
 	SDL_DestroyWindow(m->win);
 }
 
 int
-SHTK_Init(const char *appname,
-          const char *appversion,
-          const char *appidentifier)
+CTK_Init(const char *appname,
+         const char *appversion,
+         const char *appidentifier)
 {
 	if (!SDL_SetAppMetadata(appname, appversion, appidentifier))
 		return 1;
@@ -204,11 +204,11 @@ SHTK_Init(const char *appname,
 }
 
 void
-SHTK_Quit()
+CTK_Quit()
 {
 	SDL_Quit();
 }
 
-#endif /* SHTK_IMPL */
+#endif /* CTK_IMPL */
 
-#endif /* _SHTK_H */
+#endif /* _CTK_H */

@@ -2,13 +2,13 @@
  * Copyright (C) 2025  Andy Frank Schoknecht
  */
 
-#define SHTK_IMPL
-#include "SHTK.h"
+#define CTK_IMPL
+#include "CTK.h"
 
 #include <stdio.h>
 
 void
-m_on_quit(struct SHTK_Menu *m,
+m_on_quit(struct CTK_Menu *m,
           void* dummy)
 {
 	(void) dummy;
@@ -20,27 +20,27 @@ int
 main(int argc,
      char **argv)
 {
-	struct SHTK_Menu m;
+	struct CTK_Menu m;
 
 	(void) argc;
 	(void) argv;
 
-	if (SHTK_Init("SHTK Example",
-	              SHTK_VERSION,
-	              "io.github.SchokiCoder.SHTK") != 0) {
-		fprintf(stderr, "Could not init SHTK\n");
+	if (CTK_Init("CTK Example",
+	              CTK_VERSION,
+	              "io.github.SchokiCoder.CTK") != 0) {
+		fprintf(stderr, "Could not init CTK\n");
 		return 0;
 	}
 
-	if (SHTK_Menu_new(&m, "test", 640, 480, 0) != 0) {
-		fprintf(stderr, "Could not init SHTK Menu\n");
+	if (CTK_Menu_new(&m, "test", 640, 480, 0) != 0) {
+		fprintf(stderr, "Could not init CTK Menu\n");
 		return 0;
 	}
 
 	m.on_quit = m_on_quit;
 
-	SHTK_Menu_mainloop(&m);
+	CTK_Menu_mainloop(&m);
 
-	SHTK_Menu_destroy(&m);
-	SHTK_Quit();
+	CTK_Menu_destroy(&m);
+	CTK_Quit();
 }

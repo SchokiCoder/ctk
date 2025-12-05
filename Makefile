@@ -4,11 +4,14 @@
 CC     :=cc
 CFLAGS :=-std=c99 -pedantic -Wall -Wextra -fsanitize=address,undefined
 
-.PHONY: run
+.PHONY: clean run
 
-run: example
-	./$<
+clean:
+	rm -f example
+
+run: clean example
+	./example
 
 example: example.c CTK.h
-	$(CC) -o $@ $(CFLAGS) $$(pkg-config --cflags sdl3) \
-		$< $$(pkg-config --libs sdl3)
+	$(CC) -o $@ $(CFLAGS) $$(pkg-config --cflags sdl3 sdl3-ttf) \
+		$< $$(pkg-config --libs sdl3 sdl3-ttf)

@@ -10,8 +10,10 @@
 This also fixes a bug where the first draw didn't work,
 which only got noticable because I also added a redraw flag for the menu.
 
-- [ ] add `Menu_add_label` function
-(is disabled), also add disabled fg color to style
+- [x] add `Menu_add_label` function
+Also add disabled fg color to style.
+Also only draw widgets set to visible.
+
 - [ ] add `Menu_add_button` function
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

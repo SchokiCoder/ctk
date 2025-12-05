@@ -57,6 +57,7 @@ static const char *FONTNAMES[] = {
 struct CTK_Style {
 	SDL_Color bg;
 	SDL_Color fg;
+	SDL_Color fg_disabled;
 };
 
 struct CTK_Menu {
@@ -83,6 +84,28 @@ CTK_Menu_new(struct CTK_Menu *m,
              const int winw,
              const int winh,
              const SDL_WindowFlags flags);
+
+int
+CTK_Menu_add(struct CTK_Menu *m);
+
+void
+CTK_Menu_render_text(struct CTK_Menu *m,
+                     const int widget);
+
+void
+CTK_Menu_set_enabled(struct CTK_Menu *m,
+                     const int widget,
+                     const int enabled);
+
+void
+CTK_Menu_set_text(struct CTK_Menu *m,
+                  const int widget,
+                  const char *text);
+
+void
+CTK_Menu_set_text_and_resize(struct CTK_Menu *m,
+                             const int widget,
+                             const char *text);
 
 void
 CTK_Menu_draw(struct CTK_Menu *m);
@@ -122,6 +145,11 @@ const struct CTK_Style CTK_Theme_TclTk = {
 	.fg.g = 0x00,
 	.fg.b = 0x00,
 	.fg.a = 0xff,
+
+	.fg_disabled.r = 0xa4,
+	.fg_disabled.g = 0xa4,
+	.fg_disabled.b = 0xa4,
+	.fg_disabled.a = 0xff,
 };
 
 #define CTK_DEFAULT_FONTSIZE 11
@@ -179,23 +207,60 @@ CTK_Menu_add(struct CTK_Menu *m)
 	return ret;
 }
 
+int
+CTK_Menu_add_label(struct CTK_Menu *m)
+{
+	int ret = m->count;
+
+	ret = CTK_Menu_add(m);
+	m->enabled[ret] = 1;
+	m->visible[ret] = 1;
+
+	return ret;
+}
+
+void
+CTK_Menu_render_text(struct CTK_Menu *m,
+                     const int widget)
+{
+	SDL_Color fg;
+	SDL_Renderer *r;
+
+	SDL_DestroySurface(m->surface[widget]);
+	SDL_DestroyTexture(m->texture[widget]);
+
+	r = SDL_GetRenderer(m->win);
+
+	if (m->enabled[widget])
+		fg = m->style.fg;
+	else
+		fg = m->style.fg_disabled;
+
+	m->surface[widget] = TTF_RenderText_LCD(CTK_font,
+	                                        m->text[widget],
+	                                        0,
+	                                        fg,
+	                                        m->style.bg);
+	m->texture[widget] = SDL_CreateTextureFromSurface(r, m->surface[widget]);
+	m->redraw = 1;
+}
+
+void
+CTK_Menu_set_enabled(struct CTK_Menu *m,
+                     const int widget,
+                     const int enabled)
+{
+	m->enabled[widget] = enabled;
+	CTK_Menu_render_text(m, widget);
+}
+
 void
 CTK_Menu_set_text(struct CTK_Menu *m,
                   const int widget,
                   const char *text)
 {
-	SDL_Renderer *r;
-
-	r = SDL_GetRenderer(m->win);
-
 	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
-	m->surface[widget] = TTF_RenderText_LCD(CTK_font,
-	                                        text,
-	                                        0,
-	                                        m->style.fg,
-	                                        m->style.bg);
-	m->texture[widget] = SDL_CreateTextureFromSurface(r, m->surface[widget]);
-	m->redraw = 1;
+	CTK_Menu_render_text(m, widget);
 }
 
 void
@@ -227,6 +292,9 @@ CTK_Menu_draw(struct CTK_Menu *m)
 	SDL_RenderClear(r);
 
 	for (i = 0; i < m->count; i++) {
+		if (!m->visible[i])
+			continue;
+
 		SDL_RenderTexture(r, m->texture[i], NULL, &m->rect[i]);
 	}
 
@@ -275,6 +343,7 @@ CTK_Menu_destroy(struct CTK_Menu *m)
 
 	for (i = 0; i < m->count; i++) {
 		SDL_DestroySurface(m->surface[i]);
+		SDL_DestroyTexture(m->texture[i]);
 	}
 	SDL_DestroyWindow(m->win);
 }

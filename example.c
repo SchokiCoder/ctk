@@ -21,7 +21,8 @@ main(int argc,
      char **argv)
 {
 	struct CTK_Menu m;
-	int label;
+	int lbl_enabled;
+	int lbl_disabled;
 
 	(void) argc;
 	(void) argv;
@@ -40,8 +41,12 @@ main(int argc,
 		return 0;
 	}
 
-	label = CTK_Menu_add(&m);
-	CTK_Menu_set_text_and_resize(&m, label, "Hello world");
+	lbl_enabled = CTK_Menu_add_label(&m);
+	CTK_Menu_set_text_and_resize(&m, lbl_enabled, "Hello world");
+	lbl_disabled = CTK_Menu_add_label(&m);
+	CTK_Menu_set_text_and_resize(&m, lbl_disabled, "See you later");
+	CTK_Menu_set_enabled(&m, lbl_disabled, 0);
+	m.rect[lbl_disabled].y = 20;
 
 	m.on_quit = m_on_quit;
 

@@ -56,6 +56,7 @@ static const char *FONTNAMES[] = {
 
 struct CTK_Style {
 	SDL_Color bg;
+	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
 };
@@ -70,12 +71,16 @@ struct CTK_Menu {
 	void              *on_quit_data;
 
 	int                count;
+	int                border[CTK_MAX_WIDGETS];
 	int                enabled[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	int                visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
-	SDL_Surface       *surface[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
+	void              (*on_click[CTK_MAX_WIDGETS])(struct CTK_Menu*,
+	                                               const int,
+	                                               void*);
+	void              *on_click_data[CTK_MAX_WIDGETS];
 };
 
 int
@@ -88,9 +93,15 @@ CTK_Menu_new(struct CTK_Menu *m,
 int
 CTK_Menu_add(struct CTK_Menu *m);
 
+int
+CTK_Menu_add_button(struct CTK_Menu *m);
+
+int
+CTK_Menu_add_label(struct CTK_Menu *m);
+
 void
-CTK_Menu_render_text(struct CTK_Menu *m,
-                     const int widget);
+CTK_Menu_create_texture(struct CTK_Menu *m,
+                        const int widget);
 
 void
 CTK_Menu_set_enabled(struct CTK_Menu *m,
@@ -141,6 +152,11 @@ const struct CTK_Style CTK_Theme_TclTk = {
 	.bg.b = 0xda,
 	.bg.a = 0xff,
 
+	.border.r = 0x83,
+	.border.g = 0x83,
+	.border.b = 0x83,
+	.border.a = 0xff,
+
 	.fg.r = 0x00,
 	.fg.g = 0x00,
 	.fg.b = 0x00,
@@ -152,6 +168,8 @@ const struct CTK_Style CTK_Theme_TclTk = {
 	.fg_disabled.a = 0xff,
 };
 
+#define CTK_DEFAULT_BUTTON_W 80
+#define CTK_DEFAULT_BUTTON_H 27
 #define CTK_DEFAULT_FONTSIZE 11
 #define CTK_DEFAULT_THEME CTK_Theme_TclTk
 
@@ -195,14 +213,31 @@ CTK_Menu_add(struct CTK_Menu *m)
 	int ret = m->count;
 
 	m->count++;
+	m->border[ret] = 0;
 	m->enabled[ret] = 0;
 	m->text[ret][0] = '\0';
 	m->rect[ret].x = 0;
 	m->rect[ret].y = 0;
 	m->rect[ret].w = 0;
 	m->rect[ret].h = 0;
-	m->surface[ret] = NULL;
 	m->visible[ret] = 0;
+	m->on_click[ret] = NULL;
+	m->on_click_data[ret] = NULL;
+
+	return ret;
+}
+
+int
+CTK_Menu_add_button(struct CTK_Menu *m)
+{
+	int ret = m->count;
+
+	ret = CTK_Menu_add(m);
+	m->border[ret] = 1;
+	m->enabled[ret] = 1;
+	m->visible[ret] = 1;
+	m->rect[ret].w = CTK_DEFAULT_BUTTON_W;
+	m->rect[ret].h = CTK_DEFAULT_BUTTON_H;
 
 	return ret;
 }
@@ -220,29 +255,55 @@ CTK_Menu_add_label(struct CTK_Menu *m)
 }
 
 void
-CTK_Menu_render_text(struct CTK_Menu *m,
-                     const int widget)
+CTK_Menu_create_texture(struct CTK_Menu *m,
+                        const int widget)
 {
 	SDL_Color fg;
-	SDL_Renderer *r;
-
-	SDL_DestroySurface(m->surface[widget]);
-	SDL_DestroyTexture(m->texture[widget]);
+	SDL_Renderer *r = NULL;
+	SDL_FRect    text_r;
+	SDL_Surface *text_s = NULL;
+	SDL_Texture *text_t = NULL;
 
 	r = SDL_GetRenderer(m->win);
+
+	SDL_DestroyTexture(m->texture[widget]);
 
 	if (m->enabled[widget])
 		fg = m->style.fg;
 	else
 		fg = m->style.fg_disabled;
 
-	m->surface[widget] = TTF_RenderText_LCD(CTK_font,
-	                                        m->text[widget],
-	                                        0,
-	                                        fg,
-	                                        m->style.bg);
-	m->texture[widget] = SDL_CreateTextureFromSurface(r, m->surface[widget]);
+	text_s = TTF_RenderText_LCD(CTK_font,
+	                            m->text[widget],
+	                            0,
+	                            fg,
+	                            m->style.bg);
+	text_t = SDL_CreateTextureFromSurface(r, text_s);
+
+	m->texture[widget] = SDL_CreateTexture(r,
+	                                       SDL_PIXELFORMAT_RGBA8888,
+	                                       SDL_TEXTUREACCESS_TARGET,
+	                                       m->rect[widget].w,
+	                                       m->rect[widget].h);
+	SDL_SetRenderTarget(r, m->texture[widget]);
+	text_r.x = (m->rect[widget].w - text_s->w) / 2.0;
+	text_r.y = (m->rect[widget].h - text_s->h) / 2.0;
+	text_r.w = text_s->w;
+	text_r.h = text_s->h;
+	SDL_RenderTexture(r, text_t, NULL, &text_r);
+	if (m->border[widget]) {
+		SDL_SetRenderDrawColor(r,
+			               m->style.border.r,
+			               m->style.border.g,
+			               m->style.border.b,
+			               m->style.border.a);
+		SDL_RenderRect(r, &m->rect[widget]);
+	}
+
 	m->redraw = 1;
+	SDL_SetRenderTarget(r, NULL);
+	SDL_DestroySurface(text_s);
+	SDL_DestroyTexture(text_t);
 }
 
 void
@@ -251,7 +312,7 @@ CTK_Menu_set_enabled(struct CTK_Menu *m,
                      const int enabled)
 {
 	m->enabled[widget] = enabled;
-	CTK_Menu_render_text(m, widget);
+	CTK_Menu_create_texture(m, widget);
 }
 
 void
@@ -259,8 +320,22 @@ CTK_Menu_set_text(struct CTK_Menu *m,
                   const int widget,
                   const char *text)
 {
+	int w, h;
+
 	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
-	CTK_Menu_render_text(m, widget);
+	TTF_GetStringSize(CTK_font,
+	                  m->text[widget],
+	                  strlen(m->text[widget]),
+	                  &w, &h);
+	if (m->border[widget]) {
+		w++;
+		h++;
+	}
+	if (w > m->rect[widget].w)
+		m->rect[widget].w = w;
+	if (h > m->rect[widget].h)
+		m->rect[widget].h = h;
+	CTK_Menu_create_texture(m, widget);
 }
 
 void
@@ -268,9 +343,20 @@ CTK_Menu_set_text_and_resize(struct CTK_Menu *m,
                              const int widget,
                              const char *text)
 {
-	CTK_Menu_set_text(m, widget, text);
-	m->rect[widget].w = m->surface[widget]->w;
-	m->rect[widget].h = m->surface[widget]->h;
+	int w, h;
+
+	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
+	TTF_GetStringSize(CTK_font,
+	                  m->text[widget],
+	                  strlen(m->text[widget]),
+	                  &w, &h);
+	if (m->border[widget]) {
+		w++;
+		h++;
+	}
+	m->rect[widget].w = w;
+	m->rect[widget].h = h;
+	CTK_Menu_create_texture(m, widget);
 }
 
 void
@@ -306,9 +392,22 @@ void
 CTK_Menu_tick(struct CTK_Menu *m)
 {
 	SDL_Event e;
+	int i;
+	SDL_FPoint p;
 
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			for (i = 0; i < m->count; i++) {
+				p.x = e.button.x;
+				p.y = e.button.y;
+				if (SDL_PointInRectFloat(&p, &m->rect[i])) {
+					m->on_click[i](m, i, m->on_click_data[i]);
+					break;
+				}
+			}
+			break;
+
 		case SDL_EVENT_QUIT:
 			if (NULL != m->on_quit) {
 				m->on_quit(m, m->on_quit_data);
@@ -342,7 +441,6 @@ CTK_Menu_destroy(struct CTK_Menu *m)
 	int i;
 
 	for (i = 0; i < m->count; i++) {
-		SDL_DestroySurface(m->surface[i]);
 		SDL_DestroyTexture(m->texture[i]);
 	}
 	SDL_DestroyWindow(m->win);

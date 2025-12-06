@@ -2,9 +2,11 @@
 # Copyright (C) 2025  Andy Frank Schoknecht
 
 CC     :=cc
-CFLAGS :=-std=c99 -pedantic -Wall -Wextra -fsanitize=address,undefined
+CFLAGS :=-std=c99 -pedantic -Wall -Wextra -fsanitize=address,undefined -g
 
 .PHONY: clean run
+
+build: example
 
 clean:
 	rm -f example

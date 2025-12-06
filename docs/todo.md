@@ -1,7 +1,7 @@
 - [ ] add more themes, especially a dark one
 - [ ] add a way to grid widgets
 - [ ] add mnemonics
-- [ ] 
+- [ ] add proper borders
 
 # basic
 
@@ -14,6 +14,10 @@ which only got noticable because I also added a redraw flag for the menu.
 Also add disabled fg color to style.
 Also only draw widgets set to visible.
 
-- [ ] add `Menu_add_button` function
+- [x] add `Menu_add_button` function
+Also change `Menu_set_text` to resize if needed,
+and streamline the texture per widget creation internals.
+
+- [ ] add a default binding for each menu on_quit to just set active to false
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

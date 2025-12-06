@@ -18,6 +18,8 @@ Also only draw widgets set to visible.
 Also change `Menu_set_text` to resize if needed,
 and streamline the texture per widget creation internals.
 
+- [x] change function names to be more in line with SDL
+- [ ] replace int flags with bools
 - [ ] add a default binding for each menu on_quit to just set active to false
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

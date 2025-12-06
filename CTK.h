@@ -84,54 +84,30 @@ struct CTK_Menu {
 };
 
 int
-CTK_Menu_new(struct CTK_Menu *m,
-             const char *title,
-             const int winw,
-             const int winh,
-             const SDL_WindowFlags flags);
+CTK_AddButton(struct CTK_Menu *m);
 
 int
-CTK_Menu_add(struct CTK_Menu *m);
+CTK_AddLabel(struct CTK_Menu *m);
 
 int
-CTK_Menu_add_button(struct CTK_Menu *m);
+CTK_AddWidget(struct CTK_Menu *m);
 
 int
-CTK_Menu_add_label(struct CTK_Menu *m);
+CTK_CreateMenu(struct CTK_Menu *m,
+               const char *title,
+               const int winw,
+               const int winh,
+               const SDL_WindowFlags flags);
 
 void
-CTK_Menu_create_texture(struct CTK_Menu *m,
+CTK_CreateWidgetTexture(struct CTK_Menu *m,
                         const int widget);
 
 void
-CTK_Menu_set_enabled(struct CTK_Menu *m,
-                     const int widget,
-                     const int enabled);
+CTK_DestroyMenu(struct CTK_Menu *m);
 
 void
-CTK_Menu_set_text(struct CTK_Menu *m,
-                  const int widget,
-                  const char *text);
-
-void
-CTK_Menu_set_text_and_resize(struct CTK_Menu *m,
-                             const int widget,
-                             const char *text);
-
-void
-CTK_Menu_draw(struct CTK_Menu *m);
-
-void
-CTK_Menu_tick(struct CTK_Menu *m);
-
-/* Alternatively, if more control is needed,
- * you can call CTK_Menu_draw and CTK_Menu_tick yourself.
- */
-void
-CTK_Menu_mainloop(struct CTK_Menu *m);
-
-void
-CTK_Menu_destroy(struct CTK_Menu *m);
+CTK_DrawMenu(struct CTK_Menu *m);
 
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
@@ -139,12 +115,36 @@ CTK_Menu_destroy(struct CTK_Menu *m);
  * Upon error, returns NOT 0. Call SDL_GetError() for more information.
  */
 int
-CTK_init(const char *appname,
+CTK_Init(const char *appname,
          const char *appversion,
          const char *appidentifier);
 
+/* Alternatively, if more control is needed,
+ * you can call CTK_DrawMenu and CTK_TickMenu yourself.
+ */
 void
-CTK_quit();
+CTK_MainloopMenu(struct CTK_Menu *m);
+
+void
+CTK_SetWidgetEnabled(struct CTK_Menu *m,
+                     const int widget,
+                     const int enabled);
+
+void
+CTK_SetWidgetText(struct CTK_Menu *m,
+                  const int widget,
+                  const char *text);
+
+void
+CTK_SetWidgetTextAndResize(struct CTK_Menu *m,
+                           const int widget,
+                           const char *text);
+
+void
+CTK_TickMenu(struct CTK_Menu *m);
+
+void
+CTK_Quit();
 
 const struct CTK_Style CTK_Theme_TclTk = {
 	.bg.r = 0xda,
@@ -178,11 +178,58 @@ static TTF_Font *CTK_font = NULL;
 #ifdef CTK_IMPL
 
 int
-CTK_Menu_new(struct CTK_Menu *m,
-             const char *title,
-             const int winw,
-             const int winh,
-             const SDL_WindowFlags flags)
+CTK_AddButton(struct CTK_Menu *m)
+{
+	int ret = m->count;
+
+	ret = CTK_AddWidget(m);
+	m->border[ret] = 1;
+	m->enabled[ret] = 1;
+	m->visible[ret] = 1;
+	m->rect[ret].w = CTK_DEFAULT_BUTTON_W;
+	m->rect[ret].h = CTK_DEFAULT_BUTTON_H;
+
+	return ret;
+}
+
+int
+CTK_AddLabel(struct CTK_Menu *m)
+{
+	int ret = m->count;
+
+	ret = CTK_AddWidget(m);
+	m->enabled[ret] = 1;
+	m->visible[ret] = 1;
+
+	return ret;
+}
+
+int
+CTK_AddWidget(struct CTK_Menu *m)
+{
+	int ret = m->count;
+
+	m->count++;
+	m->border[ret] = 0;
+	m->enabled[ret] = 0;
+	m->text[ret][0] = '\0';
+	m->rect[ret].x = 0;
+	m->rect[ret].y = 0;
+	m->rect[ret].w = 0;
+	m->rect[ret].h = 0;
+	m->visible[ret] = 0;
+	m->on_click[ret] = NULL;
+	m->on_click_data[ret] = NULL;
+
+	return ret;
+}
+
+int
+CTK_CreateMenu(struct CTK_Menu *m,
+               const char *title,
+               const int winw,
+               const int winh,
+               const SDL_WindowFlags flags)
 {
 	SDL_Renderer *r;
 
@@ -207,55 +254,8 @@ CTK_Menu_new(struct CTK_Menu *m,
 	return 0;
 }
 
-int
-CTK_Menu_add(struct CTK_Menu *m)
-{
-	int ret = m->count;
-
-	m->count++;
-	m->border[ret] = 0;
-	m->enabled[ret] = 0;
-	m->text[ret][0] = '\0';
-	m->rect[ret].x = 0;
-	m->rect[ret].y = 0;
-	m->rect[ret].w = 0;
-	m->rect[ret].h = 0;
-	m->visible[ret] = 0;
-	m->on_click[ret] = NULL;
-	m->on_click_data[ret] = NULL;
-
-	return ret;
-}
-
-int
-CTK_Menu_add_button(struct CTK_Menu *m)
-{
-	int ret = m->count;
-
-	ret = CTK_Menu_add(m);
-	m->border[ret] = 1;
-	m->enabled[ret] = 1;
-	m->visible[ret] = 1;
-	m->rect[ret].w = CTK_DEFAULT_BUTTON_W;
-	m->rect[ret].h = CTK_DEFAULT_BUTTON_H;
-
-	return ret;
-}
-
-int
-CTK_Menu_add_label(struct CTK_Menu *m)
-{
-	int ret = m->count;
-
-	ret = CTK_Menu_add(m);
-	m->enabled[ret] = 1;
-	m->visible[ret] = 1;
-
-	return ret;
-}
-
 void
-CTK_Menu_create_texture(struct CTK_Menu *m,
+CTK_CreateWidgetTexture(struct CTK_Menu *m,
                         const int widget)
 {
 	SDL_Color fg;
@@ -307,60 +307,18 @@ CTK_Menu_create_texture(struct CTK_Menu *m,
 }
 
 void
-CTK_Menu_set_enabled(struct CTK_Menu *m,
-                     const int widget,
-                     const int enabled)
+CTK_DestroyMenu(struct CTK_Menu *m)
 {
-	m->enabled[widget] = enabled;
-	CTK_Menu_create_texture(m, widget);
-}
+	int i;
 
-void
-CTK_Menu_set_text(struct CTK_Menu *m,
-                  const int widget,
-                  const char *text)
-{
-	int w, h;
-
-	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
-	TTF_GetStringSize(CTK_font,
-	                  m->text[widget],
-	                  strlen(m->text[widget]),
-	                  &w, &h);
-	if (m->border[widget]) {
-		w++;
-		h++;
+	for (i = 0; i < m->count; i++) {
+		SDL_DestroyTexture(m->texture[i]);
 	}
-	if (w > m->rect[widget].w)
-		m->rect[widget].w = w;
-	if (h > m->rect[widget].h)
-		m->rect[widget].h = h;
-	CTK_Menu_create_texture(m, widget);
+	SDL_DestroyWindow(m->win);
 }
 
 void
-CTK_Menu_set_text_and_resize(struct CTK_Menu *m,
-                             const int widget,
-                             const char *text)
-{
-	int w, h;
-
-	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
-	TTF_GetStringSize(CTK_font,
-	                  m->text[widget],
-	                  strlen(m->text[widget]),
-	                  &w, &h);
-	if (m->border[widget]) {
-		w++;
-		h++;
-	}
-	m->rect[widget].w = w;
-	m->rect[widget].h = h;
-	CTK_Menu_create_texture(m, widget);
-}
-
-void
-CTK_Menu_draw(struct CTK_Menu *m)
+CTK_DrawMenu(struct CTK_Menu *m)
 {
 	int i;
 	SDL_Renderer *r;
@@ -388,66 +346,8 @@ CTK_Menu_draw(struct CTK_Menu *m)
 	m->redraw = 0;
 }
 
-void
-CTK_Menu_tick(struct CTK_Menu *m)
-{
-	SDL_Event e;
-	int i;
-	SDL_FPoint p;
-
-	while (SDL_PollEvent(&e)) {
-		switch (e.type) {
-		case SDL_EVENT_MOUSE_BUTTON_UP:
-			for (i = 0; i < m->count; i++) {
-				p.x = e.button.x;
-				p.y = e.button.y;
-				if (SDL_PointInRectFloat(&p, &m->rect[i])) {
-					m->on_click[i](m, i, m->on_click_data[i]);
-					break;
-				}
-			}
-			break;
-
-		case SDL_EVENT_QUIT:
-			if (NULL != m->on_quit) {
-				m->on_quit(m, m->on_quit_data);
-			}
-			break;
-		}
-	}
-}
-
-void
-CTK_Menu_mainloop(struct CTK_Menu *m)
-{
-	Uint64 now, last;
-
-	while (m->active) {
-		SDL_WaitEvent(NULL);
-
-		now = SDL_GetTicks();
-		if (now - last > 1000 / CTK_MAX_TICKRATE) {
-			last = now;
-
-			CTK_Menu_tick(m);
-			CTK_Menu_draw(m);
-		}
-	}
-}
-
-void
-CTK_Menu_destroy(struct CTK_Menu *m)
-{
-	int i;
-
-	for (i = 0; i < m->count; i++) {
-		SDL_DestroyTexture(m->texture[i]);
-	}
-	SDL_DestroyWindow(m->win);
-}
-
 int
-CTK_init(const char *appname,
+CTK_Init(const char *appname,
          const char *appversion,
          const char *appidentifier)
 {
@@ -477,7 +377,107 @@ CTK_init(const char *appname,
 }
 
 void
-CTK_quit()
+CTK_MainloopMenu(struct CTK_Menu *m)
+{
+	Uint64 now, last;
+
+	while (m->active) {
+		SDL_WaitEvent(NULL);
+
+		now = SDL_GetTicks();
+		if (now - last > 1000 / CTK_MAX_TICKRATE) {
+			last = now;
+
+			CTK_TickMenu(m);
+			CTK_DrawMenu(m);
+		}
+	}
+}
+
+void
+CTK_SetWidgetEnabled(struct CTK_Menu *m,
+                     const int widget,
+                     const int enabled)
+{
+	m->enabled[widget] = enabled;
+	CTK_CreateWidgetTexture(m, widget);
+}
+
+void
+CTK_SetWidgetText(struct CTK_Menu *m,
+                  const int widget,
+                  const char *text)
+{
+	int w, h;
+
+	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
+	TTF_GetStringSize(CTK_font,
+	                  m->text[widget],
+	                  strlen(m->text[widget]),
+	                  &w, &h);
+	if (m->border[widget]) {
+		w++;
+		h++;
+	}
+	if (w > m->rect[widget].w)
+		m->rect[widget].w = w;
+	if (h > m->rect[widget].h)
+		m->rect[widget].h = h;
+	CTK_CreateWidgetTexture(m, widget);
+}
+
+void
+CTK_SetWidgetTextAndResize(struct CTK_Menu *m,
+                           const int widget,
+                           const char *text)
+{
+	int w, h;
+
+	strncpy(m->text[widget], text, CTK_MAX_TEXTLEN - 1);
+	TTF_GetStringSize(CTK_font,
+	                  m->text[widget],
+	                  strlen(m->text[widget]),
+	                  &w, &h);
+	if (m->border[widget]) {
+		w++;
+		h++;
+	}
+	m->rect[widget].w = w;
+	m->rect[widget].h = h;
+	CTK_CreateWidgetTexture(m, widget);
+}
+
+void
+CTK_TickMenu(struct CTK_Menu *m)
+{
+	SDL_Event e;
+	int i;
+	SDL_FPoint p;
+
+	while (SDL_PollEvent(&e)) {
+		switch (e.type) {
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			for (i = 0; i < m->count; i++) {
+				p.x = e.button.x;
+				p.y = e.button.y;
+				if (SDL_PointInRectFloat(&p, &m->rect[i])) {
+					m->on_click[i](m, i, m->on_click_data[i]);
+					break;
+				}
+			}
+			break;
+
+		case SDL_EVENT_QUIT:
+			if (NULL != m->on_quit) {
+				m->on_quit(m, m->on_quit_data);
+			}
+			break;
+		}
+	}
+}
+
+void
+CTK_Quit()
 {
 	TTF_CloseFont(CTK_font);
 	TTF_Quit();

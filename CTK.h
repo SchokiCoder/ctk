@@ -62,19 +62,19 @@ struct CTK_Style {
 };
 
 struct CTK_Menu {
-	int                active;
+	bool               active;
 	SDL_Window        *win;
 	struct CTK_Style   style;
-	int                redraw;
+	bool               redraw;
 
 	void              (*on_quit)(struct CTK_Menu*, void*);
 	void              *on_quit_data;
 
 	int                count;
-	int                border[CTK_MAX_WIDGETS];
-	int                enabled[CTK_MAX_WIDGETS];
+	bool               border[CTK_MAX_WIDGETS];
+	bool               enabled[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
-	int                visible[CTK_MAX_WIDGETS];
+	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 	void              (*on_click[CTK_MAX_WIDGETS])(struct CTK_Menu*,
@@ -92,7 +92,10 @@ CTK_AddLabel(struct CTK_Menu *m);
 int
 CTK_AddWidget(struct CTK_Menu *m);
 
-int
+/* Returns true on success or false on failure.
+ * Call SDL_GetError() for more information.
+ */
+bool
 CTK_CreateMenu(struct CTK_Menu *m,
                const char *title,
                const int winw,
@@ -112,9 +115,10 @@ CTK_DrawMenu(struct CTK_Menu *m);
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
  * appidentifier = Eg. "com.brave.Browser".
- * Upon error, returns NOT 0. Call SDL_GetError() for more information.
+ * Returns true on success or false on failure.
+ * Call SDL_GetError() for more information.
  */
-int
+bool
 CTK_Init(const char *appname,
          const char *appversion,
          const char *appidentifier);
@@ -128,7 +132,7 @@ CTK_MainloopMenu(struct CTK_Menu *m);
 void
 CTK_SetWidgetEnabled(struct CTK_Menu *m,
                      const int widget,
-                     const int enabled);
+                     const bool enabled);
 
 void
 CTK_SetWidgetText(struct CTK_Menu *m,
@@ -183,9 +187,9 @@ CTK_AddButton(struct CTK_Menu *m)
 	int ret = m->count;
 
 	ret = CTK_AddWidget(m);
-	m->border[ret] = 1;
-	m->enabled[ret] = 1;
-	m->visible[ret] = 1;
+	m->border[ret] = true;
+	m->enabled[ret] = true;
+	m->visible[ret] = true;
 	m->rect[ret].w = CTK_DEFAULT_BUTTON_W;
 	m->rect[ret].h = CTK_DEFAULT_BUTTON_H;
 
@@ -198,8 +202,8 @@ CTK_AddLabel(struct CTK_Menu *m)
 	int ret = m->count;
 
 	ret = CTK_AddWidget(m);
-	m->enabled[ret] = 1;
-	m->visible[ret] = 1;
+	m->enabled[ret] = true;
+	m->visible[ret] = true;
 
 	return ret;
 }
@@ -210,21 +214,21 @@ CTK_AddWidget(struct CTK_Menu *m)
 	int ret = m->count;
 
 	m->count++;
-	m->border[ret] = 0;
-	m->enabled[ret] = 0;
+	m->border[ret] = false;
+	m->enabled[ret] = false;
 	m->text[ret][0] = '\0';
 	m->rect[ret].x = 0;
 	m->rect[ret].y = 0;
 	m->rect[ret].w = 0;
 	m->rect[ret].h = 0;
-	m->visible[ret] = 0;
+	m->visible[ret] = false;
 	m->on_click[ret] = NULL;
 	m->on_click_data[ret] = NULL;
 
 	return ret;
 }
 
-int
+bool
 CTK_CreateMenu(struct CTK_Menu *m,
                const char *title,
                const int winw,
@@ -233,25 +237,25 @@ CTK_CreateMenu(struct CTK_Menu *m,
 {
 	SDL_Renderer *r;
 
-	m->active = 1;
+	m->active = true;
 	m->count = 0;
 	m->on_quit = NULL;
 	m->on_quit_data = NULL;
 	m->style = CTK_DEFAULT_THEME;
-	m->redraw = 1;
+	m->redraw = true;
 
 	if (!SDL_CreateWindowAndRenderer(title, winw, winh, flags, &m->win, &r)) {
-		m->active = 0;
-		return 1;
+		m->active = false;
+		return false;
 	}
 
 	if (!SDL_SetRenderLogicalPresentation(r, winw, winh,
 	                                      SDL_LOGICAL_PRESENTATION_DISABLED)) {
-		m->active = 0;
-		return 2;
+		m->active = false;
+		return false;
 	}
 
-	return 0;
+	return true;
 }
 
 void
@@ -300,7 +304,7 @@ CTK_CreateWidgetTexture(struct CTK_Menu *m,
 		SDL_RenderRect(r, &m->rect[widget]);
 	}
 
-	m->redraw = 1;
+	m->redraw = true;
 	SDL_SetRenderTarget(r, NULL);
 	SDL_DestroySurface(text_s);
 	SDL_DestroyTexture(text_t);
@@ -343,10 +347,10 @@ CTK_DrawMenu(struct CTK_Menu *m)
 	}
 
 	SDL_RenderPresent(r);
-	m->redraw = 0;
+	m->redraw = false;
 }
 
-int
+bool
 CTK_Init(const char *appname,
          const char *appversion,
          const char *appidentifier)
@@ -356,13 +360,13 @@ CTK_Init(const char *appname,
 	char path[pathlen];
 
 	if (!SDL_SetAppMetadata(appname, appversion, appidentifier))
-		return 1;
+		return false;
 
 	if (!SDL_Init(SDL_INIT_EVENTS | SDL_INIT_VIDEO))
-		return 2;
+		return false;
 
 	if (!TTF_Init())
-		return 3;
+		return false;
 
 	for (i = 0; i < ARRLEN(FONTNAMES); i++) {
 		snprintf(path, pathlen - 1, "%s%s", FONTPATH, FONTNAMES[i]);
@@ -371,9 +375,9 @@ CTK_Init(const char *appname,
 			break;
 	}
 	if (NULL == CTK_font)
-		return 4;
+		return false;
 
-	return 0;
+	return true;
 }
 
 void
@@ -397,7 +401,7 @@ CTK_MainloopMenu(struct CTK_Menu *m)
 void
 CTK_SetWidgetEnabled(struct CTK_Menu *m,
                      const int widget,
-                     const int enabled)
+                     const bool enabled)
 {
 	m->enabled[widget] = enabled;
 	CTK_CreateWidgetTexture(m, widget);

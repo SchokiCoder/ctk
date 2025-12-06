@@ -45,7 +45,7 @@ main(int argc,
 	(void) argc;
 	(void) argv;
 
-	if (CTK_Init("CTK Example",
+	if (!CTK_Init("CTK Example",
 	              CTK_VERSION,
 	              "io.github.SchokiCoder.CTK") != 0) {
 		fprintf(stderr, "Could not init CTK\n");
@@ -53,7 +53,7 @@ main(int argc,
 		return 0;
 	}
 
-	if (CTK_CreateMenu(&m, "test", 640, 480, 0) != 0) {
+	if (!CTK_CreateMenu(&m, "test", 640, 480, 0) != 0) {
 		fprintf(stderr, "Could not init CTK Menu\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
 		return 0;
@@ -64,7 +64,7 @@ main(int argc,
 
 	lbl_disabled = CTK_AddLabel(&m);
 	CTK_SetWidgetText(&m, lbl_disabled, "See you later");
-	CTK_SetWidgetEnabled(&m, lbl_disabled, 0);
+	CTK_SetWidgetEnabled(&m, lbl_disabled, false);
 	m.rect[lbl_disabled].x = 100;
 
 	btn_counter = CTK_AddButton(&m);

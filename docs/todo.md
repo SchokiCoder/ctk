@@ -28,6 +28,15 @@ and gain readability.
 
 - [x] add a default binding for each menu on_quit to set active to false
 - [x] add missing enabled and bound checks for on_click event
-- [ ] add default window flags
+- [x] add default window flags and many events that trigger a redraw
+
+- [ ] add canonical entry
+- [ ] add canonical checkbox
+- [ ] add canonical radiobutton
+- [ ] add canonical progressbar
+- [ ] add canonical scale
+
+- [ ] add a content fitting resize (just initially?)
+
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

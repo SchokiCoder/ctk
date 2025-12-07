@@ -92,7 +92,12 @@ CTK_AddLabel(struct CTK_Menu *m);
 int
 CTK_AddWidget(struct CTK_Menu *m);
 
-/* Returns true on success or false on failure.
+/* m = Menu to initialize.
+ * title = Used as window title.
+ * winw = Window width.
+ * winh = Window height.
+ * flags = SDL window flags. May be 0 to use defaults.
+ * Returns true on success or false on failure.
  * Call SDL_GetError() for more information.
  */
 bool
@@ -176,10 +181,11 @@ const struct CTK_Style CTK_Theme_TclTk = {
 	.fg_disabled.a = 0xff,
 };
 
-#define CTK_DEFAULT_BUTTON_W 80
-#define CTK_DEFAULT_BUTTON_H 27
-#define CTK_DEFAULT_FONTSIZE 11
-#define CTK_DEFAULT_THEME CTK_Theme_TclTk
+#define CTK_DEFAULT_BUTTON_W     80
+#define CTK_DEFAULT_BUTTON_H     27
+#define CTK_DEFAULT_FONTSIZE     11
+#define CTK_DEFAULT_THEME        CTK_Theme_TclTk
+#define CTK_DEFAULT_WINDOW_FLAGS (SDL_WINDOW_RESIZABLE)
 
 static TTF_Font *CTK_font = NULL;
 
@@ -239,6 +245,7 @@ CTK_CreateMenu(struct CTK_Menu *m,
                const int winh,
                const SDL_WindowFlags flags)
 {
+	SDL_WindowFlags f;
 	SDL_Renderer *r;
 
 	m->active = true;
@@ -248,7 +255,12 @@ CTK_CreateMenu(struct CTK_Menu *m,
 	m->style = CTK_DEFAULT_THEME;
 	m->redraw = true;
 
-	if (!SDL_CreateWindowAndRenderer(title, winw, winh, flags, &m->win, &r)) {
+	if (0 == flags)
+		f = CTK_DEFAULT_WINDOW_FLAGS;
+	else
+		f = flags;
+
+	if (!SDL_CreateWindowAndRenderer(title, winw, winh, f, &m->win, &r)) {
 		m->active = false;
 		return false;
 	}
@@ -484,6 +496,21 @@ CTK_TickMenu(struct CTK_Menu *m)
 					break;
 				}
 			}
+			break;
+
+		case SDL_EVENT_WINDOW_SHOWN:
+		case SDL_EVENT_WINDOW_EXPOSED:
+		case SDL_EVENT_WINDOW_RESIZED:
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+		case SDL_EVENT_WINDOW_METAL_VIEW_RESIZED:
+		case SDL_EVENT_WINDOW_MAXIMIZED:
+		case SDL_EVENT_WINDOW_RESTORED:
+		case SDL_EVENT_WINDOW_ICCPROF_CHANGED:
+		case SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+		case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
+		case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
+			m->redraw = true;
 			break;
 
 		case SDL_EVENT_QUIT:

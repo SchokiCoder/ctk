@@ -3,7 +3,9 @@
 
 - [ ] add a way to grid widgets
 - [ ] add mnemonics
+
 - [ ] add proper borders
+- [ ] add button click border change
 
 # basic
 
@@ -30,7 +32,9 @@ and gain readability.
 - [x] add missing enabled and bound checks for on_click event
 - [x] add default window flags and many events that trigger a redraw
 
-- [ ] add canonical entry
+- [x] add canonical entry mock up and fix attempts to draw empty text
+- [ ] add widget focus system
+- [ ] finalize canonical entry
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton
 - [ ] add canonical progressbar

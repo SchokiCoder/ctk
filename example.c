@@ -50,6 +50,7 @@ main(int argc,
 	struct CTK_Menu m;
 	int btn_state,   lbl_state;
 	int btn_counter, lbl_counter;
+	int txt;
 
 	(void) argc;
 	(void) argv;
@@ -87,6 +88,9 @@ main(int argc,
 	CTK_SetWidgetText(&m, lbl_counter, "0");
 	m.rect[lbl_counter].x = 100;
 	m.rect[lbl_counter].y = 30;
+
+	txt = CTK_AddEntry(&m);
+	m.rect[txt].y = 60;
 
 	CTK_MainloopMenu(&m);
 

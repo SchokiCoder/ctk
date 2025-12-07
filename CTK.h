@@ -56,6 +56,10 @@ static const char *FONTNAMES[] = {
 
 struct CTK_Style {
 	SDL_Color bg;
+	SDL_Color bg_button;
+	SDL_Color bg_entry;
+	SDL_Color bg_label;
+	SDL_Color bg_widget;
 	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
@@ -71,8 +75,11 @@ struct CTK_Menu {
 	void              *on_quit_data;
 
 	int                count;
+	SDL_Color         *bg[CTK_MAX_WIDGETS];
 	bool               border[CTK_MAX_WIDGETS];
+	int                cursor[CTK_MAX_WIDGETS];
 	bool               enabled[CTK_MAX_WIDGETS];
+	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
@@ -85,6 +92,9 @@ struct CTK_Menu {
 
 int
 CTK_AddButton(struct CTK_Menu *m);
+
+int
+CTK_AddEntry(struct CTK_Menu *m);
 
 int
 CTK_AddLabel(struct CTK_Menu *m);
@@ -165,6 +175,26 @@ const struct CTK_Style CTK_Theme_TclTk = {
 	.bg.b = 0xda,
 	.bg.a = 0xff,
 
+	.bg_button.r = 0xda,
+	.bg_button.g = 0xda,
+	.bg_button.b = 0xda,
+	.bg_button.a = 0xff,
+
+	.bg_entry.r = 0xff,
+	.bg_entry.g = 0xff,
+	.bg_entry.b = 0xff,
+	.bg_entry.a = 0xff,
+
+	.bg_label.r = 0xda,
+	.bg_label.g = 0xda,
+	.bg_label.b = 0xda,
+	.bg_label.a = 0xff,
+
+	.bg_widget.r = 0x00,
+	.bg_widget.g = 0x00,
+	.bg_widget.b = 0x00,
+	.bg_widget.a = 0x00,
+
 	.border.r = 0x83,
 	.border.g = 0x83,
 	.border.b = 0x83,
@@ -183,6 +213,8 @@ const struct CTK_Style CTK_Theme_TclTk = {
 
 #define CTK_DEFAULT_BUTTON_W     80
 #define CTK_DEFAULT_BUTTON_H     27
+#define CTK_DEFAULT_ENTRY_W      165
+#define CTK_DEFAULT_ENTRY_H      CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_FONTSIZE     11
 #define CTK_DEFAULT_THEME        CTK_Theme_TclTk
 #define CTK_DEFAULT_WINDOW_FLAGS (SDL_WINDOW_RESIZABLE)
@@ -194,9 +226,10 @@ static TTF_Font *CTK_font = NULL;
 int
 CTK_AddButton(struct CTK_Menu *m)
 {
-	int ret = m->count;
+	int ret;
 
 	ret = CTK_AddWidget(m);
+	m->bg[ret] = &m->style.bg_button;
 	m->border[ret] = true;
 	m->enabled[ret] = true;
 	m->visible[ret] = true;
@@ -207,11 +240,29 @@ CTK_AddButton(struct CTK_Menu *m)
 }
 
 int
-CTK_AddLabel(struct CTK_Menu *m)
+CTK_AddEntry(struct CTK_Menu *m)
 {
-	int ret = m->count;
+	int ret;
 
 	ret = CTK_AddWidget(m);
+	m->bg[ret] = &m->style.bg_entry;
+	m->border[ret] = true;
+	m->enabled[ret] = true;
+	m->visible[ret] = true;
+	m->rect[ret].w = CTK_DEFAULT_ENTRY_W;
+	m->rect[ret].h = CTK_DEFAULT_ENTRY_H;
+	CTK_CreateWidgetTexture(m, ret);
+
+	return ret;
+}
+
+int
+CTK_AddLabel(struct CTK_Menu *m)
+{
+	int ret;
+
+	ret = CTK_AddWidget(m);
+	m->bg[ret] = &m->style.bg_label;
 	m->enabled[ret] = true;
 	m->visible[ret] = true;
 
@@ -224,8 +275,11 @@ CTK_AddWidget(struct CTK_Menu *m)
 	int ret = m->count;
 
 	m->count++;
+	m->bg[ret] = &m->style.bg_widget;
 	m->border[ret] = false;
+	m->cursor[ret] = 0;
 	m->enabled[ret] = false;
+	m->scroll[ret] = 0;
 	m->text[ret][0] = '\0';
 	m->rect[ret].x = 0;
 	m->rect[ret].y = 0;
@@ -293,24 +347,34 @@ CTK_CreateWidgetTexture(struct CTK_Menu *m,
 	else
 		fg = m->style.fg_disabled;
 
-	text_s = TTF_RenderText_LCD(CTK_font,
-	                            m->text[widget],
-	                            0,
-	                            fg,
-	                            m->style.bg);
-	text_t = SDL_CreateTextureFromSurface(r, text_s);
-
 	m->texture[widget] = SDL_CreateTexture(r,
 	                                       SDL_PIXELFORMAT_RGBA8888,
 	                                       SDL_TEXTUREACCESS_TARGET,
 	                                       m->rect[widget].w,
 	                                       m->rect[widget].h);
 	SDL_SetRenderTarget(r, m->texture[widget]);
-	text_r.x = (m->rect[widget].w - text_s->w) / 2.0;
-	text_r.y = (m->rect[widget].h - text_s->h) / 2.0;
-	text_r.w = text_s->w;
-	text_r.h = text_s->h;
-	SDL_RenderTexture(r, text_t, NULL, &text_r);
+	SDL_SetRenderDrawColor(r,
+	                       m->bg[widget]->r,
+	                       m->bg[widget]->g,
+	                       m->bg[widget]->b,
+	                       m->bg[widget]->a);
+	SDL_RenderClear(r);
+
+	if (strlen(m->text[widget]) != 0) {
+		text_s = TTF_RenderText_LCD(CTK_font,
+			                    m->text[widget],
+			                    0,
+			                    fg,
+			                    *m->bg[widget]);
+		text_t = SDL_CreateTextureFromSurface(r, text_s);
+
+		text_r.x = (m->rect[widget].w - text_s->w) / 2.0;
+		text_r.y = (m->rect[widget].h - text_s->h) / 2.0;
+		text_r.w = text_s->w;
+		text_r.h = text_s->h;
+		SDL_RenderTexture(r, text_t, NULL, &text_r);
+	}
+
 	if (m->border[widget]) {
 		SDL_SetRenderDrawColor(r,
 			               m->style.border.r,

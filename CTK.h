@@ -477,7 +477,9 @@ CTK_TickMenu(struct CTK_Menu *m)
 			for (i = 0; i < m->count; i++) {
 				p.x = e.button.x;
 				p.y = e.button.y;
-				if (SDL_PointInRectFloat(&p, &m->rect[i])) {
+				if (SDL_PointInRectFloat(&p, &m->rect[i]) &&
+				    m->enabled[i] &&
+				    NULL != m->on_click[i]) {
 					m->on_click[i](m, i, m->on_click_data[i]);
 					break;
 				}

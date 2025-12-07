@@ -36,10 +36,10 @@ btn_state_on_click(struct CTK_Menu *m,
 
 	if (m->enabled[lbl_state]) {
 		CTK_SetWidgetEnabled(m, lbl_state, false);
-		CTK_SetWidgetText(m, lbl_state, "See you later");
+		CTK_SetWidgetTextAndResize(m, lbl_state, "See you later");
 	} else {
 		CTK_SetWidgetEnabled(m, lbl_state, true);
-		CTK_SetWidgetText(m, lbl_state, "Hello again world");
+		CTK_SetWidgetTextAndResize(m, lbl_state, "Hello again world");
 	}
 }
 

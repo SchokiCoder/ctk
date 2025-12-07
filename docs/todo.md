@@ -27,7 +27,7 @@ This is used to create equal error checking with SDL functions,
 and gain readability.
 
 - [x] add a default binding for each menu on_quit to set active to false
-- [ ] add missing enabled and bound checks for on_click event
+- [x] add missing enabled and bound checks for on_click event
 - [ ] add default window flags
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

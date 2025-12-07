@@ -130,6 +130,10 @@ void
 CTK_MainloopMenu(struct CTK_Menu *m);
 
 void
+CTK_MenuDefaultOnQuit(struct CTK_Menu *m,
+                      void            *dummy);
+
+void
 CTK_SetWidgetEnabled(struct CTK_Menu *m,
                      const int widget,
                      const bool enabled);
@@ -239,7 +243,7 @@ CTK_CreateMenu(struct CTK_Menu *m,
 
 	m->active = true;
 	m->count = 0;
-	m->on_quit = NULL;
+	m->on_quit = CTK_MenuDefaultOnQuit;
 	m->on_quit_data = NULL;
 	m->style = CTK_DEFAULT_THEME;
 	m->redraw = true;
@@ -396,6 +400,15 @@ CTK_MainloopMenu(struct CTK_Menu *m)
 			CTK_DrawMenu(m);
 		}
 	}
+}
+
+void
+CTK_MenuDefaultOnQuit(struct CTK_Menu *m,
+                      void            *dummy)
+{
+	(void) dummy;
+
+	m->active = false;
 }
 
 void

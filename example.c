@@ -9,15 +9,6 @@
 #include <stdlib.h>
 
 void
-m_on_quit(struct CTK_Menu *m,
-          void* dummy)
-{
-	(void) dummy;
-
-	m->active = false;
-}
-
-void
 btn_counter_on_click(struct CTK_Menu *m,
                      const int widget,
                      void *data)
@@ -34,12 +25,30 @@ btn_counter_on_click(struct CTK_Menu *m,
 	CTK_SetWidgetText(m, lbl_counter, str);
 }
 
+void
+btn_state_on_click(struct CTK_Menu *m,
+                   const int widget,
+                   void *data)
+{
+	int lbl_state = *((int*) (data));
+
+	(void) widget;
+
+	if (m->enabled[lbl_state]) {
+		CTK_SetWidgetEnabled(m, lbl_state, false);
+		CTK_SetWidgetText(m, lbl_state, "See you later");
+	} else {
+		CTK_SetWidgetEnabled(m, lbl_state, true);
+		CTK_SetWidgetText(m, lbl_state, "Hello again world");
+	}
+}
+
 int
 main(int argc,
      char **argv)
 {
 	struct CTK_Menu m;
-	int lbl_enabled, lbl_disabled;
+	int btn_state,   lbl_state;
 	int btn_counter, lbl_counter;
 
 	(void) argc;
@@ -59,13 +68,14 @@ main(int argc,
 		return 0;
 	}
 
-	lbl_enabled = CTK_AddLabel(&m);
-	CTK_SetWidgetText(&m, lbl_enabled, "Hello world");
+	btn_state = CTK_AddButton(&m);
+	CTK_SetWidgetText(&m, btn_state, "Switch");
+	m.on_click[btn_state] = btn_state_on_click;
+	m.on_click_data[btn_state] = &lbl_state;
 
-	lbl_disabled = CTK_AddLabel(&m);
-	CTK_SetWidgetText(&m, lbl_disabled, "See you later");
-	CTK_SetWidgetEnabled(&m, lbl_disabled, false);
-	m.rect[lbl_disabled].x = 100;
+	lbl_state = CTK_AddLabel(&m);
+	CTK_SetWidgetText(&m, lbl_state, "Hello world");
+	m.rect[lbl_state].x = 100;
 
 	btn_counter = CTK_AddButton(&m);
 	CTK_SetWidgetText(&m, btn_counter, "Count");
@@ -77,8 +87,6 @@ main(int argc,
 	CTK_SetWidgetText(&m, lbl_counter, "0");
 	m.rect[lbl_counter].x = 100;
 	m.rect[lbl_counter].y = 30;
-
-	m.on_quit = m_on_quit;
 
 	CTK_MainloopMenu(&m);
 

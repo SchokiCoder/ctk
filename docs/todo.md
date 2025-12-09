@@ -33,6 +33,18 @@ and gain readability.
 - [x] add default window flags and many events that trigger a redraw
 
 - [x] add canonical entry mock up and fix attempts to draw empty text
+- [x] rename the `CTK_Menu` to `CTK_Instance`
+Once menubars and menus are added, this couldn't stay anyway.
+May as well get it out of the way early.
+Why not call it `CTK_Window`?
+"Window" implies that there is always a graphical window present for this...
+instance.
+This may not apply, either by lib users handcrafting it to not be, or by me
+making it possible for an instance to be embedded in another instance's window.
+Instance is just more generic, while not creating confusion.
+I also took this as a chance to format example function names,
+and general spacing.
+
 - [ ] add widget focus system
 - [ ] finalize canonical entry
 - [ ] add canonical checkbox

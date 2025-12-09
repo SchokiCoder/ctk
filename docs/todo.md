@@ -45,8 +45,10 @@ Instance is just more generic, while not creating confusion.
 I also took this as a chance to format example function names,
 and general spacing.
 
-- [ ] add widget focus system
-- [ ] finalize canonical entry
+- [x] add bare widget tabfocus system
+- [ ] add tabfocus change upon mouse click
+- [ ] add drawn tabfocus ring
+- [ ] add text editing to canonical entry
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton
 - [ ] add canonical progressbar

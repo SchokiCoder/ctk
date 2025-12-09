@@ -67,9 +67,11 @@ struct CTK_Style {
 
 struct CTK_Instance {
 	bool               active;
-	SDL_Window        *win;
-	struct CTK_Style   style;
 	bool               redraw;
+	struct CTK_Style   style;
+	int                tabfocus;
+	int                taborder[CTK_MAX_WIDGETS];
+	SDL_Window        *win;
 
 	/* instance events */
 	void              (*on_quit)(struct CTK_Instance*, void*);
@@ -278,7 +280,9 @@ CTK_AddWidget(struct CTK_Instance *inst)
 {
 	int ret = inst->count;
 
+	inst->taborder[inst->count] = ret;
 	inst->count++;
+
 	inst->bg[ret] = &inst->style.bg_widget;
 	inst->border[ret] = false;
 	inst->cursor[ret] = 0;
@@ -307,6 +311,7 @@ CTK_CreateInstance(struct CTK_Instance *inst,
 	SDL_Renderer *r;
 
 	inst->active = true;
+	inst->tabfocus = 0;
 	inst->count = 0;
 	inst->on_quit = CTK_InstanceDefaultOnQuit;
 	inst->on_quit_data = NULL;
@@ -564,6 +569,22 @@ CTK_TickInstance(struct CTK_Instance *inst)
 					                  i,
 					                  inst->on_click_data[i]);
 					break;
+				}
+			}
+			break;
+
+		case SDL_EVENT_KEY_DOWN:
+			if (SDLK_TAB == e.key.key) {
+				if (SDL_KMOD_SHIFT & e.key.mod) {
+					inst->tabfocus--;
+					if (inst->tabfocus < 0) {
+						inst->tabfocus = inst->count - 1;
+					}
+				} else {
+					inst->tabfocus++;
+					if (inst->tabfocus >= inst->count) {
+						inst->tabfocus = 0;
+					}
 				}
 			}
 			break;

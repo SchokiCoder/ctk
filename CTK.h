@@ -54,13 +54,13 @@ static const char *FONTNAMES[] = {
 };
 #endif
 
-typedef enum {
+typedef enum CTK_TextAlignment {
 	CTK_TEXT_ALIGNMENT_LEFT,
 	CTK_TEXT_ALIGNMENT_CENTER,
 	CTK_TEXT_ALIGNMENT_RIGHT,
 } CTK_TextAlignment;
 
-struct CTK_Style {
+typedef struct CTK_Style {
 	SDL_Color bg;
 	SDL_Color bg_button;
 	SDL_Color bg_entry;
@@ -69,12 +69,12 @@ struct CTK_Style {
 	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
-};
+} CTK_Style;
 
-struct CTK_Instance {
+typedef struct CTK_Instance {
 	bool               active;
 	bool               redraw;
-	struct CTK_Style   style;
+	CTK_Style          style;
 	int                tabfocus;
 	int                taborder[CTK_MAX_WIDGETS];
 	SDL_Window        *win;
@@ -102,19 +102,19 @@ struct CTK_Instance {
 	                                               const int,
 	                                               void*);
 	void              *on_click_data[CTK_MAX_WIDGETS];
-};
+} CTK_Instance;
 
 int
-CTK_AddButton(struct CTK_Instance *inst);
+CTK_AddButton(CTK_Instance *inst);
 
 int
-CTK_AddEntry(struct CTK_Instance *inst);
+CTK_AddEntry(CTK_Instance *inst);
 
 int
-CTK_AddLabel(struct CTK_Instance *inst);
+CTK_AddLabel(CTK_Instance *inst);
 
 int
-CTK_AddWidget(struct CTK_Instance *inst);
+CTK_AddWidget(CTK_Instance *inst);
 
 /* inst = Instance to initialize.
  * title = Used as window title.
@@ -125,21 +125,21 @@ CTK_AddWidget(struct CTK_Instance *inst);
  * Call SDL_GetError() for more information.
  */
 bool
-CTK_CreateInstance(struct CTK_Instance *inst,
-               const char              *title,
-               const int                winw,
-               const int                winh,
-               const SDL_WindowFlags    flags);
+CTK_CreateInstance(CTK_Instance          *inst,
+                   const char            *title,
+                   const int              winw,
+                   const int              winh,
+                   const SDL_WindowFlags  flags);
 
 void
-CTK_CreateWidgetTexture(struct CTK_Instance *inst,
-                        const int            widget);
+CTK_CreateWidgetTexture(CTK_Instance *inst,
+                        const int     widget);
 
 void
-CTK_DestroyInstance(struct CTK_Instance *inst);
+CTK_DestroyInstance(CTK_Instance *inst);
 
 void
-CTK_DrawInstance(struct CTK_Instance *inst);
+CTK_DrawInstance(CTK_Instance *inst);
 
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
@@ -156,34 +156,34 @@ CTK_Init(const char *appname,
  * you can call CTK_DrawInstance and CTK_TickInstance yourself.
  */
 void
-CTK_MainloopInstance(struct CTK_Instance *inst);
+CTK_MainloopInstance(CTK_Instance *inst);
 
 void
-CTK_InstanceDefaultOnQuit(struct CTK_Instance *inst,
-                          void                *dummy);
+CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
+                          void         *dummy);
 
 void
-CTK_SetWidgetEnabled(struct CTK_Instance *inst,
-                     const int            widget,
-                     const bool           enabled);
+CTK_SetWidgetEnabled(CTK_Instance *inst,
+                     const int     widget,
+                     const bool    enabled);
 
 void
-CTK_SetWidgetText(struct CTK_Instance *inst,
-                  const int            widget,
-                  const char          *text);
+CTK_SetWidgetText(CTK_Instance *inst,
+                  const int     widget,
+                  const char   *text);
 
 void
-CTK_SetWidgetTextAndResize(struct CTK_Instance *inst,
-                           const int            widget,
-                           const char          *text);
+CTK_SetWidgetTextAndResize(CTK_Instance *inst,
+                           const int     widget,
+                           const char   *text);
 
 void
-CTK_TickInstance(struct CTK_Instance *inst);
+CTK_TickInstance(CTK_Instance *inst);
 
 void
 CTK_Quit();
 
-const struct CTK_Style CTK_Theme_TclTk = {
+const CTK_Style CTK_Theme_TclTk = {
 	.bg.r = 0xda,
 	.bg.g = 0xda,
 	.bg.b = 0xda,
@@ -238,7 +238,7 @@ static TTF_Font *CTK_font = NULL;
 #ifdef CTK_IMPL
 
 int
-CTK_AddButton(struct CTK_Instance *inst)
+CTK_AddButton(CTK_Instance *inst)
 {
 	int ret;
 
@@ -255,7 +255,7 @@ CTK_AddButton(struct CTK_Instance *inst)
 }
 
 int
-CTK_AddEntry(struct CTK_Instance *inst)
+CTK_AddEntry(CTK_Instance *inst)
 {
 	int ret;
 
@@ -273,7 +273,7 @@ CTK_AddEntry(struct CTK_Instance *inst)
 }
 
 int
-CTK_AddLabel(struct CTK_Instance *inst)
+CTK_AddLabel(CTK_Instance *inst)
 {
 	int ret;
 
@@ -286,7 +286,7 @@ CTK_AddLabel(struct CTK_Instance *inst)
 }
 
 int
-CTK_AddWidget(struct CTK_Instance *inst)
+CTK_AddWidget(CTK_Instance *inst)
 {
 	int ret = inst->count;
 
@@ -313,11 +313,11 @@ CTK_AddWidget(struct CTK_Instance *inst)
 }
 
 bool
-CTK_CreateInstance(struct CTK_Instance *inst,
-               const char              *title,
-               const int                winw,
-               const int                winh,
-               const SDL_WindowFlags    flags)
+CTK_CreateInstance(CTK_Instance          *inst,
+                   const char            *title,
+                   const int              winw,
+                   const int              winh,
+                   const SDL_WindowFlags  flags)
 {
 	SDL_WindowFlags f;
 	SDL_Renderer *r;
@@ -350,8 +350,8 @@ CTK_CreateInstance(struct CTK_Instance *inst,
 }
 
 void
-CTK_CreateWidgetTexture(struct CTK_Instance *inst,
-                        const int            widget)
+CTK_CreateWidgetTexture(CTK_Instance *inst,
+                        const int     widget)
 {
 	SDL_Color fg;
 	SDL_Renderer *r = NULL;
@@ -425,7 +425,7 @@ CTK_CreateWidgetTexture(struct CTK_Instance *inst,
 }
 
 void
-CTK_DestroyInstance(struct CTK_Instance *inst)
+CTK_DestroyInstance(CTK_Instance *inst)
 {
 	int i;
 
@@ -436,7 +436,7 @@ CTK_DestroyInstance(struct CTK_Instance *inst)
 }
 
 void
-CTK_DrawInstance(struct CTK_Instance *inst)
+CTK_DrawInstance(CTK_Instance *inst)
 {
 	int i;
 	SDL_Renderer *r;
@@ -495,7 +495,7 @@ CTK_Init(const char *appname,
 }
 
 void
-CTK_MainloopInstance(struct CTK_Instance *inst)
+CTK_MainloopInstance(CTK_Instance *inst)
 {
 	Uint64 now, last;
 
@@ -513,8 +513,8 @@ CTK_MainloopInstance(struct CTK_Instance *inst)
 }
 
 void
-CTK_InstanceDefaultOnQuit(struct CTK_Instance *inst,
-                          void                *dummy)
+CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
+                          void         *dummy)
 {
 	(void) dummy;
 
@@ -522,18 +522,18 @@ CTK_InstanceDefaultOnQuit(struct CTK_Instance *inst,
 }
 
 void
-CTK_SetWidgetEnabled(struct CTK_Instance *inst,
-                     const int            widget,
-                     const bool           enabled)
+CTK_SetWidgetEnabled(CTK_Instance *inst,
+                     const int     widget,
+                     const bool    enabled)
 {
 	inst->enabled[widget] = enabled;
 	CTK_CreateWidgetTexture(inst, widget);
 }
 
 void
-CTK_SetWidgetText(struct CTK_Instance *inst,
-                  const int            widget,
-                  const char          *text)
+CTK_SetWidgetText(CTK_Instance *inst,
+                  const int     widget,
+                  const char   *text)
 {
 	int w, h;
 
@@ -554,7 +554,7 @@ CTK_SetWidgetText(struct CTK_Instance *inst,
 }
 
 void
-CTK_SetWidgetTextAlignment(struct CTK_Instance     *inst,
+CTK_SetWidgetTextAlignment(CTK_Instance            *inst,
                            const int                widget,
                            const CTK_TextAlignment  alignment)
 {
@@ -563,9 +563,9 @@ CTK_SetWidgetTextAlignment(struct CTK_Instance     *inst,
 }
 
 void
-CTK_SetWidgetTextAndResize(struct CTK_Instance *inst,
-                           const int            widget,
-                           const char          *text)
+CTK_SetWidgetTextAndResize(CTK_Instance *inst,
+                           const int     widget,
+                           const char   *text)
 {
 	int w, h;
 
@@ -584,7 +584,7 @@ CTK_SetWidgetTextAndResize(struct CTK_Instance *inst,
 }
 
 void
-CTK_TickInstance(struct CTK_Instance *inst)
+CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
 	int i;

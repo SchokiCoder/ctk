@@ -9,9 +9,9 @@
 #include <stdlib.h>
 
 void
-btnCounterOnClick(struct CTK_Instance *inst,
-                  const int            widget,
-                  void                *data)
+btnCounterOnClick(CTK_Instance *inst,
+                  const int     widget,
+                  void         *data)
 {
 	long i;
 	int lbl_counter = *((int*) (data));
@@ -26,9 +26,9 @@ btnCounterOnClick(struct CTK_Instance *inst,
 }
 
 void
-btnStateOnClick(struct CTK_Instance *inst,
-                const int            widget,
-                void                *data)
+btnStateOnClick(CTK_Instance *inst,
+                const int     widget,
+                void         *data)
 {
 	int lbl_state = *((int*) (data));
 
@@ -47,7 +47,7 @@ int
 main(int    argc,
      char **argv)
 {
-	struct CTK_Instance inst;
+	CTK_Instance inst;
 	int btn_state,   lbl_state;
 	int btn_counter, lbl_counter;
 	int txt;

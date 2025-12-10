@@ -36,10 +36,10 @@ btnStateOnClick(CTK_Instance *inst,
 
 	if (inst->enabled[lbl_state]) {
 		CTK_SetWidgetEnabled(inst, lbl_state, false);
-		CTK_SetWidgetTextAndResize(inst, lbl_state, "See you later");
+		CTK_SetWidgetText(inst, lbl_state, "See you later");
 	} else {
 		CTK_SetWidgetEnabled(inst, lbl_state, true);
-		CTK_SetWidgetTextAndResize(inst, lbl_state, "Hello again world");
+		CTK_SetWidgetText(inst, lbl_state, "Hello again world");
 	}
 }
 

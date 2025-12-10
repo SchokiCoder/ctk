@@ -49,7 +49,9 @@ and general spacing.
 - [x] add text input to canonical entry
 - [x] add text alignment
 - [x] add typedefs for all structs and enums
-- [ ] add label default height
+- [x] add label default height
+This is for easier visual alignment even when just placing widgets with coords.
+
 - [ ] fix entry border disappearing after input
 - [ ] add tabfocus change upon mouse click
 - [ ] add drawn tabfocus ring

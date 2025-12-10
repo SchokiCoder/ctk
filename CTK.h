@@ -230,6 +230,7 @@ const CTK_Style CTK_Theme_TclTk = {
 #define CTK_DEFAULT_ENTRY_W      165
 #define CTK_DEFAULT_ENTRY_H      CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_FONTSIZE     11
+#define CTK_DEFAULT_LABEL_H      CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_THEME        CTK_Theme_TclTk
 #define CTK_DEFAULT_WINDOW_FLAGS (SDL_WINDOW_RESIZABLE)
 
@@ -281,6 +282,7 @@ CTK_AddLabel(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_label;
 	inst->enabled[ret] = true;
 	inst->visible[ret] = true;
+	inst->rect[ret].h = CTK_DEFAULT_LABEL_H;
 
 	return ret;
 }

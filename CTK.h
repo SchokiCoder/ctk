@@ -54,6 +54,12 @@ static const char *FONTNAMES[] = {
 };
 #endif
 
+typedef enum {
+	CTK_TEXT_ALIGNMENT_LEFT,
+	CTK_TEXT_ALIGNMENT_CENTER,
+	CTK_TEXT_ALIGNMENT_RIGHT,
+} CTK_TextAlignment;
+
 struct CTK_Style {
 	SDL_Color bg;
 	SDL_Color bg_button;
@@ -85,6 +91,7 @@ struct CTK_Instance {
 	bool               enabled[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
+	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
 	bool               text_editable[CTK_MAX_WIDGETS];
 	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
@@ -239,6 +246,7 @@ CTK_AddButton(struct CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_button;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
+	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_CENTER;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
 	inst->rect[ret].h = CTK_DEFAULT_BUTTON_H;
@@ -291,6 +299,7 @@ CTK_AddWidget(struct CTK_Instance *inst)
 	inst->enabled[ret] = false;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
+	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
 	inst->text_editable[ret] = false;
 	inst->rect[ret].x = 0;
 	inst->rect[ret].y = 0;
@@ -380,10 +389,23 @@ CTK_CreateWidgetTexture(struct CTK_Instance *inst,
 			                    *inst->bg[widget]);
 		text_t = SDL_CreateTextureFromSurface(r, text_s);
 
-		text_r.x = (inst->rect[widget].w - text_s->w) / 2.0;
+		switch (inst->text_alignment[widget]) {
+		case CTK_TEXT_ALIGNMENT_LEFT:
+			text_r.x = 0;
+			break;
+
+		case CTK_TEXT_ALIGNMENT_CENTER:
+			text_r.x = (inst->rect[widget].w - text_s->w) / 2.0;
+			break;
+
+		case CTK_TEXT_ALIGNMENT_RIGHT:
+			text_r.x = inst->rect[widget].w - text_s->w;
+			break;
+		}
 		text_r.y = (inst->rect[widget].h - text_s->h) / 2.0;
 		text_r.w = text_s->w;
 		text_r.h = text_s->h;
+
 		SDL_RenderTexture(r, text_t, NULL, &text_r);
 	}
 
@@ -528,6 +550,15 @@ CTK_SetWidgetText(struct CTK_Instance *inst,
 		inst->rect[widget].w = w;
 	if (h > inst->rect[widget].h)
 		inst->rect[widget].h = h;
+	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
+CTK_SetWidgetTextAlignment(struct CTK_Instance     *inst,
+                           const int                widget,
+                           const CTK_TextAlignment  alignment)
+{
+	inst->text_alignment[widget] = alignment;
 	CTK_CreateWidgetTexture(inst, widget);
 }
 

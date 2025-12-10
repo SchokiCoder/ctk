@@ -47,7 +47,8 @@ and general spacing.
 
 - [x] add bare widget tabfocus system
 - [x] add text input to canonical entry
-- [ ] add text alignment
+- [x] add text alignment
+- [ ] add typedefs for all structs and enums
 - [ ] add tabfocus change upon mouse click
 - [ ] add drawn tabfocus ring
 

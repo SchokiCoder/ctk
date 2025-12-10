@@ -71,6 +71,7 @@ main(int    argc,
 
 	btn_state = CTK_AddButton(&inst);
 	CTK_SetWidgetText(&inst, btn_state, "Switch");
+	CTK_SetWidgetTextAlignment(&inst, btn_state, CTK_TEXT_ALIGNMENT_LEFT);
 	inst.on_click[btn_state] = btnStateOnClick;
 	inst.on_click_data[btn_state] = &lbl_state;
 

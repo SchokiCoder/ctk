@@ -163,6 +163,10 @@ CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
                           void         *dummy);
 
 void
+CTK_SetTabfocus(CTK_Instance *inst,
+                const int     widget);
+
+void
 CTK_SetWidgetEnabled(CTK_Instance *inst,
                      const int     widget,
                      const bool    enabled);
@@ -524,6 +528,19 @@ CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
 }
 
 void
+CTK_SetTabfocus(CTK_Instance *inst,
+                const int     widget)
+{
+	inst->tabfocus = widget;
+
+	if (inst->text_editable[inst->tabfocus]) {
+		SDL_StartTextInput(inst->win);
+	} else {
+		SDL_StopTextInput(inst->win);
+	}
+}
+
+void
 CTK_SetWidgetEnabled(CTK_Instance *inst,
                      const int     widget,
                      const bool    enabled)
@@ -623,11 +640,7 @@ CTK_TickInstance(CTK_Instance *inst)
 					}
 				}
 
-				if (inst->text_editable[inst->tabfocus]) {
-					SDL_StartTextInput(inst->win);
-				} else {
-					SDL_StopTextInput(inst->win);
-				}
+				CTK_SetTabfocus(inst, inst->tabfocus);
 			}
 			break;
 

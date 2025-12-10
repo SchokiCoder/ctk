@@ -93,6 +93,8 @@ main(int    argc,
 	txt = CTK_AddEntry(&inst);
 	inst.rect[txt].y = 60;
 
+	CTK_SetTabfocus(&inst, txt);
+
 	CTK_MainloopInstance(&inst);
 
 	CTK_DestroyInstance(&inst);

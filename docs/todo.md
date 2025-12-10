@@ -52,6 +52,7 @@ and general spacing.
 - [x] add label default height
 This is for easier visual alignment even when just placing widgets with coords.
 
+- [x] add proper setter function for tabfocus
 - [ ] fix entry border disappearing after input
 - [ ] add tabfocus change upon mouse click
 - [ ] add drawn tabfocus ring

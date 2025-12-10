@@ -53,7 +53,10 @@ and general spacing.
 This is for easier visual alignment even when just placing widgets with coords.
 
 - [x] add proper setter function for tabfocus
-- [ ] fix entry border disappearing after input
+- [x] fix entry border disappearing after input
+It used the wrong rect, since creating the texture changes the render target.
+Given that, I have no idea why the border even worked at all.
+
 - [ ] add tabfocus change upon mouse click
 - [ ] add drawn tabfocus ring
 

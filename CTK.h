@@ -361,7 +361,7 @@ CTK_CreateWidgetTexture(CTK_Instance *inst,
 {
 	SDL_Color fg;
 	SDL_Renderer *r = NULL;
-	SDL_FRect    text_r;
+	SDL_FRect    rect;
 	SDL_Surface *text_s = NULL;
 	SDL_Texture *text_t = NULL;
 
@@ -397,31 +397,36 @@ CTK_CreateWidgetTexture(CTK_Instance *inst,
 
 		switch (inst->text_alignment[widget]) {
 		case CTK_TEXT_ALIGNMENT_LEFT:
-			text_r.x = 0;
+			rect.x = 0;
 			break;
 
 		case CTK_TEXT_ALIGNMENT_CENTER:
-			text_r.x = (inst->rect[widget].w - text_s->w) / 2.0;
+			rect.x = (inst->rect[widget].w - text_s->w) / 2.0;
 			break;
 
 		case CTK_TEXT_ALIGNMENT_RIGHT:
-			text_r.x = inst->rect[widget].w - text_s->w;
+			rect.x = inst->rect[widget].w - text_s->w;
 			break;
 		}
-		text_r.y = (inst->rect[widget].h - text_s->h) / 2.0;
-		text_r.w = text_s->w;
-		text_r.h = text_s->h;
+		rect.y = (inst->rect[widget].h - text_s->h) / 2.0;
+		rect.w = text_s->w;
+		rect.h = text_s->h;
 
-		SDL_RenderTexture(r, text_t, NULL, &text_r);
+		SDL_RenderTexture(r, text_t, NULL, &rect);
 	}
 
 	if (inst->border[widget]) {
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = inst->rect[widget].w;
+		rect.h = inst->rect[widget].h;
+
 		SDL_SetRenderDrawColor(r,
 			               inst->style.border.r,
 			               inst->style.border.g,
 			               inst->style.border.b,
 			               inst->style.border.a);
-		SDL_RenderRect(r, &inst->rect[widget]);
+		SDL_RenderRect(r, &rect);
 	}
 
 	inst->redraw = true;

@@ -85,6 +85,7 @@ struct CTK_Instance {
 	bool               enabled[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
+	bool               text_editable[CTK_MAX_WIDGETS];
 	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
@@ -254,6 +255,7 @@ CTK_AddEntry(struct CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_entry;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
+	inst->text_editable[ret] = true;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
 	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
@@ -289,6 +291,7 @@ CTK_AddWidget(struct CTK_Instance *inst)
 	inst->enabled[ret] = false;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
+	inst->text_editable[ret] = false;
 	inst->rect[ret].x = 0;
 	inst->rect[ret].y = 0;
 	inst->rect[ret].w = 0;
@@ -586,6 +589,20 @@ CTK_TickInstance(struct CTK_Instance *inst)
 						inst->tabfocus = 0;
 					}
 				}
+
+				if (inst->text_editable[inst->tabfocus]) {
+					SDL_StartTextInput(inst->win);
+				} else {
+					SDL_StopTextInput(inst->win);
+				}
+			}
+			break;
+
+		case SDL_EVENT_TEXT_INPUT:
+			if (inst->cursor[inst->tabfocus] < CTK_MAX_TEXTLEN) {
+				inst->text[inst->tabfocus][inst->cursor[inst->tabfocus]] = e.text.text[0];
+				inst->cursor[inst->tabfocus]++;
+				CTK_CreateWidgetTexture(inst, inst->tabfocus);
 			}
 			break;
 

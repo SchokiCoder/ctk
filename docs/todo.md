@@ -46,9 +46,11 @@ I also took this as a chance to format example function names,
 and general spacing.
 
 - [x] add bare widget tabfocus system
+- [x] add text input to canonical entry
+- [ ] add text alignment
 - [ ] add tabfocus change upon mouse click
 - [ ] add drawn tabfocus ring
-- [ ] add text editing to canonical entry
+
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton
 - [ ] add canonical progressbar

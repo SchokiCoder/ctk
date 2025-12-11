@@ -479,6 +479,12 @@ CTK_DrawInstance(CTK_Instance *inst)
 	inst->redraw = false;
 }
 
+int
+CTK_GetFocusedWidget(const CTK_Instance *inst)
+{
+	return inst->taborder[inst->tabfocus];
+}
+
 bool
 CTK_Init(const char *appname,
          const char *appversion,
@@ -615,6 +621,7 @@ void
 CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
+	int fw;
 	int i;
 	SDL_FPoint p;
 
@@ -643,14 +650,16 @@ CTK_TickInstance(CTK_Instance *inst)
 						if (inst->tabfocus < 0) {
 							inst->tabfocus = inst->count - 1;
 						}
-					} while (!inst->focusable[inst->taborder[inst->tabfocus]]);
+						fw = CTK_GetFocusedWidget(inst);
+					} while (!inst->focusable[fw]);
 				} else {
 					do {
 						inst->tabfocus++;
 						if (inst->tabfocus >= inst->count) {
 							inst->tabfocus = 0;
 						}
-					} while (!inst->focusable[inst->taborder[inst->tabfocus]]);
+						fw = CTK_GetFocusedWidget(inst);
+					} while (!inst->focusable[fw]);
 				}
 
 				CTK_SetTabfocus(inst, inst->tabfocus);
@@ -658,10 +667,11 @@ CTK_TickInstance(CTK_Instance *inst)
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:
-			if (inst->cursor[inst->tabfocus] < CTK_MAX_TEXTLEN) {
-				inst->text[inst->tabfocus][inst->cursor[inst->tabfocus]] = e.text.text[0];
-				inst->cursor[inst->tabfocus]++;
-				CTK_CreateWidgetTexture(inst, inst->tabfocus);
+			fw = CTK_GetFocusedWidget(inst);
+			if (inst->cursor[fw] < CTK_MAX_TEXTLEN) {
+				inst->text[fw][inst->cursor[fw]] = e.text.text[0];
+				inst->cursor[fw]++;
+				CTK_CreateWidgetTexture(inst, fw);
 			}
 			break;
 

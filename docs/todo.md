@@ -58,9 +58,10 @@ It used the wrong rect, since creating the texture changes the render target.
 Given that, I have no idea why the border even worked at all.
 
 - [x] add widget property "focusable"
-- [ ] fix misuse of tabfocus
+- [x] fix misuse of tabfocus
 - [ ] add drawn tabfocus ring
 - [ ] add tabfocus change upon mouse click
+- [ ] add triggering a button via space key
 
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton

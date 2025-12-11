@@ -65,7 +65,8 @@ Given that, I have no idea why the border even worked at all.
 Also add a WidgetId type for better readability.
 Hopefully this will not confuse me anymore... the author of the code.
 
-- [ ] add triggering a button via space key
+- [x] add triggering onClick of a focused widget via space key
+- [ ] fix missing visibility check for space key and mouse down triggering
 
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton

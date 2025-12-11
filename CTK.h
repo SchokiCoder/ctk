@@ -690,7 +690,19 @@ CTK_TickInstance(CTK_Instance *inst)
 			break;
 
 		case SDL_EVENT_KEY_DOWN:
-			if (SDLK_TAB == e.key.key) {
+			switch (e.key.key) {
+			case SDLK_SPACE:
+				fw = CTK_GetFocusedWidget(inst);
+
+				if (inst->enabled[fw] &&
+				    NULL != inst->on_click[fw]) {
+					inst->on_click[fw](inst,
+					                   fw,
+					                   inst->on_click_data[fw]);
+				}
+				break;
+
+			case SDLK_TAB:
 				if (SDL_KMOD_SHIFT & e.key.mod) {
 					do {
 						inst->tabfocus--;
@@ -711,6 +723,7 @@ CTK_TickInstance(CTK_Instance *inst)
 
 				CTK_SetFocusedWidget(inst,
 				                     CTK_GetFocusedWidget(inst));
+				break;
 			}
 			break;
 

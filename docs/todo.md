@@ -59,7 +59,7 @@ Given that, I have no idea why the border even worked at all.
 
 - [x] add widget property "focusable"
 - [x] fix misuse of tabfocus
-- [ ] add drawn tabfocus ring
+- [x] add drawn tabfocus ring
 - [ ] add tabfocus change upon mouse click
 - [ ] add triggering a button via space key
 

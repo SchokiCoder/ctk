@@ -69,6 +69,7 @@ typedef struct CTK_Style {
 	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
+	SDL_Color focus;
 } CTK_Style;
 
 typedef struct CTK_Instance {
@@ -141,6 +142,9 @@ CTK_DestroyInstance(CTK_Instance *inst);
 
 void
 CTK_DrawInstance(CTK_Instance *inst);
+
+int
+CTK_GetFocusedWidget(const CTK_Instance *inst);
 
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
@@ -228,6 +232,11 @@ const CTK_Style CTK_Theme_TclTk = {
 	.fg_disabled.g = 0xa4,
 	.fg_disabled.b = 0xa4,
 	.fg_disabled.a = 0xff,
+
+	.focus.r = 0x48,
+	.focus.g = 0x68,
+	.focus.b = 0x87,
+	.focus.a = 0xff,
 };
 
 #define CTK_DEFAULT_BUTTON_W     80
@@ -454,7 +463,10 @@ void
 CTK_DrawInstance(CTK_Instance *inst)
 {
 	int i;
+	int fw;
 	SDL_Renderer *r;
+
+	fw = CTK_GetFocusedWidget(inst);
 
 	if (!inst->redraw)
 		return;
@@ -474,6 +486,13 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 		SDL_RenderTexture(r, inst->texture[i], NULL, &inst->rect[i]);
 	}
+
+	SDL_SetRenderDrawColor(r,
+	                       inst->style.focus.r,
+	                       inst->style.focus.g,
+	                       inst->style.focus.b,
+	                       inst->style.focus.a);
+	SDL_RenderRect(r, &inst->rect[fw]);
 
 	SDL_RenderPresent(r);
 	inst->redraw = false;
@@ -553,6 +572,7 @@ CTK_SetTabfocus(CTK_Instance *inst,
 	} else {
 		SDL_StopTextInput(inst->win);
 	}
+	inst->redraw = true;
 }
 
 void

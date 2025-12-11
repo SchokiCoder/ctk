@@ -666,6 +666,7 @@ CTK_TickInstance(CTK_Instance *inst)
 				p.x = e.button.x;
 				p.y = e.button.y;
 				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
+				    inst->visible[i] &&
 				    inst->enabled[i] &&
 				    inst->focusable[i]) {
 					CTK_SetFocusedWidget(inst, i);
@@ -679,6 +680,7 @@ CTK_TickInstance(CTK_Instance *inst)
 				p.x = e.button.x;
 				p.y = e.button.y;
 				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
+				    inst->visible[i] &&
 				    inst->enabled[i] &&
 				    NULL != inst->on_click[i]) {
 					inst->on_click[i](inst,
@@ -694,7 +696,8 @@ CTK_TickInstance(CTK_Instance *inst)
 			case SDLK_SPACE:
 				fw = CTK_GetFocusedWidget(inst);
 
-				if (inst->enabled[fw] &&
+				if (inst->visible[fw] &&
+				    inst->enabled[fw] &&
 				    NULL != inst->on_click[fw]) {
 					inst->on_click[fw](inst,
 					                   fw,

@@ -66,7 +66,7 @@ Also add a WidgetId type for better readability.
 Hopefully this will not confuse me anymore... the author of the code.
 
 - [x] add triggering onClick of a focused widget via space key
-- [ ] fix missing visibility check for space key and mouse down triggering
+- [x] fix missing visibility check for space key and mouse button triggering
 
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton

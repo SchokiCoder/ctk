@@ -57,8 +57,10 @@ This is for easier visual alignment even when just placing widgets with coords.
 It used the wrong rect, since creating the texture changes the render target.
 Given that, I have no idea why the border even worked at all.
 
-- [ ] add tabfocus change upon mouse click
+- [x] add widget property "focusable"
+- [ ] fix misuse of tabfocus
 - [ ] add drawn tabfocus ring
+- [ ] add tabfocus change upon mouse click
 
 - [ ] add canonical checkbox
 - [ ] add canonical radiobutton

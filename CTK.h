@@ -89,6 +89,7 @@ typedef struct CTK_Instance {
 	bool               border[CTK_MAX_WIDGETS];
 	int                cursor[CTK_MAX_WIDGETS];
 	bool               enabled[CTK_MAX_WIDGETS];
+	bool               focusable[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
@@ -251,6 +252,7 @@ CTK_AddButton(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_button;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
+	inst->focusable[ret] = true;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_CENTER;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
@@ -268,6 +270,7 @@ CTK_AddEntry(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_entry;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
+	inst->focusable[ret] = true;
 	inst->text_editable[ret] = true;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
@@ -303,6 +306,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->border[ret] = false;
 	inst->cursor[ret] = 0;
 	inst->enabled[ret] = false;
+	inst->focusable[ret] = false;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
@@ -634,15 +638,19 @@ CTK_TickInstance(CTK_Instance *inst)
 		case SDL_EVENT_KEY_DOWN:
 			if (SDLK_TAB == e.key.key) {
 				if (SDL_KMOD_SHIFT & e.key.mod) {
-					inst->tabfocus--;
-					if (inst->tabfocus < 0) {
-						inst->tabfocus = inst->count - 1;
-					}
+					do {
+						inst->tabfocus--;
+						if (inst->tabfocus < 0) {
+							inst->tabfocus = inst->count - 1;
+						}
+					} while (!inst->focusable[inst->taborder[inst->tabfocus]]);
 				} else {
-					inst->tabfocus++;
-					if (inst->tabfocus >= inst->count) {
-						inst->tabfocus = 0;
-					}
+					do {
+						inst->tabfocus++;
+						if (inst->tabfocus >= inst->count) {
+							inst->tabfocus = 0;
+						}
+					} while (!inst->focusable[inst->taborder[inst->tabfocus]]);
 				}
 
 				CTK_SetTabfocus(inst, inst->tabfocus);

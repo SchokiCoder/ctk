@@ -54,6 +54,8 @@ static const char *FONTNAMES[] = {
 };
 #endif
 
+typedef int CTK_WidgetId;
+
 typedef enum CTK_TextAlignment {
 	CTK_TEXT_ALIGNMENT_LEFT,
 	CTK_TEXT_ALIGNMENT_CENTER,
@@ -77,7 +79,7 @@ typedef struct CTK_Instance {
 	bool               redraw;
 	CTK_Style          style;
 	int                tabfocus;
-	int                taborder[CTK_MAX_WIDGETS];
+	CTK_WidgetId       taborder[CTK_MAX_WIDGETS];
 	SDL_Window        *win;
 
 	/* instance events */
@@ -101,21 +103,21 @@ typedef struct CTK_Instance {
 
 	/* widget events */
 	void              (*on_click[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                               const int,
+	                                               const CTK_WidgetId,
 	                                               void*);
 	void              *on_click_data[CTK_MAX_WIDGETS];
 } CTK_Instance;
 
-int
+CTK_WidgetId
 CTK_AddButton(CTK_Instance *inst);
 
-int
+CTK_WidgetId
 CTK_AddEntry(CTK_Instance *inst);
 
-int
+CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst);
 
-int
+CTK_WidgetId
 CTK_AddWidget(CTK_Instance *inst);
 
 /* inst = Instance to initialize.
@@ -134,8 +136,8 @@ CTK_CreateInstance(CTK_Instance          *inst,
                    const SDL_WindowFlags  flags);
 
 void
-CTK_CreateWidgetTexture(CTK_Instance *inst,
-                        const int     widget);
+CTK_CreateWidgetTexture(CTK_Instance       *inst,
+                        const CTK_WidgetId  widget);
 
 void
 CTK_DestroyInstance(CTK_Instance *inst);
@@ -143,7 +145,7 @@ CTK_DestroyInstance(CTK_Instance *inst);
 void
 CTK_DrawInstance(CTK_Instance *inst);
 
-int
+CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
 
 /* appname = Name of application, duh.
@@ -168,23 +170,28 @@ CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
                           void         *dummy);
 
 void
-CTK_SetTabfocus(CTK_Instance *inst,
-                const int     widget);
+CTK_SetFocusedWidget(CTK_Instance       *inst,
+                     const CTK_WidgetId  widget);
 
 void
-CTK_SetWidgetEnabled(CTK_Instance *inst,
-                     const int     widget,
-                     const bool    enabled);
+CTK_SetWidgetEnabled(CTK_Instance       *inst,
+                     const CTK_WidgetId  widget,
+                     const bool          enabled);
 
 void
-CTK_SetWidgetText(CTK_Instance *inst,
-                  const int     widget,
-                  const char   *text);
+CTK_SetWidgetText(CTK_Instance       *inst,
+                  const CTK_WidgetId  widget,
+                  const char         *text);
 
 void
-CTK_SetWidgetTextAndResize(CTK_Instance *inst,
-                           const int     widget,
-                           const char   *text);
+CTK_SetWidgetTextAlignment(CTK_Instance            *inst,
+                           const CTK_WidgetId       widget,
+                           const CTK_TextAlignment  alignment);
+
+void
+CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
+                           const CTK_WidgetId  widget,
+                           const char         *text);
 
 void
 CTK_TickInstance(CTK_Instance *inst);
@@ -252,10 +259,10 @@ static TTF_Font *CTK_font = NULL;
 
 #ifdef CTK_IMPL
 
-int
+CTK_WidgetId
 CTK_AddButton(CTK_Instance *inst)
 {
-	int ret;
+	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
 	inst->bg[ret] = &inst->style.bg_button;
@@ -270,10 +277,10 @@ CTK_AddButton(CTK_Instance *inst)
 	return ret;
 }
 
-int
+CTK_WidgetId
 CTK_AddEntry(CTK_Instance *inst)
 {
-	int ret;
+	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
 	inst->bg[ret] = &inst->style.bg_entry;
@@ -289,10 +296,10 @@ CTK_AddEntry(CTK_Instance *inst)
 	return ret;
 }
 
-int
+CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst)
 {
-	int ret;
+	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
 	inst->bg[ret] = &inst->style.bg_label;
@@ -303,10 +310,10 @@ CTK_AddLabel(CTK_Instance *inst)
 	return ret;
 }
 
-int
+CTK_WidgetId
 CTK_AddWidget(CTK_Instance *inst)
 {
-	int ret = inst->count;
+	CTK_WidgetId ret = inst->count;
 
 	inst->taborder[inst->count] = ret;
 	inst->count++;
@@ -369,8 +376,8 @@ CTK_CreateInstance(CTK_Instance          *inst,
 }
 
 void
-CTK_CreateWidgetTexture(CTK_Instance *inst,
-                        const int     widget)
+CTK_CreateWidgetTexture(CTK_Instance       *inst,
+                        const CTK_WidgetId  widget)
 {
 	SDL_Color fg;
 	SDL_Renderer *r = NULL;
@@ -463,7 +470,7 @@ void
 CTK_DrawInstance(CTK_Instance *inst)
 {
 	int i;
-	int fw;
+	CTK_WidgetId fw;
 	SDL_Renderer *r;
 
 	fw = CTK_GetFocusedWidget(inst);
@@ -498,7 +505,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 	inst->redraw = false;
 }
 
-int
+CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
 	return inst->taborder[inst->tabfocus];
@@ -562,10 +569,17 @@ CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
 }
 
 void
-CTK_SetTabfocus(CTK_Instance *inst,
-                const int     widget)
+CTK_SetFocusedWidget(CTK_Instance       *inst,
+                     const CTK_WidgetId  widget)
 {
-	inst->tabfocus = widget;
+	int i;
+
+	for (i = 0; i < inst->count; i++) {
+		if (widget == inst->taborder[i]) {
+			inst->tabfocus = i;
+			break;
+		}
+	}
 
 	if (inst->text_editable[inst->tabfocus]) {
 		SDL_StartTextInput(inst->win);
@@ -576,18 +590,18 @@ CTK_SetTabfocus(CTK_Instance *inst,
 }
 
 void
-CTK_SetWidgetEnabled(CTK_Instance *inst,
-                     const int     widget,
-                     const bool    enabled)
+CTK_SetWidgetEnabled(CTK_Instance       *inst,
+                     const CTK_WidgetId  widget,
+                     const bool          enabled)
 {
 	inst->enabled[widget] = enabled;
 	CTK_CreateWidgetTexture(inst, widget);
 }
 
 void
-CTK_SetWidgetText(CTK_Instance *inst,
-                  const int     widget,
-                  const char   *text)
+CTK_SetWidgetText(CTK_Instance       *inst,
+                  const CTK_WidgetId  widget,
+                  const char         *text)
 {
 	int w, h;
 
@@ -609,7 +623,7 @@ CTK_SetWidgetText(CTK_Instance *inst,
 
 void
 CTK_SetWidgetTextAlignment(CTK_Instance            *inst,
-                           const int                widget,
+                           const CTK_WidgetId       widget,
                            const CTK_TextAlignment  alignment)
 {
 	inst->text_alignment[widget] = alignment;
@@ -617,9 +631,9 @@ CTK_SetWidgetTextAlignment(CTK_Instance            *inst,
 }
 
 void
-CTK_SetWidgetTextAndResize(CTK_Instance *inst,
-                           const int     widget,
-                           const char   *text)
+CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
+                           const CTK_WidgetId  widget,
+                           const char         *text)
 {
 	int w, h;
 
@@ -641,7 +655,7 @@ void
 CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
-	int fw;
+	CTK_WidgetId fw;
 	int i;
 	SDL_FPoint p;
 
@@ -654,7 +668,7 @@ CTK_TickInstance(CTK_Instance *inst)
 				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
 				    inst->enabled[i] &&
 				    inst->focusable[i]) {
-					CTK_SetTabfocus(inst, i);
+					CTK_SetFocusedWidget(inst, i);
 					break;
 				}
 			}
@@ -695,7 +709,8 @@ CTK_TickInstance(CTK_Instance *inst)
 					} while (!inst->focusable[fw]);
 				}
 
-				CTK_SetTabfocus(inst, inst->tabfocus);
+				CTK_SetFocusedWidget(inst,
+				                     CTK_GetFocusedWidget(inst));
 			}
 			break;
 

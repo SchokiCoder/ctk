@@ -9,12 +9,12 @@
 #include <stdlib.h>
 
 void
-btnCounterOnClick(CTK_Instance *inst,
-                  const int     widget,
-                  void         *data)
+btnCounterOnClick(CTK_Instance       *inst,
+                  const CTK_WidgetId  widget,
+                  void               *data)
 {
 	long i;
-	int lbl_counter = *((int*) (data));
+	CTK_WidgetId lbl_counter = *((CTK_WidgetId*) (data));
 	char str[CTK_MAX_TEXTLEN];
 
 	(void) widget;
@@ -26,11 +26,11 @@ btnCounterOnClick(CTK_Instance *inst,
 }
 
 void
-btnStateOnClick(CTK_Instance *inst,
-                const int     widget,
-                void         *data)
+btnStateOnClick(CTK_Instance       *inst,
+                const CTK_WidgetId  widget,
+                void               *data)
 {
-	int lbl_state = *((int*) (data));
+	CTK_WidgetId lbl_state = *((CTK_WidgetId*) (data));
 
 	(void) widget;
 
@@ -48,9 +48,9 @@ main(int    argc,
      char **argv)
 {
 	CTK_Instance inst;
-	int btn_state,   lbl_state;
-	int btn_counter, lbl_counter;
-	int txt;
+	CTK_WidgetId btn_state,   lbl_state;
+	CTK_WidgetId btn_counter, lbl_counter;
+	CTK_WidgetId txt;
 
 	(void) argc;
 	(void) argv;
@@ -93,7 +93,7 @@ main(int    argc,
 	txt = CTK_AddEntry(&inst);
 	inst.rect[txt].y = 60;
 
-	CTK_SetTabfocus(&inst, txt);
+	CTK_SetFocusedWidget(&inst, txt);
 
 	CTK_MainloopInstance(&inst);
 

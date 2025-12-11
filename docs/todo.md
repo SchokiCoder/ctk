@@ -61,7 +61,10 @@ Given that, I have no idea why the border even worked at all.
 - [x] fix misuse of tabfocus
 - [x] add drawn tabfocus ring
 - [x] add tabfocus change upon mouse click
-- [ ] fix set tab focus
+- [x] replace improper function to set a focused widget
+Also add a WidgetId type for better readability.
+Hopefully this will not confuse me anymore... the author of the code.
+
 - [ ] add triggering a button via space key
 
 - [ ] add canonical checkbox

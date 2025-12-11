@@ -647,6 +647,19 @@ CTK_TickInstance(CTK_Instance *inst)
 
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+			for (i = 0; i < inst->count; i++) {
+				p.x = e.button.x;
+				p.y = e.button.y;
+				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
+				    inst->enabled[i] &&
+				    inst->focusable[i]) {
+					CTK_SetTabfocus(inst, i);
+					break;
+				}
+			}
+			break;
+
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			for (i = 0; i < inst->count; i++) {
 				p.x = e.button.x;

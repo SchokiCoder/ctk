@@ -56,6 +56,12 @@ static const char *FONTNAMES[] = {
 
 typedef int CTK_WidgetId;
 
+typedef enum CTK_InputMethod {
+	CTK_INPUT_NONE,
+	CTK_INPUT_TEXT,
+	CTK_INPUT_TOGGLE,
+} CTK_InputMethod;
+
 typedef enum CTK_TextAlignment {
 	CTK_TEXT_ALIGNMENT_LEFT,
 	CTK_TEXT_ALIGNMENT_CENTER,
@@ -93,10 +99,10 @@ typedef struct CTK_Instance {
 	int                cursor[CTK_MAX_WIDGETS];
 	bool               enabled[CTK_MAX_WIDGETS];
 	bool               focusable[CTK_MAX_WIDGETS];
+	CTK_InputMethod    input_method[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
-	bool               text_editable[CTK_MAX_WIDGETS];
 	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
@@ -110,6 +116,9 @@ typedef struct CTK_Instance {
 
 CTK_WidgetId
 CTK_AddButton(CTK_Instance *inst);
+
+CTK_WidgetId
+CTK_AddCheckbox(CTK_Instance *inst);
 
 CTK_WidgetId
 CTK_AddEntry(CTK_Instance *inst);
@@ -246,14 +255,17 @@ const CTK_Style CTK_Theme_TclTk = {
 	.focus.a = 0xff,
 };
 
-#define CTK_DEFAULT_BUTTON_W     80
-#define CTK_DEFAULT_BUTTON_H     27
-#define CTK_DEFAULT_ENTRY_W      165
-#define CTK_DEFAULT_ENTRY_H      CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_FONTSIZE     11
-#define CTK_DEFAULT_LABEL_H      CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_THEME        CTK_Theme_TclTk
-#define CTK_DEFAULT_WINDOW_FLAGS (SDL_WINDOW_RESIZABLE)
+#define CTK_DEFAULT_BUTTON_W      80
+#define CTK_DEFAULT_BUTTON_H      27
+#define CTK_DEFAULT_CHECKBOX_W    CTK_DEFAULT_BUTTON_H - 4
+#define CTK_DEFAULT_CHECKBOX_H    CTK_DEFAULT_BUTTON_H - 4
+#define CTK_DEFAULT_CHECKBOX_FILL 0.7
+#define CTK_DEFAULT_ENTRY_W       165
+#define CTK_DEFAULT_ENTRY_H       CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_FONTSIZE      11
+#define CTK_DEFAULT_LABEL_H       CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_THEME         CTK_Theme_TclTk
+#define CTK_DEFAULT_WINDOW_FLAGS  (SDL_WINDOW_RESIZABLE)
 
 static TTF_Font *CTK_font = NULL;
 
@@ -278,6 +290,25 @@ CTK_AddButton(CTK_Instance *inst)
 }
 
 CTK_WidgetId
+CTK_AddCheckbox(CTK_Instance *inst)
+{
+	CTK_WidgetId ret;
+
+	ret = CTK_AddWidget(inst);
+	inst->bg[ret] = &inst->style.bg_entry;
+	inst->border[ret] = true;
+	inst->enabled[ret] = true;
+	inst->focusable[ret] = true;
+	inst->input_method[ret] = CTK_INPUT_TOGGLE;
+	inst->visible[ret] = true;
+	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;
+	inst->rect[ret].h = CTK_DEFAULT_CHECKBOX_H;
+	CTK_CreateWidgetTexture(inst, ret);
+
+	return ret;
+}
+
+CTK_WidgetId
 CTK_AddEntry(CTK_Instance *inst)
 {
 	CTK_WidgetId ret;
@@ -287,7 +318,7 @@ CTK_AddEntry(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
-	inst->text_editable[ret] = true;
+	inst->input_method[ret] = CTK_INPUT_TEXT;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
 	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
@@ -323,10 +354,10 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->cursor[ret] = 0;
 	inst->enabled[ret] = false;
 	inst->focusable[ret] = false;
+	inst->input_method[ret] = CTK_INPUT_NONE;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
-	inst->text_editable[ret] = false;
 	inst->rect[ret].x = 0;
 	inst->rect[ret].y = 0;
 	inst->rect[ret].w = 0;
@@ -407,32 +438,56 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	                       inst->bg[widget]->a);
 	SDL_RenderClear(r);
 
-	if (strlen(inst->text[widget]) != 0) {
-		text_s = TTF_RenderText_LCD(CTK_font,
-			                    inst->text[widget],
-			                    0,
-			                    fg,
-			                    *inst->bg[widget]);
-		text_t = SDL_CreateTextureFromSurface(r, text_s);
+	switch (inst->input_method[widget]) {
+	case CTK_INPUT_NONE:
+	case CTK_INPUT_TEXT:
+		if (strlen(inst->text[widget]) != 0) {
+			text_s = TTF_RenderText_LCD(CTK_font,
+					            inst->text[widget],
+					            0,
+					            fg,
+					            *inst->bg[widget]);
+			text_t = SDL_CreateTextureFromSurface(r, text_s);
 
-		switch (inst->text_alignment[widget]) {
-		case CTK_TEXT_ALIGNMENT_LEFT:
-			rect.x = 0;
-			break;
+			switch (inst->text_alignment[widget]) {
+			case CTK_TEXT_ALIGNMENT_LEFT:
+				rect.x = 0;
+				break;
 
-		case CTK_TEXT_ALIGNMENT_CENTER:
-			rect.x = (inst->rect[widget].w - text_s->w) / 2.0;
-			break;
+			case CTK_TEXT_ALIGNMENT_CENTER:
+				rect.x = (inst->rect[widget].w - text_s->w) / 2.0;
+				break;
 
-		case CTK_TEXT_ALIGNMENT_RIGHT:
-			rect.x = inst->rect[widget].w - text_s->w;
-			break;
+			case CTK_TEXT_ALIGNMENT_RIGHT:
+				rect.x = inst->rect[widget].w - text_s->w;
+				break;
+			}
+			rect.y = (inst->rect[widget].h - text_s->h) / 2.0;
+			rect.w = text_s->w;
+			rect.h = text_s->h;
+
+			SDL_RenderTexture(r, text_t, NULL, &rect);
 		}
-		rect.y = (inst->rect[widget].h - text_s->h) / 2.0;
-		rect.w = text_s->w;
-		rect.h = text_s->h;
+		break;
 
-		SDL_RenderTexture(r, text_t, NULL, &rect);
+	case CTK_INPUT_TOGGLE:
+		if (inst->text[widget][0]) {
+			rect.x = (inst->rect[widget].w -
+			          inst->rect[widget].w *
+			          CTK_DEFAULT_CHECKBOX_FILL) / 2.0;
+			rect.y = (inst->rect[widget].h -
+			          inst->rect[widget].h *
+			          CTK_DEFAULT_CHECKBOX_FILL) / 2.0;
+			rect.w = inst->rect[widget].w * CTK_DEFAULT_CHECKBOX_FILL;
+			rect.h = inst->rect[widget].h * CTK_DEFAULT_CHECKBOX_FILL;
+			SDL_SetRenderDrawColor(r,
+					       inst->style.fg.r,
+					       inst->style.fg.g,
+					       inst->style.fg.b,
+					       inst->style.fg.a);
+			SDL_RenderFillRect(r, &rect);
+		}
+		break;
 	}
 
 	if (inst->border[widget]) {
@@ -581,7 +636,7 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 		}
 	}
 
-	if (inst->text_editable[inst->tabfocus]) {
+	if (CTK_INPUT_TEXT == inst->input_method[CTK_GetFocusedWidget(inst)]) {
 		SDL_StartTextInput(inst->win);
 	} else {
 		SDL_StopTextInput(inst->win);
@@ -681,11 +736,19 @@ CTK_TickInstance(CTK_Instance *inst)
 				p.y = e.button.y;
 				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
 				    inst->visible[i] &&
-				    inst->enabled[i] &&
-				    NULL != inst->on_click[i]) {
-					inst->on_click[i](inst,
-					                  i,
-					                  inst->on_click_data[i]);
+				    inst->enabled[i]) {
+					if (NULL != inst->on_click[i]) {
+						inst->on_click[i](inst,
+						                  i,
+						                  inst->on_click_data[i]);
+					}
+					if (CTK_INPUT_TOGGLE == inst->input_method[i]) {
+						if (inst->text[i][0] != true)
+							inst->text[i][0] = true;
+						else
+							inst->text[i][0] = false;
+						CTK_CreateWidgetTexture(inst, i);
+					}
 					break;
 				}
 			}
@@ -697,11 +760,19 @@ CTK_TickInstance(CTK_Instance *inst)
 				fw = CTK_GetFocusedWidget(inst);
 
 				if (inst->visible[fw] &&
-				    inst->enabled[fw] &&
-				    NULL != inst->on_click[fw]) {
-					inst->on_click[fw](inst,
-					                   fw,
-					                   inst->on_click_data[fw]);
+				    inst->enabled[fw]) {
+					if (NULL != inst->on_click[fw]) {
+						inst->on_click[fw](inst,
+							           fw,
+							           inst->on_click_data[fw]);
+					}
+					if (CTK_INPUT_TOGGLE == inst->input_method[fw]) {
+						if (inst->text[fw][0] != true)
+							inst->text[fw][0] = true;
+						else
+							inst->text[fw][0] = false;
+						CTK_CreateWidgetTexture(inst, fw);
+					}
 				}
 				break;
 

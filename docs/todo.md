@@ -68,7 +68,7 @@ Hopefully this will not confuse me anymore... the author of the code.
 - [x] add triggering onClick of a focused widget via space key
 - [x] fix missing visibility check for space key and mouse button triggering
 
-- [ ] add canonical checkbox
+- [x] add canonical checkbox
 - [ ] add canonical radiobutton
 - [ ] add canonical progressbar
 - [ ] add canonical scale

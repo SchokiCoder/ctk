@@ -51,6 +51,7 @@ main(int    argc,
 	CTK_WidgetId btn_state,   lbl_state;
 	CTK_WidgetId btn_counter, lbl_counter;
 	CTK_WidgetId txt;
+	CTK_WidgetId ckb;
 
 	(void) argc;
 	(void) argv;
@@ -92,6 +93,9 @@ main(int    argc,
 
 	txt = CTK_AddEntry(&inst);
 	inst.rect[txt].y = 60;
+
+	ckb = CTK_AddCheckbox(&inst);
+	inst.rect[ckb].y = 90;
 
 	CTK_SetFocusedWidget(&inst, txt);
 

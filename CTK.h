@@ -56,11 +56,14 @@ static const char *FONTNAMES[] = {
 
 typedef int CTK_WidgetId;
 
-typedef enum CTK_InputMethod {
-	CTK_INPUT_NONE,
-	CTK_INPUT_TEXT,
-	CTK_INPUT_TOGGLE,
-} CTK_InputMethod;
+typedef enum CTK_WidgetType {
+	CTK_WTYPE_UNKNOWN,
+	CTK_WTYPE_BUTTON,
+	CTK_WTYPE_CHECKBOX,
+	CTK_WTYPE_ENTRY,
+	CTK_WTYPE_LABEL,
+	CTK_WTYPE_RADIOBUTTON,
+} CTK_WidgetType;
 
 typedef enum CTK_TextAlignment {
 	CTK_TEXT_ALIGNMENT_LEFT,
@@ -99,10 +102,11 @@ typedef struct CTK_Instance {
 	int                cursor[CTK_MAX_WIDGETS];
 	bool               enabled[CTK_MAX_WIDGETS];
 	bool               focusable[CTK_MAX_WIDGETS];
-	CTK_InputMethod    input_method[CTK_MAX_WIDGETS];
+	int                group[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
+	CTK_WidgetType     type[CTK_MAX_WIDGETS];
 	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
@@ -127,7 +131,13 @@ CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst);
 
 CTK_WidgetId
+CTK_AddRadiobutton(CTK_Instance *inst);
+
+CTK_WidgetId
 CTK_AddWidget(CTK_Instance *inst);
+
+SDL_FColor
+CTK_ColorIntToFColor(const SDL_Color c);
 
 /* inst = Instance to initialize.
  * title = Used as window title.
@@ -206,6 +216,10 @@ void
 CTK_TickInstance(CTK_Instance *inst);
 
 void
+CTK_ToggleRadiobutton(CTK_Instance *inst,
+                      CTK_WidgetId  widget);
+
+void
 CTK_Quit();
 
 const CTK_Style CTK_Theme_TclTk = {
@@ -255,17 +269,20 @@ const CTK_Style CTK_Theme_TclTk = {
 	.focus.a = 0xff,
 };
 
-#define CTK_DEFAULT_BUTTON_W      80
-#define CTK_DEFAULT_BUTTON_H      27
-#define CTK_DEFAULT_CHECKBOX_W    CTK_DEFAULT_BUTTON_H - 4
-#define CTK_DEFAULT_CHECKBOX_H    CTK_DEFAULT_BUTTON_H - 4
-#define CTK_DEFAULT_CHECKBOX_FILL 0.7
-#define CTK_DEFAULT_ENTRY_W       165
-#define CTK_DEFAULT_ENTRY_H       CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_FONTSIZE      11
-#define CTK_DEFAULT_LABEL_H       CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_THEME         CTK_Theme_TclTk
-#define CTK_DEFAULT_WINDOW_FLAGS  (SDL_WINDOW_RESIZABLE)
+#define CTK_DEFAULT_BUTTON_W         80
+#define CTK_DEFAULT_BUTTON_H         27
+#define CTK_DEFAULT_CHECKBOX_W       CTK_DEFAULT_BUTTON_H - 4
+#define CTK_DEFAULT_CHECKBOX_H       CTK_DEFAULT_BUTTON_H - 4
+#define CTK_DEFAULT_CHECKBOX_FILL    0.7
+#define CTK_DEFAULT_ENTRY_W          165
+#define CTK_DEFAULT_ENTRY_H          CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_FONTSIZE         11
+#define CTK_DEFAULT_LABEL_H          CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_RADIOBUTTON_W    CTK_DEFAULT_CHECKBOX_W
+#define CTK_DEFAULT_RADIOBUTTON_H    CTK_DEFAULT_CHECKBOX_H
+#define CTK_DEFAULT_RADIOBUTTON_FILL CTK_DEFAULT_CHECKBOX_FILL
+#define CTK_DEFAULT_THEME            CTK_Theme_TclTk
+#define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
 
 static TTF_Font *CTK_font = NULL;
 
@@ -282,6 +299,7 @@ CTK_AddButton(CTK_Instance *inst)
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_CENTER;
+	inst->type[ret] = CTK_WTYPE_BUTTON;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
 	inst->rect[ret].h = CTK_DEFAULT_BUTTON_H;
@@ -299,7 +317,7 @@ CTK_AddCheckbox(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
-	inst->input_method[ret] = CTK_INPUT_TOGGLE;
+	inst->type[ret] = CTK_WTYPE_CHECKBOX;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;
 	inst->rect[ret].h = CTK_DEFAULT_CHECKBOX_H;
@@ -318,7 +336,7 @@ CTK_AddEntry(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
-	inst->input_method[ret] = CTK_INPUT_TEXT;
+	inst->type[ret] = CTK_WTYPE_ENTRY;
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
 	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
@@ -335,8 +353,29 @@ CTK_AddLabel(CTK_Instance *inst)
 	ret = CTK_AddWidget(inst);
 	inst->bg[ret] = &inst->style.bg_label;
 	inst->enabled[ret] = true;
+	inst->type[ret] = CTK_WTYPE_LABEL;
 	inst->visible[ret] = true;
 	inst->rect[ret].h = CTK_DEFAULT_LABEL_H;
+
+	return ret;
+}
+
+CTK_WidgetId
+CTK_AddRadiobutton(CTK_Instance *inst)
+{
+	CTK_WidgetId ret;
+
+	ret = CTK_AddWidget(inst);
+	inst->bg[ret] = &inst->style.bg_entry;
+	inst->border[ret] = true;
+	inst->enabled[ret] = true;
+	inst->focusable[ret] = true;
+	inst->group[ret] = 0;
+	inst->type[ret] = CTK_WTYPE_RADIOBUTTON;
+	inst->visible[ret] = true;
+	inst->rect[ret].w = CTK_DEFAULT_RADIOBUTTON_W;
+	inst->rect[ret].h = CTK_DEFAULT_RADIOBUTTON_H;
+	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
 }
@@ -354,10 +393,11 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->cursor[ret] = 0;
 	inst->enabled[ret] = false;
 	inst->focusable[ret] = false;
-	inst->input_method[ret] = CTK_INPUT_NONE;
+	inst->group[ret] = -1;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
+	inst->type[ret] = CTK_WTYPE_UNKNOWN;
 	inst->rect[ret].x = 0;
 	inst->rect[ret].y = 0;
 	inst->rect[ret].w = 0;
@@ -365,6 +405,19 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->visible[ret] = false;
 	inst->on_click[ret] = NULL;
 	inst->on_click_data[ret] = NULL;
+
+	return ret;
+}
+
+SDL_FColor
+CTK_ColorIntToFColor(const SDL_Color c)
+{
+	SDL_FColor ret = {
+		.r = c.r / 255.0,
+		.g = c.g / 255.0,
+		.b = c.b / 255.0,
+		.a = c.a / 255.0,
+	};
 
 	return ret;
 }
@@ -415,6 +468,8 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	SDL_FRect    rect;
 	SDL_Surface *text_s = NULL;
 	SDL_Texture *text_t = NULL;
+	const int    numv = 3;
+	SDL_Vertex   v[numv];
 
 	r = SDL_GetRenderer(inst->win);
 
@@ -431,6 +486,59 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	                                       inst->rect[widget].w,
 	                                       inst->rect[widget].h);
 	SDL_SetRenderTarget(r, inst->texture[widget]);
+
+	/* radiobuttons specifically */
+	if (CTK_WTYPE_RADIOBUTTON == inst->type[widget]) {
+		v[0].position.x = 0;
+		v[0].position.y = 0;
+		v[0].color = CTK_ColorIntToFColor(inst->style.border);
+		v[0].tex_coord.x = 0;
+		v[0].tex_coord.y = 0;
+		v[1].position.x = inst->rect[widget].w;
+		v[1].position.y = 0;
+		v[1].color = CTK_ColorIntToFColor(inst->style.border);
+		v[1].tex_coord.x = 0;
+		v[1].tex_coord.y = 0;
+		v[2].position.x = inst->rect[widget].w / 2.0;
+		v[2].position.y = inst->rect[widget].h;
+		v[2].color = CTK_ColorIntToFColor(inst->style.border);
+		v[2].tex_coord.x = 0;
+		v[2].tex_coord.y = 0;
+		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+
+		v[0].position.x++;
+		v[0].position.y++;
+		v[0].color = CTK_ColorIntToFColor(*inst->bg[widget]);
+		v[1].position.x--;
+		v[1].position.y++;
+		v[1].color = CTK_ColorIntToFColor(*inst->bg[widget]);
+		v[2].position.y--;
+		v[2].color = CTK_ColorIntToFColor(*inst->bg[widget]);
+		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+
+		if (inst->text[widget][0]) {
+			v[0].position.x = (inst->rect[widget].w -
+			                  inst->rect[widget].w *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
+			v[0].position.y = (inst->rect[widget].h -
+			                  inst->rect[widget].h *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
+			v[0].color = CTK_ColorIntToFColor(inst->style.fg);
+			v[1].position.x = v[0].position.x +
+			                  (inst->rect[widget].w *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL);
+			v[1].position.y = v[0].position.y;
+			v[1].color = CTK_ColorIntToFColor(inst->style.fg);
+			v[2].position.y = inst->rect[widget].h *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL;
+			v[2].color = CTK_ColorIntToFColor(inst->style.fg);
+			SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+		}
+
+		goto cleanup;
+	}
+
+	/* background */
 	SDL_SetRenderDrawColor(r,
 	                       inst->bg[widget]->r,
 	                       inst->bg[widget]->g,
@@ -438,9 +546,12 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	                       inst->bg[widget]->a);
 	SDL_RenderClear(r);
 
-	switch (inst->input_method[widget]) {
-	case CTK_INPUT_NONE:
-	case CTK_INPUT_TEXT:
+	/* content */
+	switch (inst->type[widget]) {
+	case CTK_WTYPE_UNKNOWN:
+	case CTK_WTYPE_BUTTON:
+	case CTK_WTYPE_ENTRY:
+	case CTK_WTYPE_LABEL:
 		if (strlen(inst->text[widget]) != 0) {
 			text_s = TTF_RenderText_LCD(CTK_font,
 					            inst->text[widget],
@@ -470,7 +581,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		}
 		break;
 
-	case CTK_INPUT_TOGGLE:
+	case CTK_WTYPE_CHECKBOX:
 		if (inst->text[widget][0]) {
 			rect.x = (inst->rect[widget].w -
 			          inst->rect[widget].w *
@@ -488,8 +599,13 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 			SDL_RenderFillRect(r, &rect);
 		}
 		break;
+
+	case CTK_WTYPE_RADIOBUTTON:
+		/* should have been handled before */
+		break;
 	}
 
+	/* border */
 	if (inst->border[widget]) {
 		rect.x = 0;
 		rect.y = 0;
@@ -504,6 +620,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		SDL_RenderRect(r, &rect);
 	}
 
+cleanup:
 	inst->redraw = true;
 	SDL_SetRenderTarget(r, NULL);
 	SDL_DestroySurface(text_s);
@@ -636,7 +753,7 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 		}
 	}
 
-	if (CTK_INPUT_TEXT == inst->input_method[CTK_GetFocusedWidget(inst)]) {
+	if (CTK_WTYPE_ENTRY == inst->type[CTK_GetFocusedWidget(inst)]) {
 		SDL_StartTextInput(inst->win);
 	} else {
 		SDL_StopTextInput(inst->win);
@@ -742,14 +859,25 @@ CTK_TickInstance(CTK_Instance *inst)
 						                  i,
 						                  inst->on_click_data[i]);
 					}
-					if (CTK_INPUT_TOGGLE == inst->input_method[i]) {
+					switch (inst->type[i]) {
+					case CTK_WTYPE_UNKNOWN:
+					case CTK_WTYPE_BUTTON:
+					case CTK_WTYPE_ENTRY:
+					case CTK_WTYPE_LABEL:
+						break;
+
+					case CTK_WTYPE_CHECKBOX:
 						if (inst->text[i][0] != true)
 							inst->text[i][0] = true;
 						else
 							inst->text[i][0] = false;
 						CTK_CreateWidgetTexture(inst, i);
+						break;
+
+					case CTK_WTYPE_RADIOBUTTON:
+						CTK_ToggleRadiobutton(inst, i);
+						break;
 					}
-					break;
 				}
 			}
 			break;
@@ -766,12 +894,24 @@ CTK_TickInstance(CTK_Instance *inst)
 							           fw,
 							           inst->on_click_data[fw]);
 					}
-					if (CTK_INPUT_TOGGLE == inst->input_method[fw]) {
+					switch (inst->type[fw]) {
+					case CTK_WTYPE_UNKNOWN:
+					case CTK_WTYPE_BUTTON:
+					case CTK_WTYPE_ENTRY:
+					case CTK_WTYPE_LABEL:
+						break;
+
+					case CTK_WTYPE_CHECKBOX:
 						if (inst->text[fw][0] != true)
 							inst->text[fw][0] = true;
 						else
 							inst->text[fw][0] = false;
 						CTK_CreateWidgetTexture(inst, fw);
+						break;
+
+					case CTK_WTYPE_RADIOBUTTON:
+						CTK_ToggleRadiobutton(inst, fw);
+						break;
 					}
 				}
 				break;
@@ -832,6 +972,25 @@ CTK_TickInstance(CTK_Instance *inst)
 			break;
 		}
 	}
+}
+
+void
+CTK_ToggleRadiobutton(CTK_Instance *inst,
+                      CTK_WidgetId  widget)
+{
+	int i;
+
+	if (inst->text[widget][0])
+		return;
+
+	for (i = 0; i < inst->count; i++) {
+		if (inst->group[i] == inst->group[widget]) {
+			inst->text[i][0] = false;
+			CTK_CreateWidgetTexture(inst, i);
+		}
+	}
+	inst->text[widget][0] = true;
+	CTK_CreateWidgetTexture(inst, widget);
 }
 
 void

@@ -69,7 +69,7 @@ Hopefully this will not confuse me anymore... the author of the code.
 - [x] fix missing visibility check for space key and mouse button triggering
 
 - [x] add canonical checkbox
-- [ ] add canonical radiobutton
+- [x] add canonical radiobutton
 - [ ] add canonical progressbar
 - [ ] add canonical scale
 

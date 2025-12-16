@@ -52,6 +52,8 @@ main(int    argc,
 	CTK_WidgetId btn_counter, lbl_counter;
 	CTK_WidgetId txt;
 	CTK_WidgetId ckb;
+	CTK_WidgetId rbn_cheese, lbl_cheese;
+	CTK_WidgetId rbn_pepperoni, lbl_pepperoni;
 
 	(void) argc;
 	(void) argv;
@@ -96,6 +98,22 @@ main(int    argc,
 
 	ckb = CTK_AddCheckbox(&inst);
 	inst.rect[ckb].y = 90;
+
+	rbn_cheese = CTK_AddRadiobutton(&inst);
+	inst.rect[rbn_cheese].y = 120;
+
+	lbl_cheese = CTK_AddLabel(&inst);
+	CTK_SetWidgetText(&inst, lbl_cheese, "Pizza with extra cheese");
+	inst.rect[lbl_cheese].x = inst.rect[rbn_cheese].x + 50;
+	inst.rect[lbl_cheese].y = inst.rect[rbn_cheese].y;
+
+	rbn_pepperoni = CTK_AddRadiobutton(&inst);
+	inst.rect[rbn_pepperoni].y = inst.rect[rbn_cheese].y + 30;
+
+	lbl_pepperoni = CTK_AddLabel(&inst);
+	CTK_SetWidgetText(&inst, lbl_pepperoni, "Pizza with pepperoni");
+	inst.rect[lbl_pepperoni].x = inst.rect[rbn_pepperoni].x + 50;
+	inst.rect[lbl_pepperoni].y = inst.rect[rbn_pepperoni].y;
 
 	CTK_SetFocusedWidget(&inst, txt);
 

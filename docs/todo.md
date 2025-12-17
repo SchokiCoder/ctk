@@ -70,9 +70,22 @@ Hopefully this will not confuse me anymore... the author of the code.
 
 - [x] add canonical checkbox
 - [x] add canonical radiobutton
-- [ ] add canonical progressbar
-- [ ] add canonical scale
+- [x] add canonical progressbar
 
+- [ ] rework widget property table into structs
+It just gets unwieldy and odd.
+A value can be of any type *that makes sense for the widget in question.*
+Float, int, string, bool, whatever, but this would force me to have one,
+for each type for each widget. Ridiculous.
+Now this decreases hackability a tiny bit.
+Only a tiny bit, because all the structs are still open.
+Now a custom widget would need to pick a sensible base to work on,
+instead of just being dumped into the table.
+Will this decrease performance? Maybe, but likely not to a relevant degree.
+
+- [ ] add scale
+
+- [ ] add bg for each widget in style
 - [ ] add a content fitting resize (just initially?)
 
 - [ ] add a way to bind keypresses to functions

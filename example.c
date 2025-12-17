@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 void
 btnCounterOnClick(CTK_Instance       *inst,
@@ -54,9 +55,12 @@ main(int    argc,
 	CTK_WidgetId ckb;
 	CTK_WidgetId rbn_cheese, lbl_cheese;
 	CTK_WidgetId rbn_pepperoni, lbl_pepperoni;
+	CTK_WidgetId pgb;
 
 	(void) argc;
 	(void) argv;
+
+	srand(time(NULL));
 
 	if (!CTK_Init("CTK Example",
 	              CTK_VERSION,
@@ -114,6 +118,10 @@ main(int    argc,
 	CTK_SetWidgetText(&inst, lbl_pepperoni, "Pizza with pepperoni");
 	inst.rect[lbl_pepperoni].x = inst.rect[rbn_pepperoni].x + 50;
 	inst.rect[lbl_pepperoni].y = inst.rect[rbn_pepperoni].y;
+
+	pgb = CTK_AddProgressbar(&inst);
+	CTK_SetWidgetValue(&inst, pgb, (rand() % 100) / 100.0);
+	inst.rect[pgb].y = inst.rect[lbl_pepperoni].y + 30;
 
 	CTK_SetFocusedWidget(&inst, txt);
 

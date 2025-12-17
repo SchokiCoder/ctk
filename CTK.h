@@ -62,6 +62,7 @@ typedef enum CTK_WidgetType {
 	CTK_WTYPE_CHECKBOX,
 	CTK_WTYPE_ENTRY,
 	CTK_WTYPE_LABEL,
+	CTK_WTYPE_PROGRESSBAR,
 	CTK_WTYPE_RADIOBUTTON,
 } CTK_WidgetType;
 
@@ -76,6 +77,7 @@ typedef struct CTK_Style {
 	SDL_Color bg_button;
 	SDL_Color bg_entry;
 	SDL_Color bg_label;
+	SDL_Color bg_progressbar;
 	SDL_Color bg_widget;
 	SDL_Color border;
 	SDL_Color fg;
@@ -107,6 +109,7 @@ typedef struct CTK_Instance {
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_MAX_WIDGETS];
+	float              value[CTK_MAX_WIDGETS];
 	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
@@ -129,6 +132,9 @@ CTK_AddEntry(CTK_Instance *inst);
 
 CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst);
+
+CTK_WidgetId
+CTK_AddProgressbar(CTK_Instance *inst);
 
 CTK_WidgetId
 CTK_AddRadiobutton(CTK_Instance *inst);
@@ -213,6 +219,11 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
                            const char         *text);
 
 void
+CTK_SetWidgetValue(CTK_Instance       *inst,
+                   const CTK_WidgetId  widget,
+                   const float         value);
+
+void
 CTK_TickInstance(CTK_Instance *inst);
 
 void
@@ -242,6 +253,11 @@ const CTK_Style CTK_Theme_TclTk = {
 	.bg_label.g = 0xda,
 	.bg_label.b = 0xda,
 	.bg_label.a = 0xff,
+
+	.bg_progressbar.r = 0xc3,
+	.bg_progressbar.g = 0xc3,
+	.bg_progressbar.b = 0xc3,
+	.bg_progressbar.a = 0xff,
 
 	.bg_widget.r = 0x00,
 	.bg_widget.g = 0x00,
@@ -278,6 +294,8 @@ const CTK_Style CTK_Theme_TclTk = {
 #define CTK_DEFAULT_ENTRY_H          CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_FONTSIZE         11
 #define CTK_DEFAULT_LABEL_H          CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_PROGRESSBAR_W    CTK_DEFAULT_BUTTON_W
+#define CTK_DEFAULT_PROGRESSBAR_H    CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_RADIOBUTTON_W    CTK_DEFAULT_CHECKBOX_W
 #define CTK_DEFAULT_RADIOBUTTON_H    CTK_DEFAULT_CHECKBOX_H
 #define CTK_DEFAULT_RADIOBUTTON_FILL CTK_DEFAULT_CHECKBOX_FILL
@@ -361,6 +379,23 @@ CTK_AddLabel(CTK_Instance *inst)
 }
 
 CTK_WidgetId
+CTK_AddProgressbar(CTK_Instance *inst)
+{
+	CTK_WidgetId ret;
+
+	ret = CTK_AddWidget(inst);
+	inst->bg[ret] = &inst->style.bg_progressbar;
+	inst->border[ret] = true;
+	inst->enabled[ret] = true;
+	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
+	inst->visible[ret] = true;
+	inst->rect[ret].w = CTK_DEFAULT_PROGRESSBAR_W;
+	inst->rect[ret].h = CTK_DEFAULT_PROGRESSBAR_H;
+
+	return ret;
+}
+
+CTK_WidgetId
 CTK_AddRadiobutton(CTK_Instance *inst)
 {
 	CTK_WidgetId ret;
@@ -402,6 +437,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].y = 0;
 	inst->rect[ret].w = 0;
 	inst->rect[ret].h = 0;
+	inst->value[ret] = 0.0;
 	inst->visible[ret] = false;
 	inst->on_click[ret] = NULL;
 	inst->on_click_data[ret] = NULL;
@@ -598,6 +634,19 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 					       inst->style.fg.a);
 			SDL_RenderFillRect(r, &rect);
 		}
+		break;
+
+	case CTK_WTYPE_PROGRESSBAR:
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = inst->rect[widget].w * inst->value[widget];
+		rect.h = inst->rect[widget].h;
+		SDL_SetRenderDrawColor(r,
+				       inst->style.fg.r,
+				       inst->style.fg.g,
+				       inst->style.fg.b,
+				       inst->style.fg.a);
+		SDL_RenderFillRect(r, &rect);
 		break;
 
 	case CTK_WTYPE_RADIOBUTTON:
@@ -824,6 +873,15 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
 }
 
 void
+CTK_SetWidgetValue(CTK_Instance       *inst,
+                   const CTK_WidgetId  widget,
+                   const float         value)
+{
+	inst->value[widget] = value;
+	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
 CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
@@ -864,6 +922,7 @@ CTK_TickInstance(CTK_Instance *inst)
 					case CTK_WTYPE_BUTTON:
 					case CTK_WTYPE_ENTRY:
 					case CTK_WTYPE_LABEL:
+					case CTK_WTYPE_PROGRESSBAR:
 						break;
 
 					case CTK_WTYPE_CHECKBOX:
@@ -899,6 +958,7 @@ CTK_TickInstance(CTK_Instance *inst)
 					case CTK_WTYPE_BUTTON:
 					case CTK_WTYPE_ENTRY:
 					case CTK_WTYPE_LABEL:
+					case CTK_WTYPE_PROGRESSBAR:
 						break;
 
 					case CTK_WTYPE_CHECKBOX:

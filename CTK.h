@@ -595,7 +595,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		v[2].color = CTK_ColorIntToFColor(*inst->bg[widget]);
 		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 
-		if (inst->text[widget][0]) {
+		if (inst->value[widget]) {
 			v[0].position.x = (inst->rect[widget].w -
 			                  inst->rect[widget].w *
 			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
@@ -661,7 +661,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_CHECKBOX:
-		if (inst->text[widget][0]) {
+		if (inst->value[widget]) {
 			rect.x = (inst->rect[widget].w -
 			          inst->rect[widget].w *
 			          CTK_DEFAULT_CHECKBOX_FILL) / 2.0;
@@ -1013,10 +1013,10 @@ CTK_TickInstance(CTK_Instance *inst)
 						break;
 
 					case CTK_WTYPE_CHECKBOX:
-						if (inst->text[i][0] != true)
-							inst->text[i][0] = true;
+						if (inst->value[i] != true)
+							inst->value[i] = true;
 						else
-							inst->text[i][0] = false;
+							inst->value[i] = false;
 						CTK_CreateWidgetTexture(inst, i);
 						break;
 
@@ -1050,10 +1050,10 @@ CTK_TickInstance(CTK_Instance *inst)
 						break;
 
 					case CTK_WTYPE_CHECKBOX:
-						if (inst->text[fw][0] != true)
-							inst->text[fw][0] = true;
+						if (inst->value[fw] != true)
+							inst->value[fw] = true;
 						else
-							inst->text[fw][0] = false;
+							inst->value[fw] = false;
 						CTK_CreateWidgetTexture(inst, fw);
 						break;
 
@@ -1128,16 +1128,16 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 {
 	int i;
 
-	if (inst->text[widget][0])
+	if (inst->value[widget])
 		return;
 
 	for (i = 0; i < inst->count; i++) {
 		if (inst->group[i] == inst->group[widget]) {
-			inst->text[i][0] = false;
+			inst->value[i] = false;
 			CTK_CreateWidgetTexture(inst, i);
 		}
 	}
-	inst->text[widget][0] = true;
+	inst->value[widget] = true;
 	CTK_CreateWidgetTexture(inst, widget);
 }
 

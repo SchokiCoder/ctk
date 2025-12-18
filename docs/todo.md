@@ -90,11 +90,8 @@ Semantic issues of this table approach will be fixed... once it's an issue :)
 
 - [x] add canonical scale
 
-- [ ] add `value_step` variable for widgets
-Thus also update input handling of scale.
-
-- [ ] use value for radiobuttons and checkboxes
-This eliminates the hacky use of text.
+- [x] use value for radiobuttons and checkboxes instead of text
+This replaces the hacky use of text... with a slightly less hacky use.
 
 - [ ] much needed clean up (too many indents)
 
@@ -106,6 +103,9 @@ This eliminates the if in `CTK_TickInstance` for each widget.
 - [ ] add bg for each widget in style
 - [ ] add a content fitting resize (just initially?)
 
+- [ ] add `value_step` variable for widgets
+Thus also update input handling of scale.
+- [ ] add key arrow handling for scale
 - [ ] add proper drag for scale
 This might result in a whole rework of mouse input handling bringing proper click as well.
 Right now a click is just button release event on a widget, which might confuse.

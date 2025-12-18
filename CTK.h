@@ -176,6 +176,18 @@ CTK_DestroyInstance(CTK_Instance *inst);
 void
 CTK_DrawInstance(CTK_Instance *inst);
 
+void
+CTK_HandleKeyDown(CTK_Instance *inst,
+                  SDL_Event    *e);
+
+void
+CTK_HandleMouseButtonDown(CTK_Instance *inst,
+                          SDL_Event    *e);
+
+void
+CTK_HandleMouseButtonUp(CTK_Instance *inst,
+                        SDL_Event    *e);
+
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
 
@@ -793,6 +805,149 @@ CTK_DrawInstance(CTK_Instance *inst)
 	inst->redraw = false;
 }
 
+void
+CTK_HandleKeyDown(CTK_Instance *inst,
+                  SDL_Event    *e)
+{
+	CTK_WidgetId fw;
+
+	switch (e->key.key) {
+	case SDLK_SPACE:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (inst->visible[fw] &&
+		    inst->enabled[fw]) {
+			if (NULL != inst->on_click[fw]) {
+				inst->on_click[fw](inst,
+					           fw,
+					           inst->on_click_data[fw]);
+			}
+			switch (inst->type[fw]) {
+			case CTK_WTYPE_UNKNOWN:
+			case CTK_WTYPE_BUTTON:
+			case CTK_WTYPE_ENTRY:
+			case CTK_WTYPE_LABEL:
+			case CTK_WTYPE_PROGRESSBAR:
+			case CTK_WTYPE_SCALE:
+				break;
+
+			case CTK_WTYPE_CHECKBOX:
+				if (inst->value[fw] != true)
+					inst->value[fw] = true;
+				else
+					inst->value[fw] = false;
+				CTK_CreateWidgetTexture(inst, fw);
+				break;
+
+			case CTK_WTYPE_RADIOBUTTON:
+				CTK_ToggleRadiobutton(inst, fw);
+				break;
+			}
+		}
+		break;
+
+	case SDLK_TAB:
+		if (SDL_KMOD_SHIFT & e->key.mod) {
+			do {
+				inst->tabfocus--;
+				if (inst->tabfocus < 0) {
+					inst->tabfocus = inst->count - 1;
+				}
+				fw = CTK_GetFocusedWidget(inst);
+			} while (!inst->focusable[fw]);
+		} else {
+			do {
+				inst->tabfocus++;
+				if (inst->tabfocus >= inst->count) {
+					inst->tabfocus = 0;
+				}
+				fw = CTK_GetFocusedWidget(inst);
+			} while (!inst->focusable[fw]);
+		}
+
+		CTK_SetFocusedWidget(inst,
+		                     CTK_GetFocusedWidget(inst));
+		break;
+	}
+}
+
+void
+CTK_HandleMouseButtonDown(CTK_Instance *inst,
+                          SDL_Event    *e)
+{
+	int i;
+	SDL_FPoint p;
+	float sw;
+
+	for (i = 0; i < inst->count; i++) {
+		p.x = e->button.x;
+		p.y = e->button.y;
+		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
+		    inst->visible[i] &&
+		    inst->enabled[i] &&
+		    inst->focusable[i]) {
+			CTK_SetFocusedWidget(inst, i);
+
+			if (CTK_WTYPE_SCALE == inst->type[i]) {
+				sw = CTK_GetScaleSliderWidth(inst, i);
+				inst->value[i] = 1.0 /
+				                 (inst->rect[i].w - sw) *
+				                 (p.x - inst->rect[i].x - (sw / 2.0));
+				if (inst->value[i] < 0.0)
+					inst->value[i] = 0.0;
+				else if (inst->value[i] > 1.0)
+					inst->value[i] = 1.0;
+
+				CTK_CreateWidgetTexture(inst, i);
+			}
+			break;
+		}
+	}
+}
+
+void
+CTK_HandleMouseButtonUp(CTK_Instance *inst,
+                        SDL_Event    *e)
+{
+	int i;
+	SDL_FPoint p;
+
+	for (i = 0; i < inst->count; i++) {
+		p.x = e->button.x;
+		p.y = e->button.y;
+		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
+		    inst->visible[i] &&
+		    inst->enabled[i]) {
+			if (NULL != inst->on_click[i]) {
+				inst->on_click[i](inst,
+				                  i,
+				                  inst->on_click_data[i]);
+			}
+			switch (inst->type[i]) {
+			case CTK_WTYPE_UNKNOWN:
+			case CTK_WTYPE_BUTTON:
+			case CTK_WTYPE_ENTRY:
+			case CTK_WTYPE_LABEL:
+			case CTK_WTYPE_PROGRESSBAR:
+			case CTK_WTYPE_SCALE:
+				break;
+
+			case CTK_WTYPE_CHECKBOX:
+				if (inst->value[i] != true)
+					inst->value[i] = true;
+				else
+					inst->value[i] = false;
+				CTK_CreateWidgetTexture(inst, i);
+				break;
+
+			case CTK_WTYPE_RADIOBUTTON:
+				CTK_ToggleRadiobutton(inst, i);
+				break;
+			}
+		}
+	}
+}
+
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
@@ -960,133 +1115,19 @@ CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
 	CTK_WidgetId fw;
-	int i;
-	SDL_FPoint p;
 
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			for (i = 0; i < inst->count; i++) {
-				p.x = e.button.x;
-				p.y = e.button.y;
-				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-				    inst->visible[i] &&
-				    inst->enabled[i] &&
-				    inst->focusable[i]) {
-					CTK_SetFocusedWidget(inst, i);
-
-					if (CTK_WTYPE_SCALE == inst->type[i]) {
-						inst->value[i] = 1.0 /
-						                 (inst->rect[i].w - CTK_GetScaleSliderWidth(inst, i)) *
-						                 (p.x - inst->rect[i].x - (CTK_GetScaleSliderWidth(inst, i) / 2.0));
-						if (inst->value[i] < 0.0)
-							inst->value[i] = 0.0;
-						else if (inst->value[i] > 1.0)
-							inst->value[i] = 1.0;
-
-						CTK_CreateWidgetTexture(inst, i);
-					}
-					break;
-				}
-			}
+			CTK_HandleMouseButtonDown(inst, &e);
 			break;
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			for (i = 0; i < inst->count; i++) {
-				p.x = e.button.x;
-				p.y = e.button.y;
-				if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-				    inst->visible[i] &&
-				    inst->enabled[i]) {
-					if (NULL != inst->on_click[i]) {
-						inst->on_click[i](inst,
-						                  i,
-						                  inst->on_click_data[i]);
-					}
-					switch (inst->type[i]) {
-					case CTK_WTYPE_UNKNOWN:
-					case CTK_WTYPE_BUTTON:
-					case CTK_WTYPE_ENTRY:
-					case CTK_WTYPE_LABEL:
-					case CTK_WTYPE_PROGRESSBAR:
-					case CTK_WTYPE_SCALE:
-						break;
-
-					case CTK_WTYPE_CHECKBOX:
-						if (inst->value[i] != true)
-							inst->value[i] = true;
-						else
-							inst->value[i] = false;
-						CTK_CreateWidgetTexture(inst, i);
-						break;
-
-					case CTK_WTYPE_RADIOBUTTON:
-						CTK_ToggleRadiobutton(inst, i);
-						break;
-					}
-				}
-			}
+			CTK_HandleMouseButtonUp(inst, &e);
 			break;
 
 		case SDL_EVENT_KEY_DOWN:
-			switch (e.key.key) {
-			case SDLK_SPACE:
-				fw = CTK_GetFocusedWidget(inst);
-
-				if (inst->visible[fw] &&
-				    inst->enabled[fw]) {
-					if (NULL != inst->on_click[fw]) {
-						inst->on_click[fw](inst,
-							           fw,
-							           inst->on_click_data[fw]);
-					}
-					switch (inst->type[fw]) {
-					case CTK_WTYPE_UNKNOWN:
-					case CTK_WTYPE_BUTTON:
-					case CTK_WTYPE_ENTRY:
-					case CTK_WTYPE_LABEL:
-					case CTK_WTYPE_PROGRESSBAR:
-					case CTK_WTYPE_SCALE:
-						break;
-
-					case CTK_WTYPE_CHECKBOX:
-						if (inst->value[fw] != true)
-							inst->value[fw] = true;
-						else
-							inst->value[fw] = false;
-						CTK_CreateWidgetTexture(inst, fw);
-						break;
-
-					case CTK_WTYPE_RADIOBUTTON:
-						CTK_ToggleRadiobutton(inst, fw);
-						break;
-					}
-				}
-				break;
-
-			case SDLK_TAB:
-				if (SDL_KMOD_SHIFT & e.key.mod) {
-					do {
-						inst->tabfocus--;
-						if (inst->tabfocus < 0) {
-							inst->tabfocus = inst->count - 1;
-						}
-						fw = CTK_GetFocusedWidget(inst);
-					} while (!inst->focusable[fw]);
-				} else {
-					do {
-						inst->tabfocus++;
-						if (inst->tabfocus >= inst->count) {
-							inst->tabfocus = 0;
-						}
-						fw = CTK_GetFocusedWidget(inst);
-					} while (!inst->focusable[fw]);
-				}
-
-				CTK_SetFocusedWidget(inst,
-				                     CTK_GetFocusedWidget(inst));
-				break;
-			}
+			CTK_HandleKeyDown(inst, &e);
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:

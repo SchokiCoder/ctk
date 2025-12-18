@@ -93,7 +93,10 @@ Semantic issues of this table approach will be fixed... once it's an issue :)
 - [x] use value for radiobuttons and checkboxes instead of text
 This replaces the hacky use of text... with a slightly less hacky use.
 
-- [ ] much needed clean up (too many indents)
+- [x] clean up `CTK_TickInstance`
+It had too many indentations.
+
+- [ ] fix vram garbage showing in the bg of radiobuttons
 
 - [ ] add instance cache for visible widgets
 This eliminates the if in `CTK_DrawInstance` for each widget.

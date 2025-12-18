@@ -64,6 +64,7 @@ typedef enum CTK_WidgetType {
 	CTK_WTYPE_LABEL,
 	CTK_WTYPE_PROGRESSBAR,
 	CTK_WTYPE_RADIOBUTTON,
+	CTK_WTYPE_SCALE,
 } CTK_WidgetType;
 
 typedef enum CTK_TextAlignment {
@@ -78,11 +79,13 @@ typedef struct CTK_Style {
 	SDL_Color bg_entry;
 	SDL_Color bg_label;
 	SDL_Color bg_progressbar;
+	SDL_Color bg_scale;
 	SDL_Color bg_widget;
 	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
 	SDL_Color focus;
+	SDL_Color scale_slider;
 } CTK_Style;
 
 typedef struct CTK_Instance {
@@ -140,6 +143,9 @@ CTK_WidgetId
 CTK_AddRadiobutton(CTK_Instance *inst);
 
 CTK_WidgetId
+CTK_AddScale(CTK_Instance *inst);
+
+CTK_WidgetId
 CTK_AddWidget(CTK_Instance *inst);
 
 SDL_FColor
@@ -172,6 +178,10 @@ CTK_DrawInstance(CTK_Instance *inst);
 
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
+
+float
+CTK_GetScaleSliderWidth(const CTK_Instance *inst,
+                        const CTK_WidgetId widget);
 
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
@@ -259,6 +269,11 @@ const CTK_Style CTK_Theme_TclTk = {
 	.bg_progressbar.b = 0xc3,
 	.bg_progressbar.a = 0xff,
 
+	.bg_scale.r = 0xc3,
+	.bg_scale.g = 0xc3,
+	.bg_scale.b = 0xc3,
+	.bg_scale.a = 0xff,
+
 	.bg_widget.r = 0x00,
 	.bg_widget.g = 0x00,
 	.bg_widget.b = 0x00,
@@ -283,21 +298,30 @@ const CTK_Style CTK_Theme_TclTk = {
 	.focus.g = 0x68,
 	.focus.b = 0x87,
 	.focus.a = 0xff,
+
+	.scale_slider.r = 0xda,
+	.scale_slider.g = 0xda,
+	.scale_slider.b = 0xda,
+	.scale_slider.a = 0xff,
 };
 
-#define CTK_DEFAULT_BUTTON_W         80
-#define CTK_DEFAULT_BUTTON_H         27
-#define CTK_DEFAULT_CHECKBOX_W       CTK_DEFAULT_BUTTON_H - 4
-#define CTK_DEFAULT_CHECKBOX_H       CTK_DEFAULT_BUTTON_H - 4
-#define CTK_DEFAULT_CHECKBOX_FILL    0.7
-#define CTK_DEFAULT_ENTRY_W          165
-#define CTK_DEFAULT_ENTRY_H          CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_FONTSIZE         11
-#define CTK_DEFAULT_LABEL_H          CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_PROGRESSBAR_W    CTK_DEFAULT_BUTTON_W
-#define CTK_DEFAULT_PROGRESSBAR_H    CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_RADIOBUTTON_W    CTK_DEFAULT_CHECKBOX_W
-#define CTK_DEFAULT_RADIOBUTTON_H    CTK_DEFAULT_CHECKBOX_H
+#define CTK_DEFAULT_BUTTON_W           80
+#define CTK_DEFAULT_BUTTON_H           27
+#define CTK_DEFAULT_CHECKBOX_W         CTK_DEFAULT_BUTTON_H - 4
+#define CTK_DEFAULT_CHECKBOX_H         CTK_DEFAULT_BUTTON_H - 4
+#define CTK_DEFAULT_CHECKBOX_FILL      0.7
+#define CTK_DEFAULT_ENTRY_W            165
+#define CTK_DEFAULT_ENTRY_H            CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_FONTSIZE           11
+#define CTK_DEFAULT_LABEL_H            CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_PROGRESSBAR_W      CTK_DEFAULT_BUTTON_W
+#define CTK_DEFAULT_PROGRESSBAR_H      CTK_DEFAULT_BUTTON_H
+#define CTK_DEFAULT_RADIOBUTTON_W      CTK_DEFAULT_CHECKBOX_W
+#define CTK_DEFAULT_RADIOBUTTON_H      CTK_DEFAULT_CHECKBOX_H
+#define CTK_DEFAULT_SCALE_W            CTK_DEFAULT_BUTTON_W
+#define CTK_DEFAULT_SCALE_H            CTK_DEFAULT_BUTTON_H
+#define CTK_SCALE_SLIDER_SIZE_FRACTION 0.3
+
 #define CTK_DEFAULT_RADIOBUTTON_FILL CTK_DEFAULT_CHECKBOX_FILL
 #define CTK_DEFAULT_THEME            CTK_Theme_TclTk
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
@@ -410,6 +434,25 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_RADIOBUTTON_W;
 	inst->rect[ret].h = CTK_DEFAULT_RADIOBUTTON_H;
+	CTK_CreateWidgetTexture(inst, ret);
+
+	return ret;
+}
+
+CTK_WidgetId
+CTK_AddScale(CTK_Instance *inst)
+{
+	CTK_WidgetId ret;
+
+	ret = CTK_AddWidget(inst);
+	inst->bg[ret] = &inst->style.bg_scale;
+	inst->border[ret] = true;
+	inst->enabled[ret] = true;
+	inst->focusable[ret] = true;
+	inst->type[ret] = CTK_WTYPE_SCALE;
+	inst->visible[ret] = true;
+	inst->rect[ret].w = CTK_DEFAULT_SCALE_W;
+	inst->rect[ret].h = CTK_DEFAULT_SCALE_H;
 	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
@@ -652,6 +695,30 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	case CTK_WTYPE_RADIOBUTTON:
 		/* should have been handled before */
 		break;
+
+	case CTK_WTYPE_SCALE:
+		rect.w = CTK_GetScaleSliderWidth(inst, widget);
+		rect.h = inst->rect[widget].h;
+		rect.x = inst->value[widget] * (inst->rect[widget].w - rect.w);
+		rect.y = 0;
+
+		SDL_SetRenderDrawColor(r,
+				       inst->style.scale_slider.r,
+				       inst->style.scale_slider.g,
+				       inst->style.scale_slider.b,
+				       inst->style.scale_slider.a);
+		SDL_RenderFillRect(r, &rect);
+
+		rect.x += rect.w / 2.0;
+		rect.w = 1.0;
+
+		SDL_SetRenderDrawColor(r,
+				       inst->style.border.r,
+				       inst->style.border.g,
+				       inst->style.border.b,
+				       inst->style.border.a);
+		SDL_RenderFillRect(r, &rect);
+		break;
 	}
 
 	/* border */
@@ -730,6 +797,13 @@ CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
 	return inst->taborder[inst->tabfocus];
+}
+
+float
+CTK_GetScaleSliderWidth(const CTK_Instance *inst,
+                        const CTK_WidgetId widget)
+{
+	return inst->rect[widget].w * CTK_SCALE_SLIDER_SIZE_FRACTION;
 }
 
 bool
@@ -900,6 +974,18 @@ CTK_TickInstance(CTK_Instance *inst)
 				    inst->enabled[i] &&
 				    inst->focusable[i]) {
 					CTK_SetFocusedWidget(inst, i);
+
+					if (CTK_WTYPE_SCALE == inst->type[i]) {
+						inst->value[i] = 1.0 /
+						                 (inst->rect[i].w - CTK_GetScaleSliderWidth(inst, i)) *
+						                 (p.x - inst->rect[i].x - (CTK_GetScaleSliderWidth(inst, i) / 2.0));
+						if (inst->value[i] < 0.0)
+							inst->value[i] = 0.0;
+						else if (inst->value[i] > 1.0)
+							inst->value[i] = 1.0;
+
+						CTK_CreateWidgetTexture(inst, i);
+					}
 					break;
 				}
 			}
@@ -923,6 +1009,7 @@ CTK_TickInstance(CTK_Instance *inst)
 					case CTK_WTYPE_ENTRY:
 					case CTK_WTYPE_LABEL:
 					case CTK_WTYPE_PROGRESSBAR:
+					case CTK_WTYPE_SCALE:
 						break;
 
 					case CTK_WTYPE_CHECKBOX:
@@ -959,6 +1046,7 @@ CTK_TickInstance(CTK_Instance *inst)
 					case CTK_WTYPE_ENTRY:
 					case CTK_WTYPE_LABEL:
 					case CTK_WTYPE_PROGRESSBAR:
+					case CTK_WTYPE_SCALE:
 						break;
 
 					case CTK_WTYPE_CHECKBOX:

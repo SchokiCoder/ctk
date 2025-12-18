@@ -72,8 +72,8 @@ Hopefully this will not confuse me anymore... the author of the code.
 - [x] add canonical radiobutton
 - [x] add canonical progressbar
 
-- [ ] rework widget property table into structs
-It just gets unwieldy and odd.
+- [x] ~~rework widget property table into structs~~
+~~It just gets unwieldy and odd.
 A value can be of any type *that makes sense for the widget in question.*
 Float, int, string, bool, whatever, but this would force me to have one,
 for each type for each widget. Ridiculous.
@@ -81,12 +81,34 @@ Now this decreases hackability a tiny bit.
 Only a tiny bit, because all the structs are still open.
 Now a custom widget would need to pick a sensible base to work on,
 instead of just being dumped into the table.
-Will this decrease performance? Maybe, but likely not to a relevant degree.
+Will this decrease performance? Maybe, but likely not to a relevant degree.~~
+This would be a transition into hellfire.
+Try reimplementing taborder and tabfocus,
+with individual structs for each widget.
+This and later optimizations not being possible anymore, makes my decision.
+Semantic issues of this table approach will be fixed... once it's an issue :)
 
-- [ ] add scale
+- [x] add canonical scale
+
+- [ ] add `value_step` variable for widgets
+Thus also update input handling of scale.
+
+- [ ] use value for radiobuttons and checkboxes
+This eliminates the hacky use of text.
+
+- [ ] much needed clean up (too many indents)
+
+- [ ] add instance cache for visible widgets
+This eliminates the if in `CTK_DrawInstance` for each widget.
+- [ ] add instance cache for active widgets
+This eliminates the if in `CTK_TickInstance` for each widget.
 
 - [ ] add bg for each widget in style
 - [ ] add a content fitting resize (just initially?)
+
+- [ ] add proper drag for scale
+This might result in a whole rework of mouse input handling bringing proper click as well.
+Right now a click is just button release event on a widget, which might confuse.
 
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

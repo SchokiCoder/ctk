@@ -44,6 +44,18 @@ btnStateOnClick(CTK_Instance       *inst,
 	}
 }
 
+void
+sclOnClick(CTK_Instance       *inst,
+           const CTK_WidgetId  widget,
+           void               *data)
+{
+	CTK_WidgetId pgb = *((CTK_WidgetId*) (data));
+
+	(void) widget;
+
+	CTK_SetWidgetValue(inst, pgb, inst->value[widget]);
+}
+
 int
 main(int    argc,
      char **argv)
@@ -55,7 +67,7 @@ main(int    argc,
 	CTK_WidgetId ckb;
 	CTK_WidgetId rbn_cheese, lbl_cheese;
 	CTK_WidgetId rbn_pepperoni, lbl_pepperoni;
-	CTK_WidgetId pgb;
+	CTK_WidgetId scl, pgb;
 
 	(void) argc;
 	(void) argv;
@@ -119,9 +131,16 @@ main(int    argc,
 	inst.rect[lbl_pepperoni].x = inst.rect[rbn_pepperoni].x + 50;
 	inst.rect[lbl_pepperoni].y = inst.rect[rbn_pepperoni].y;
 
+	scl = CTK_AddScale(&inst);
+	CTK_SetWidgetValue(&inst, scl, (rand() % 100) / 100.0);
+	inst.rect[scl].y = inst.rect[lbl_pepperoni].y + 30;
+	inst.on_click[scl] = sclOnClick;
+	inst.on_click_data[scl] = &pgb;
+
 	pgb = CTK_AddProgressbar(&inst);
-	CTK_SetWidgetValue(&inst, pgb, (rand() % 100) / 100.0);
-	inst.rect[pgb].y = inst.rect[lbl_pepperoni].y + 30;
+	CTK_SetWidgetValue(&inst, pgb, inst.value[scl]);
+	inst.rect[pgb].x = inst.rect[scl].x + 100;
+	inst.rect[pgb].y = inst.rect[scl].y;
 
 	CTK_SetFocusedWidget(&inst, txt);
 

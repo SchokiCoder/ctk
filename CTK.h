@@ -79,12 +79,14 @@ typedef struct CTK_Style {
 	SDL_Color bg_entry;
 	SDL_Color bg_label;
 	SDL_Color bg_progressbar;
+	SDL_Color bg_radiobutton;
 	SDL_Color bg_scale;
 	SDL_Color bg_widget;
 	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
 	SDL_Color focus;
+	SDL_Color radiobutton;
 	SDL_Color scale_slider;
 } CTK_Style;
 
@@ -281,6 +283,11 @@ const CTK_Style CTK_Theme_TclTk = {
 	.bg_progressbar.b = 0xc3,
 	.bg_progressbar.a = 0xff,
 
+	.bg_radiobutton.r = 0x00,
+	.bg_radiobutton.g = 0x00,
+	.bg_radiobutton.b = 0x00,
+	.bg_radiobutton.a = 0x00,
+
 	.bg_scale.r = 0xc3,
 	.bg_scale.g = 0xc3,
 	.bg_scale.b = 0xc3,
@@ -310,6 +317,11 @@ const CTK_Style CTK_Theme_TclTk = {
 	.focus.g = 0x68,
 	.focus.b = 0x87,
 	.focus.a = 0xff,
+
+	.radiobutton.r = 0xff,
+	.radiobutton.g = 0xff,
+	.radiobutton.b = 0xff,
+	.radiobutton.a = 0xff,
 
 	.scale_slider.r = 0xda,
 	.scale_slider.g = 0xda,
@@ -437,7 +449,7 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
-	inst->bg[ret] = &inst->style.bg_entry;
+	inst->bg[ret] = &inst->style.bg_radiobutton;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
@@ -578,57 +590,6 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	                                       inst->rect[widget].h);
 	SDL_SetRenderTarget(r, inst->texture[widget]);
 
-	/* radiobuttons specifically */
-	if (CTK_WTYPE_RADIOBUTTON == inst->type[widget]) {
-		v[0].position.x = 0;
-		v[0].position.y = 0;
-		v[0].color = CTK_ColorIntToFColor(inst->style.border);
-		v[0].tex_coord.x = 0;
-		v[0].tex_coord.y = 0;
-		v[1].position.x = inst->rect[widget].w;
-		v[1].position.y = 0;
-		v[1].color = CTK_ColorIntToFColor(inst->style.border);
-		v[1].tex_coord.x = 0;
-		v[1].tex_coord.y = 0;
-		v[2].position.x = inst->rect[widget].w / 2.0;
-		v[2].position.y = inst->rect[widget].h;
-		v[2].color = CTK_ColorIntToFColor(inst->style.border);
-		v[2].tex_coord.x = 0;
-		v[2].tex_coord.y = 0;
-		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
-
-		v[0].position.x++;
-		v[0].position.y++;
-		v[0].color = CTK_ColorIntToFColor(*inst->bg[widget]);
-		v[1].position.x--;
-		v[1].position.y++;
-		v[1].color = CTK_ColorIntToFColor(*inst->bg[widget]);
-		v[2].position.y--;
-		v[2].color = CTK_ColorIntToFColor(*inst->bg[widget]);
-		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
-
-		if (inst->value[widget]) {
-			v[0].position.x = (inst->rect[widget].w -
-			                  inst->rect[widget].w *
-			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
-			v[0].position.y = (inst->rect[widget].h -
-			                  inst->rect[widget].h *
-			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
-			v[0].color = CTK_ColorIntToFColor(inst->style.fg);
-			v[1].position.x = v[0].position.x +
-			                  (inst->rect[widget].w *
-			                  CTK_DEFAULT_RADIOBUTTON_FILL);
-			v[1].position.y = v[0].position.y;
-			v[1].color = CTK_ColorIntToFColor(inst->style.fg);
-			v[2].position.y = inst->rect[widget].h *
-			                  CTK_DEFAULT_RADIOBUTTON_FILL;
-			v[2].color = CTK_ColorIntToFColor(inst->style.fg);
-			SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
-		}
-
-		goto cleanup;
-	}
-
 	/* background */
 	SDL_SetRenderDrawColor(r,
 	                       inst->bg[widget]->r,
@@ -705,7 +666,52 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_RADIOBUTTON:
-		/* should have been handled before */
+		v[0].position.x = 0;
+		v[0].position.y = 0;
+		v[0].color = CTK_ColorIntToFColor(inst->style.border);
+		v[0].tex_coord.x = 0;
+		v[0].tex_coord.y = 0;
+		v[1].position.x = inst->rect[widget].w;
+		v[1].position.y = 0;
+		v[1].color = CTK_ColorIntToFColor(inst->style.border);
+		v[1].tex_coord.x = 0;
+		v[1].tex_coord.y = 0;
+		v[2].position.x = inst->rect[widget].w / 2.0;
+		v[2].position.y = inst->rect[widget].h;
+		v[2].color = CTK_ColorIntToFColor(inst->style.border);
+		v[2].tex_coord.x = 0;
+		v[2].tex_coord.y = 0;
+		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+
+		v[0].position.x++;
+		v[0].position.y++;
+		v[0].color = CTK_ColorIntToFColor(inst->style.radiobutton);
+		v[1].position.x--;
+		v[1].position.y++;
+		v[1].color = CTK_ColorIntToFColor(inst->style.radiobutton);
+		v[2].position.y--;
+		v[2].color = CTK_ColorIntToFColor(inst->style.radiobutton);
+		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+
+		if (inst->value[widget]) {
+			v[0].position.x = (inst->rect[widget].w -
+			                  inst->rect[widget].w *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
+			v[0].position.y = (inst->rect[widget].h -
+			                  inst->rect[widget].h *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
+			v[0].color = CTK_ColorIntToFColor(inst->style.fg);
+			v[1].position.x = v[0].position.x +
+			                  (inst->rect[widget].w *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL);
+			v[1].position.y = v[0].position.y;
+			v[1].color = CTK_ColorIntToFColor(inst->style.fg);
+			v[2].position.y = inst->rect[widget].h *
+			                  CTK_DEFAULT_RADIOBUTTON_FILL;
+			v[2].color = CTK_ColorIntToFColor(inst->style.fg);
+			SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+		}
+		goto cleanup;
 		break;
 
 	case CTK_WTYPE_SCALE:
@@ -733,7 +739,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		break;
 	}
 
-	/* border */
+	/* generic border */
 	if (inst->border[widget]) {
 		rect.x = 0;
 		rect.y = 0;

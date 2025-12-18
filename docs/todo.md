@@ -96,7 +96,7 @@ This replaces the hacky use of text... with a slightly less hacky use.
 - [x] clean up `CTK_TickInstance`
 It had too many indentations.
 
-- [ ] fix vram garbage showing in the bg of radiobuttons
+- [x] fix vram garbage showing in the bg of radiobuttons
 
 - [ ] add instance cache for visible widgets
 This eliminates the if in `CTK_DrawInstance` for each widget.

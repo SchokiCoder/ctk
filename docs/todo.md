@@ -98,10 +98,21 @@ It had too many indentations.
 
 - [x] fix vram garbage showing in the bg of radiobuttons
 
-- [ ] add instance cache for visible widgets
+- [x] add instance cache for visible widgets
 This eliminates the if in `CTK_DrawInstance` for each widget.
+
 - [ ] add instance cache for active widgets
 This eliminates the if in `CTK_TickInstance` for each widget.
+
+- [ ] merge focusable into taborder, taborder needs to have it's own length
+rename arr into "focusable_w"
+which eliminates those issues:
+the focusable property isn't used in `CTK_SetFocusedWidget`
+a needed check is in key's tab and shift+tab handling instead
+
+- [ ] pgb and btn lack create texture in add widget func??
+- [ ] what if visible property changes after widget has been focused?
+- [ ] what if enabled property changes after widget has been focused?
 
 - [ ] add bg for each widget in style
 - [ ] add a content fitting resize (just initially?)

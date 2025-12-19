@@ -102,6 +102,10 @@ typedef struct CTK_Instance {
 	void              (*on_quit)(struct CTK_Instance*, void*);
 	void              *on_quit_data;
 
+	/* widget cache */
+	int                visible_ws;
+	CTK_WidgetId       visible_w[CTK_MAX_WIDGETS];
+
 	/* widget data */
 	int                count;
 	SDL_Color         *bg[CTK_MAX_WIDGETS];
@@ -115,7 +119,6 @@ typedef struct CTK_Instance {
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_MAX_WIDGETS];
 	float              value[CTK_MAX_WIDGETS];
-	bool               visible[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 
@@ -197,6 +200,13 @@ float
 CTK_GetScaleSliderWidth(const CTK_Instance *inst,
                         const CTK_WidgetId widget);
 
+/* Returns iterator of "visible" array, if visible, otherwise -1.
+ * Does NOT return WidgetId or bool-like.
+ */
+int
+CTK_GetWidgetVisibleId(const CTK_Instance *inst,
+                       const CTK_WidgetId widget);
+
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
  * appidentifier = Eg. "com.brave.Browser".
@@ -246,6 +256,11 @@ void
 CTK_SetWidgetValue(CTK_Instance       *inst,
                    const CTK_WidgetId  widget,
                    const float         value);
+
+void
+CTK_SetWidgetVisible(CTK_Instance       *inst,
+                     const CTK_WidgetId  widget,
+                     const bool          visible);
 
 void
 CTK_TickInstance(CTK_Instance *inst);
@@ -366,9 +381,9 @@ CTK_AddButton(CTK_Instance *inst)
 	inst->focusable[ret] = true;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_CENTER;
 	inst->type[ret] = CTK_WTYPE_BUTTON;
-	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
 	inst->rect[ret].h = CTK_DEFAULT_BUTTON_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
 }
@@ -384,9 +399,9 @@ CTK_AddCheckbox(CTK_Instance *inst)
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
 	inst->type[ret] = CTK_WTYPE_CHECKBOX;
-	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;
 	inst->rect[ret].h = CTK_DEFAULT_CHECKBOX_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
@@ -403,9 +418,9 @@ CTK_AddEntry(CTK_Instance *inst)
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
 	inst->type[ret] = CTK_WTYPE_ENTRY;
-	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
 	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
@@ -420,8 +435,8 @@ CTK_AddLabel(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_label;
 	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_LABEL;
-	inst->visible[ret] = true;
 	inst->rect[ret].h = CTK_DEFAULT_LABEL_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
 }
@@ -436,9 +451,9 @@ CTK_AddProgressbar(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
-	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_PROGRESSBAR_W;
 	inst->rect[ret].h = CTK_DEFAULT_PROGRESSBAR_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
 }
@@ -455,9 +470,9 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	inst->focusable[ret] = true;
 	inst->group[ret] = 0;
 	inst->type[ret] = CTK_WTYPE_RADIOBUTTON;
-	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_RADIOBUTTON_W;
 	inst->rect[ret].h = CTK_DEFAULT_RADIOBUTTON_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
@@ -474,9 +489,9 @@ CTK_AddScale(CTK_Instance *inst)
 	inst->enabled[ret] = true;
 	inst->focusable[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
-	inst->visible[ret] = true;
 	inst->rect[ret].w = CTK_DEFAULT_SCALE_W;
 	inst->rect[ret].h = CTK_DEFAULT_SCALE_H;
+	CTK_SetWidgetVisible(inst, ret, true);
 	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
@@ -505,7 +520,6 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].w = 0;
 	inst->rect[ret].h = 0;
 	inst->value[ret] = 0.0;
-	inst->visible[ret] = false;
 	inst->on_click[ret] = NULL;
 	inst->on_click_data[ret] = NULL;
 
@@ -793,11 +807,11 @@ CTK_DrawInstance(CTK_Instance *inst)
 	                       inst->style.bg.a);
 	SDL_RenderClear(r);
 
-	for (i = 0; i < inst->count; i++) {
-		if (!inst->visible[i])
-			continue;
-
-		SDL_RenderTexture(r, inst->texture[i], NULL, &inst->rect[i]);
+	for (i = 0; i < inst->visible_ws; i++) {
+		SDL_RenderTexture(r,
+		                  inst->texture[inst->visible_w[i]],
+		                  NULL,
+		                  &inst->rect[inst->visible_w[i]]);
 	}
 
 	SDL_SetRenderDrawColor(r,
@@ -821,8 +835,7 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 	case SDLK_SPACE:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (inst->visible[fw] &&
-		    inst->enabled[fw]) {
+		if (inst->enabled[fw]) {
 			if (NULL != inst->on_click[fw]) {
 				inst->on_click[fw](inst,
 					           fw,
@@ -889,7 +902,6 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 		p.x = e->button.x;
 		p.y = e->button.y;
 		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-		    inst->visible[i] &&
 		    inst->enabled[i] &&
 		    inst->focusable[i]) {
 			CTK_SetFocusedWidget(inst, i);
@@ -922,7 +934,7 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 		p.x = e->button.x;
 		p.y = e->button.y;
 		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-		    inst->visible[i] &&
+		    CTK_GetWidgetVisibleId(inst, i) != -1 &&
 		    inst->enabled[i]) {
 			if (NULL != inst->on_click[i]) {
 				inst->on_click[i](inst,
@@ -965,6 +977,21 @@ CTK_GetScaleSliderWidth(const CTK_Instance *inst,
                         const CTK_WidgetId widget)
 {
 	return inst->rect[widget].w * CTK_SCALE_SLIDER_SIZE_FRACTION;
+}
+
+int
+CTK_GetWidgetVisibleId(const CTK_Instance *inst,
+                       const CTK_WidgetId widget)
+{
+	int i;
+
+	for (i = 0; i < inst->visible_ws; i++) {
+		if (widget == inst->visible_w[i]) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 bool
@@ -1031,7 +1058,8 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 	int i;
 
 	for (i = 0; i < inst->count; i++) {
-		if (widget == inst->taborder[i]) {
+		if (widget == inst->taborder[i] &&
+		    CTK_GetWidgetVisibleId(inst, widget) != -1) {
 			inst->tabfocus = i;
 			break;
 		}
@@ -1114,6 +1142,32 @@ CTK_SetWidgetValue(CTK_Instance       *inst,
 {
 	inst->value[widget] = value;
 	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
+CTK_SetWidgetVisible(CTK_Instance       *inst,
+                     const CTK_WidgetId  widget,
+                     const bool          visible)
+{
+	int i;
+	int visibleId;
+
+	visibleId = CTK_GetWidgetVisibleId(inst, widget);
+
+	if ((visible == true && visibleId != -1) ||
+	    (visible == false && visibleId == -1)) {
+		return;
+	}
+
+	if (true == visible) {
+		inst->visible_w[inst->visible_ws] = widget;
+		inst->visible_ws++;
+	} else {
+		for (i = visibleId; i < inst->visible_ws - 1; i++) {
+			inst->visible_w[i] = inst->visible_w[i + 1];
+		}
+		inst->visible_ws--;
+	}
 }
 
 void

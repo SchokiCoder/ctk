@@ -102,6 +102,8 @@ typedef struct CTK_Instance {
 	void              *on_quit_data;
 
 	/* widget cache */
+	int                enabled_ws;
+	CTK_WidgetId       enabled_w[CTK_MAX_WIDGETS];
 	int                focusable_ws;
 	CTK_WidgetId       focusable_w[CTK_MAX_WIDGETS];
 	int                visible_ws;
@@ -112,7 +114,6 @@ typedef struct CTK_Instance {
 	SDL_Color         *bg[CTK_MAX_WIDGETS];
 	bool               border[CTK_MAX_WIDGETS];
 	int                cursor[CTK_MAX_WIDGETS];
-	bool               enabled[CTK_MAX_WIDGETS];
 	int                group[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
@@ -200,12 +201,15 @@ float
 CTK_GetScaleSliderWidth(const CTK_Instance *inst,
                         const CTK_WidgetId widget);
 
-/* Returns iterator of "visible" array, if visible, otherwise -1.
- * Does NOT return WidgetId or bool-like.
- */
-int
+bool
+CTK_GetWidgetEnabledId(const CTK_Instance *inst,
+                       const CTK_WidgetId  widget,
+                       int                *cacheId);
+
+bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
-                       const CTK_WidgetId widget);
+                       const CTK_WidgetId  widget,
+                       int                *cacheId);
 
 /* appname = Name of application, duh.
  * appversion = Eg. "1.2.5".
@@ -217,6 +221,14 @@ bool
 CTK_Init(const char *appname,
          const char *appversion,
          const char *appidentifier);
+
+bool
+CTK_IsWidgetEnabled(const CTK_Instance *inst,
+                    const CTK_WidgetId  widget);
+
+bool
+CTK_IsWidgetVisible(const CTK_Instance *inst,
+                    const CTK_WidgetId  widget);
 
 /* Alternatively, if more control is needed,
  * you can call CTK_DrawInstance and CTK_TickInstance yourself.
@@ -375,12 +387,13 @@ CTK_AddButton(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 	inst->focusable_w[inst->focusable_ws] = ret;
 	inst->focusable_ws++;
 
 	inst->bg[ret] = &inst->style.bg_button;
 	inst->border[ret] = true;
-	inst->enabled[ret] = true;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_CENTER;
 	inst->type[ret] = CTK_WTYPE_BUTTON;
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
@@ -396,12 +409,13 @@ CTK_AddCheckbox(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 	inst->focusable_w[inst->focusable_ws] = ret;
 	inst->focusable_ws++;
 
 	inst->bg[ret] = &inst->style.bg_entry;
 	inst->border[ret] = true;
-	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_CHECKBOX;
 	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;
 	inst->rect[ret].h = CTK_DEFAULT_CHECKBOX_H;
@@ -417,12 +431,13 @@ CTK_AddEntry(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 	inst->focusable_w[inst->focusable_ws] = ret;
 	inst->focusable_ws++;
 
 	inst->bg[ret] = &inst->style.bg_entry;
 	inst->border[ret] = true;
-	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_ENTRY;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
 	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
@@ -438,9 +453,10 @@ CTK_AddLabel(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 
 	inst->bg[ret] = &inst->style.bg_label;
-	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_LABEL;
 	inst->rect[ret].h = CTK_DEFAULT_LABEL_H;
 	CTK_SetWidgetVisible(inst, ret, true);
@@ -454,10 +470,11 @@ CTK_AddProgressbar(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 
 	inst->bg[ret] = &inst->style.bg_progressbar;
 	inst->border[ret] = true;
-	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
 	inst->rect[ret].w = CTK_DEFAULT_PROGRESSBAR_W;
 	inst->rect[ret].h = CTK_DEFAULT_PROGRESSBAR_H;
@@ -472,12 +489,13 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 	inst->focusable_w[inst->focusable_ws] = ret;
 	inst->focusable_ws++;
 
 	inst->bg[ret] = &inst->style.bg_radiobutton;
 	inst->border[ret] = true;
-	inst->enabled[ret] = true;
 	inst->group[ret] = 0;
 	inst->type[ret] = CTK_WTYPE_RADIOBUTTON;
 	inst->rect[ret].w = CTK_DEFAULT_RADIOBUTTON_W;
@@ -494,12 +512,13 @@ CTK_AddScale(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->enabled_w[inst->enabled_ws] = ret;
+	inst->enabled_ws++;
 	inst->focusable_w[inst->focusable_ws] = ret;
 	inst->focusable_ws++;
 
 	inst->bg[ret] = &inst->style.bg_scale;
 	inst->border[ret] = true;
-	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
 	inst->rect[ret].w = CTK_DEFAULT_SCALE_W;
 	inst->rect[ret].h = CTK_DEFAULT_SCALE_H;
@@ -519,7 +538,6 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_widget;
 	inst->border[ret] = false;
 	inst->cursor[ret] = 0;
-	inst->enabled[ret] = false;
 	inst->group[ret] = -1;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
@@ -561,11 +579,17 @@ CTK_CreateInstance(CTK_Instance          *inst,
 
 	inst->active = true;
 	inst->focused_w = 0;
-	inst->count = 0;
-	inst->on_quit = CTK_InstanceDefaultOnQuit;
-	inst->on_quit_data = NULL;
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
+
+	inst->on_quit = CTK_InstanceDefaultOnQuit;
+	inst->on_quit_data = NULL;
+
+	inst->enabled_ws = 0;
+	inst->focusable_ws = 0;
+	inst->visible_ws = 0;
+
+	inst->count = 0;
 
 	if (0 == flags)
 		f = CTK_DEFAULT_WINDOW_FLAGS;
@@ -602,7 +626,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 
 	SDL_DestroyTexture(inst->texture[widget]);
 
-	if (inst->enabled[widget])
+	if (CTK_IsWidgetEnabled(inst, widget))
 		fg = inst->style.fg;
 	else
 		fg = inst->style.fg_disabled;
@@ -845,33 +869,31 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 	case SDLK_SPACE:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (inst->enabled[fw]) {
-			if (NULL != inst->on_click[fw]) {
-				inst->on_click[fw](inst,
-					           fw,
-					           inst->on_click_data[fw]);
-			}
-			switch (inst->type[fw]) {
-			case CTK_WTYPE_UNKNOWN:
-			case CTK_WTYPE_BUTTON:
-			case CTK_WTYPE_ENTRY:
-			case CTK_WTYPE_LABEL:
-			case CTK_WTYPE_PROGRESSBAR:
-			case CTK_WTYPE_SCALE:
-				break;
+		if (NULL != inst->on_click[fw]) {
+			inst->on_click[fw](inst,
+				           fw,
+				           inst->on_click_data[fw]);
+		}
+		switch (inst->type[fw]) {
+		case CTK_WTYPE_UNKNOWN:
+		case CTK_WTYPE_BUTTON:
+		case CTK_WTYPE_ENTRY:
+		case CTK_WTYPE_LABEL:
+		case CTK_WTYPE_PROGRESSBAR:
+		case CTK_WTYPE_SCALE:
+			break;
 
-			case CTK_WTYPE_CHECKBOX:
-				if (inst->value[fw] != true)
-					inst->value[fw] = true;
-				else
-					inst->value[fw] = false;
-				CTK_CreateWidgetTexture(inst, fw);
-				break;
+		case CTK_WTYPE_CHECKBOX:
+			if (inst->value[fw] != true)
+				inst->value[fw] = true;
+			else
+				inst->value[fw] = false;
+			CTK_CreateWidgetTexture(inst, fw);
+			break;
 
-			case CTK_WTYPE_RADIOBUTTON:
-				CTK_ToggleRadiobutton(inst, fw);
-				break;
-			}
+		case CTK_WTYPE_RADIOBUTTON:
+			CTK_ToggleRadiobutton(inst, fw);
+			break;
 		}
 		break;
 
@@ -901,25 +923,27 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 	int i;
 	SDL_FPoint p;
 	float sw;
+	CTK_WidgetId w;
 
-	for (i = 0; i < inst->count; i++) {
+	for (i = 0; i < inst->enabled_ws; i++) {
+		w = inst->enabled_w[i];
+
 		p.x = e->button.x;
 		p.y = e->button.y;
-		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-		    inst->enabled[i]) {
-			CTK_SetFocusedWidget(inst, i);
+		if (SDL_PointInRectFloat(&p, &inst->rect[w])) {
+			CTK_SetFocusedWidget(inst, w);
 
-			if (CTK_WTYPE_SCALE == inst->type[i]) {
-				sw = CTK_GetScaleSliderWidth(inst, i);
-				inst->value[i] = 1.0 /
-				                 (inst->rect[i].w - sw) *
-				                 (p.x - inst->rect[i].x - (sw / 2.0));
-				if (inst->value[i] < 0.0)
-					inst->value[i] = 0.0;
-				else if (inst->value[i] > 1.0)
-					inst->value[i] = 1.0;
+			if (CTK_WTYPE_SCALE == inst->type[w]) {
+				sw = CTK_GetScaleSliderWidth(inst, w);
+				inst->value[w] = 1.0 /
+				                 (inst->rect[w].w - sw) *
+				                 (p.x - inst->rect[w].x - (sw / 2.0));
+				if (inst->value[w] < 0.0)
+					inst->value[w] = 0.0;
+				else if (inst->value[w] > 1.0)
+					inst->value[w] = 1.0;
 
-				CTK_CreateWidgetTexture(inst, i);
+				CTK_CreateWidgetTexture(inst, w);
 			}
 			break;
 		}
@@ -937,8 +961,8 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 		p.x = e->button.x;
 		p.y = e->button.y;
 		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-		    CTK_GetWidgetVisibleId(inst, i) != -1 &&
-		    inst->enabled[i]) {
+		    CTK_IsWidgetVisible(inst, i) &&
+		    CTK_IsWidgetEnabled(inst, i)) {
 			if (NULL != inst->on_click[i]) {
 				inst->on_click[i](inst,
 				                  i,
@@ -982,19 +1006,38 @@ CTK_GetScaleSliderWidth(const CTK_Instance *inst,
 	return inst->rect[widget].w * CTK_SCALE_SLIDER_SIZE_FRACTION;
 }
 
-int
+bool
+CTK_GetWidgetEnabledId(const CTK_Instance *inst,
+                       const CTK_WidgetId  widget,
+                       int                *cacheId)
+{
+	int i;
+
+	for (i = 0; i < inst->enabled_ws; i++) {
+		if (widget == inst->enabled_w[i]) {
+			*cacheId = i;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
-                       const CTK_WidgetId widget)
+                       const CTK_WidgetId  widget,
+                       int                *cacheId)
 {
 	int i;
 
 	for (i = 0; i < inst->visible_ws; i++) {
 		if (widget == inst->visible_w[i]) {
-			return i;
+			*cacheId = i;
+			return true;
 		}
 	}
 
-	return -1;
+	return false;
 }
 
 bool
@@ -1025,6 +1068,24 @@ CTK_Init(const char *appname,
 		return false;
 
 	return true;
+}
+
+bool
+CTK_IsWidgetEnabled(const CTK_Instance *inst,
+                    const CTK_WidgetId  widget)
+{
+	int dummy;
+
+	return CTK_GetWidgetEnabledId(inst, widget, &dummy);
+}
+
+bool
+CTK_IsWidgetVisible(const CTK_Instance *inst,
+                    const CTK_WidgetId  widget)
+{
+	int dummy;
+
+	return CTK_GetWidgetVisibleId(inst, widget, &dummy);
 }
 
 void
@@ -1062,7 +1123,7 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 
 	for (i = 0; i < inst->focusable_ws; i++) {
 		if (widget == inst->focusable_w[i] &&
-		    CTK_GetWidgetVisibleId(inst, widget) != -1) {
+		    CTK_IsWidgetVisible(inst, widget)) {
 			inst->focused_w = i;
 			break;
 		}
@@ -1081,7 +1142,26 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
                      const CTK_WidgetId  widget,
                      const bool          enabled)
 {
-	inst->enabled[widget] = enabled;
+	int i;
+	bool is_enabled;
+	int enabledId;
+
+	is_enabled = CTK_GetWidgetEnabledId(inst, widget, &enabledId);
+
+	if (enabled == is_enabled) {
+		return;
+	}
+
+	if (true == enabled) {
+		inst->enabled_w[inst->enabled_ws] = widget;
+		inst->enabled_ws++;
+	} else {
+		for (i = enabledId; i < inst->enabled_ws - 1; i++) {
+			inst->enabled_w[i] = inst->enabled_w[i + 1];
+		}
+		inst->enabled_ws--;
+	}
+
 	CTK_CreateWidgetTexture(inst, widget);
 }
 
@@ -1153,12 +1233,12 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
                      const bool          visible)
 {
 	int i;
+	bool is_visible;
 	int visibleId;
 
-	visibleId = CTK_GetWidgetVisibleId(inst, widget);
+	is_visible = CTK_GetWidgetVisibleId(inst, widget, &visibleId);
 
-	if ((visible == true && visibleId != -1) ||
-	    (visible == false && visibleId == -1)) {
+	if (visible == is_visible) {
 		return;
 	}
 

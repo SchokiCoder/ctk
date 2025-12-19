@@ -104,14 +104,19 @@ This eliminates the if in `CTK_DrawInstance` for each widget.
 - [x] add instance cache for focusable widgets
 This practically merges the focusable property and taborder
 
-- [ ] missing "enabled" check in set focus?
-
-- [ ] add instance cache for enabled widgets
+- [x] add instance cache for enabled widgets
 This eliminates the if in `CTK_TickInstance` for each widget.
 
+- [ ] add cache kick-outs
+A widget turning invisible can't stay enabled.
+A widget turning invisible can't stay focusable.
+A widget turning invisible can't stay focused.
+A widget turning disabled can't stay focusable.
+A widget turning disabled can't stay focused.
+A widget turning unfocusable can't stay focused.
+
+- [ ] missing "enabled" check in set focus?
 - [ ] pgb and btn lack create texture in add widget func??
-- [ ] what if visible property changes after widget has been focused?
-- [ ] what if enabled property changes after widget has been focused?
 
 - [ ] add bg for each widget in style
 - [ ] add a content fitting resize (just initially?)

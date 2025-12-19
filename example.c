@@ -35,7 +35,7 @@ btnStateOnClick(CTK_Instance       *inst,
 
 	(void) widget;
 
-	if (inst->enabled[lbl_state]) {
+	if (CTK_IsWidgetEnabled(inst, lbl_state)) {
 		CTK_SetWidgetEnabled(inst, lbl_state, false);
 		CTK_SetWidgetText(inst, lbl_state, "See you later");
 	} else {

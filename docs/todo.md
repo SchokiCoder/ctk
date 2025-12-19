@@ -101,14 +101,13 @@ It had too many indentations.
 - [x] add instance cache for visible widgets
 This eliminates the if in `CTK_DrawInstance` for each widget.
 
-- [ ] add instance cache for active widgets
-This eliminates the if in `CTK_TickInstance` for each widget.
+- [x] add instance cache for focusable widgets
+This practically merges the focusable property and taborder
 
-- [ ] merge focusable into taborder, taborder needs to have it's own length
-rename arr into "focusable_w"
-which eliminates those issues:
-the focusable property isn't used in `CTK_SetFocusedWidget`
-a needed check is in key's tab and shift+tab handling instead
+- [ ] missing "enabled" check in set focus?
+
+- [ ] add instance cache for enabled widgets
+This eliminates the if in `CTK_TickInstance` for each widget.
 
 - [ ] pgb and btn lack create texture in add widget func??
 - [ ] what if visible property changes after widget has been focused?

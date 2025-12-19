@@ -92,10 +92,9 @@ typedef struct CTK_Style {
 
 typedef struct CTK_Instance {
 	bool               active;
+	int                focused_w;
 	bool               redraw;
 	CTK_Style          style;
-	int                tabfocus;
-	CTK_WidgetId       taborder[CTK_MAX_WIDGETS];
 	SDL_Window        *win;
 
 	/* instance events */
@@ -103,6 +102,8 @@ typedef struct CTK_Instance {
 	void              *on_quit_data;
 
 	/* widget cache */
+	int                focusable_ws;
+	CTK_WidgetId       focusable_w[CTK_MAX_WIDGETS];
 	int                visible_ws;
 	CTK_WidgetId       visible_w[CTK_MAX_WIDGETS];
 
@@ -112,7 +113,6 @@ typedef struct CTK_Instance {
 	bool               border[CTK_MAX_WIDGETS];
 	int                cursor[CTK_MAX_WIDGETS];
 	bool               enabled[CTK_MAX_WIDGETS];
-	bool               focusable[CTK_MAX_WIDGETS];
 	int                group[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
@@ -375,10 +375,12 @@ CTK_AddButton(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->focusable_w[inst->focusable_ws] = ret;
+	inst->focusable_ws++;
+
 	inst->bg[ret] = &inst->style.bg_button;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
-	inst->focusable[ret] = true;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_CENTER;
 	inst->type[ret] = CTK_WTYPE_BUTTON;
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
@@ -394,10 +396,12 @@ CTK_AddCheckbox(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->focusable_w[inst->focusable_ws] = ret;
+	inst->focusable_ws++;
+
 	inst->bg[ret] = &inst->style.bg_entry;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
-	inst->focusable[ret] = true;
 	inst->type[ret] = CTK_WTYPE_CHECKBOX;
 	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;
 	inst->rect[ret].h = CTK_DEFAULT_CHECKBOX_H;
@@ -413,10 +417,12 @@ CTK_AddEntry(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->focusable_w[inst->focusable_ws] = ret;
+	inst->focusable_ws++;
+
 	inst->bg[ret] = &inst->style.bg_entry;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
-	inst->focusable[ret] = true;
 	inst->type[ret] = CTK_WTYPE_ENTRY;
 	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
 	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
@@ -432,6 +438,7 @@ CTK_AddLabel(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+
 	inst->bg[ret] = &inst->style.bg_label;
 	inst->enabled[ret] = true;
 	inst->type[ret] = CTK_WTYPE_LABEL;
@@ -447,6 +454,7 @@ CTK_AddProgressbar(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+
 	inst->bg[ret] = &inst->style.bg_progressbar;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
@@ -464,10 +472,12 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->focusable_w[inst->focusable_ws] = ret;
+	inst->focusable_ws++;
+
 	inst->bg[ret] = &inst->style.bg_radiobutton;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
-	inst->focusable[ret] = true;
 	inst->group[ret] = 0;
 	inst->type[ret] = CTK_WTYPE_RADIOBUTTON;
 	inst->rect[ret].w = CTK_DEFAULT_RADIOBUTTON_W;
@@ -484,10 +494,12 @@ CTK_AddScale(CTK_Instance *inst)
 	CTK_WidgetId ret;
 
 	ret = CTK_AddWidget(inst);
+	inst->focusable_w[inst->focusable_ws] = ret;
+	inst->focusable_ws++;
+
 	inst->bg[ret] = &inst->style.bg_scale;
 	inst->border[ret] = true;
 	inst->enabled[ret] = true;
-	inst->focusable[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
 	inst->rect[ret].w = CTK_DEFAULT_SCALE_W;
 	inst->rect[ret].h = CTK_DEFAULT_SCALE_H;
@@ -502,14 +514,12 @@ CTK_AddWidget(CTK_Instance *inst)
 {
 	CTK_WidgetId ret = inst->count;
 
-	inst->taborder[inst->count] = ret;
 	inst->count++;
 
 	inst->bg[ret] = &inst->style.bg_widget;
 	inst->border[ret] = false;
 	inst->cursor[ret] = 0;
 	inst->enabled[ret] = false;
-	inst->focusable[ret] = false;
 	inst->group[ret] = -1;
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
@@ -550,7 +560,7 @@ CTK_CreateInstance(CTK_Instance          *inst,
 	SDL_Renderer *r;
 
 	inst->active = true;
-	inst->tabfocus = 0;
+	inst->focused_w = 0;
 	inst->count = 0;
 	inst->on_quit = CTK_InstanceDefaultOnQuit;
 	inst->on_quit_data = NULL;
@@ -867,21 +877,15 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 
 	case SDLK_TAB:
 		if (SDL_KMOD_SHIFT & e->key.mod) {
-			do {
-				inst->tabfocus--;
-				if (inst->tabfocus < 0) {
-					inst->tabfocus = inst->count - 1;
-				}
-				fw = CTK_GetFocusedWidget(inst);
-			} while (!inst->focusable[fw]);
+			inst->focused_w--;
+			if (inst->focused_w < 0) {
+				inst->focused_w = inst->focusable_ws - 1;
+			}
 		} else {
-			do {
-				inst->tabfocus++;
-				if (inst->tabfocus >= inst->count) {
-					inst->tabfocus = 0;
-				}
-				fw = CTK_GetFocusedWidget(inst);
-			} while (!inst->focusable[fw]);
+			inst->focused_w++;
+			if (inst->focused_w >= inst->focusable_ws) {
+				inst->focused_w = 0;
+			}
 		}
 
 		CTK_SetFocusedWidget(inst,
@@ -902,8 +906,7 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 		p.x = e->button.x;
 		p.y = e->button.y;
 		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-		    inst->enabled[i] &&
-		    inst->focusable[i]) {
+		    inst->enabled[i]) {
 			CTK_SetFocusedWidget(inst, i);
 
 			if (CTK_WTYPE_SCALE == inst->type[i]) {
@@ -969,7 +972,7 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
-	return inst->taborder[inst->tabfocus];
+	return inst->focusable_w[inst->focused_w];
 }
 
 float
@@ -1057,10 +1060,10 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 {
 	int i;
 
-	for (i = 0; i < inst->count; i++) {
-		if (widget == inst->taborder[i] &&
+	for (i = 0; i < inst->focusable_ws; i++) {
+		if (widget == inst->focusable_w[i] &&
 		    CTK_GetWidgetVisibleId(inst, widget) != -1) {
-			inst->tabfocus = i;
+			inst->focused_w = i;
 			break;
 		}
 	}

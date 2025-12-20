@@ -207,6 +207,11 @@ CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        int                *cacheId);
 
 bool
+CTK_GetWidgetFocusableId(const CTK_Instance *inst,
+                         const CTK_WidgetId  widget,
+                         int                *cacheId);
+
+bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
                        int                *cacheId);
@@ -225,6 +230,10 @@ CTK_Init(const char *appname,
 bool
 CTK_IsWidgetEnabled(const CTK_Instance *inst,
                     const CTK_WidgetId  widget);
+
+bool
+CTK_IsWidgetFocusable(const CTK_Instance *inst,
+                      const CTK_WidgetId  widget);
 
 bool
 CTK_IsWidgetVisible(const CTK_Instance *inst,
@@ -248,6 +257,11 @@ void
 CTK_SetWidgetEnabled(CTK_Instance       *inst,
                      const CTK_WidgetId  widget,
                      const bool          enabled);
+
+void
+CTK_SetWidgetFocusable(CTK_Instance       *inst,
+                       const CTK_WidgetId  widget,
+                       const bool          focusable);
 
 void
 CTK_SetWidgetText(CTK_Instance       *inst,
@@ -1024,6 +1038,23 @@ CTK_GetWidgetEnabledId(const CTK_Instance *inst,
 }
 
 bool
+CTK_GetWidgetFocusableId(const CTK_Instance *inst,
+                         const CTK_WidgetId  widget,
+                         int                *cacheId)
+{
+	int i;
+
+	for (i = 0; i < inst->focusable_ws; i++) {
+		if (widget == inst->focusable_w[i]) {
+			*cacheId = i;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
                        int                *cacheId)
@@ -1077,6 +1108,15 @@ CTK_IsWidgetEnabled(const CTK_Instance *inst,
 	int dummy;
 
 	return CTK_GetWidgetEnabledId(inst, widget, &dummy);
+}
+
+bool
+CTK_IsWidgetFocusable(const CTK_Instance *inst,
+                      const CTK_WidgetId  widget)
+{
+	int dummy;
+
+	return CTK_GetWidgetFocusableId(inst, widget, &dummy);
 }
 
 bool
@@ -1160,6 +1200,36 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
 			inst->enabled_w[i] = inst->enabled_w[i + 1];
 		}
 		inst->enabled_ws--;
+
+		CTK_SetWidgetFocusable(inst, widget, false);
+	}
+
+	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
+CTK_SetWidgetFocusable(CTK_Instance       *inst,
+                       const CTK_WidgetId  widget,
+                       const bool          focusable)
+{
+	int i;
+	bool is_focusable;
+	int focusableId;
+
+	is_focusable = CTK_GetWidgetFocusableId(inst, widget, &focusableId);
+
+	if (focusable == is_focusable) {
+		return;
+	}
+
+	if (true == focusable) {
+		inst->focusable_w[inst->focusable_ws] = widget;
+		inst->focusable_ws++;
+	} else {
+		for (i = focusableId; i < inst->focusable_ws - 1; i++) {
+			inst->focusable_w[i] = inst->focusable_w[i + 1];
+		}
+		inst->focusable_ws--;
 	}
 
 	CTK_CreateWidgetTexture(inst, widget);
@@ -1250,6 +1320,9 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 			inst->visible_w[i] = inst->visible_w[i + 1];
 		}
 		inst->visible_ws--;
+
+		CTK_SetWidgetFocusable(inst, widget, false);
+		CTK_SetWidgetEnabled(inst, widget, false);
 	}
 }
 

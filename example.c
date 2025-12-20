@@ -27,20 +27,44 @@ btnCounterOnClick(CTK_Instance       *inst,
 }
 
 void
-btnStateOnClick(CTK_Instance       *inst,
-                const CTK_WidgetId  widget,
-                void               *data)
+ckbEnabledOnClick(CTK_Instance       *inst,
+                  const CTK_WidgetId  widget,
+                  void               *data)
 {
-	CTK_WidgetId lbl_state = *((CTK_WidgetId*) (data));
+	int i;
 
-	(void) widget;
+	(void) data;
 
-	if (CTK_IsWidgetEnabled(inst, lbl_state)) {
-		CTK_SetWidgetEnabled(inst, lbl_state, false);
-		CTK_SetWidgetText(inst, lbl_state, "See you later");
-	} else {
-		CTK_SetWidgetEnabled(inst, lbl_state, true);
-		CTK_SetWidgetText(inst, lbl_state, "Hello again world");
+	for (i = 6; i < inst->count; i++) {
+		CTK_SetWidgetEnabled(inst, i, (bool) inst->value[widget]);
+	}
+}
+
+void
+ckbFocusableOnClick(CTK_Instance       *inst,
+                    const CTK_WidgetId  widget,
+                    void               *data)
+{
+	int i;
+
+	(void) data;
+
+	for (i = 6; i < inst->count; i++) {
+		CTK_SetWidgetFocusable(inst, i, (bool) inst->value[widget]);
+	}
+}
+
+void
+ckbVisibleOnClick(CTK_Instance       *inst,
+                  const CTK_WidgetId  widget,
+                  void               *data)
+{
+	int i;
+
+	(void) data;
+
+	for (i = 6; i < inst->count; i++) {
+		CTK_SetWidgetVisible(inst, i, (bool) inst->value[widget]);
 	}
 }
 
@@ -60,8 +84,12 @@ int
 main(int    argc,
      char **argv)
 {
+	const int MARGIN = 5;
+
 	CTK_Instance inst;
-	CTK_WidgetId btn_state,   lbl_state;
+	CTK_WidgetId ckb_focusable, lbl_focusable,
+	             ckb_enabled, lbl_enabled,
+	             ckb_visible, lbl_visible;
 	CTK_WidgetId btn_counter, lbl_counter;
 	CTK_WidgetId txt;
 	CTK_WidgetId ckb;
@@ -88,58 +116,99 @@ main(int    argc,
 		return 0;
 	}
 
-	btn_state = CTK_AddButton(&inst);
-	CTK_SetWidgetText(&inst, btn_state, "Switch");
-	CTK_SetWidgetTextAlignment(&inst, btn_state, CTK_TEXT_ALIGNMENT_LEFT);
-	inst.on_click[btn_state] = btnStateOnClick;
-	inst.on_click_data[btn_state] = &lbl_state;
+	ckb_focusable = CTK_AddCheckbox(&inst);
+	inst.rect[ckb_focusable].x = MARGIN;
+	inst.rect[ckb_focusable].y = MARGIN;
+	inst.on_click[ckb_focusable] = ckbFocusableOnClick;
 
-	lbl_state = CTK_AddLabel(&inst);
-	CTK_SetWidgetText(&inst, lbl_state, "Hello world");
-	inst.rect[lbl_state].x = 100;
+	lbl_focusable = CTK_AddLabel(&inst);
+	CTK_SetWidgetText(&inst, lbl_focusable, "Focusable");
+	inst.rect[lbl_focusable].x = inst.rect[ckb_focusable].x +
+	                             inst.rect[ckb_focusable].w + MARGIN;
+	inst.rect[lbl_focusable].y = inst.rect[ckb_focusable].y;
+
+	ckb_enabled = CTK_AddCheckbox(&inst);
+	inst.rect[ckb_enabled].x = inst.rect[ckb_focusable].x;
+	inst.rect[ckb_enabled].y = inst.rect[ckb_focusable].y +
+	                           inst.rect[ckb_focusable].h + MARGIN;
+	inst.on_click[ckb_enabled] = ckbEnabledOnClick;
+
+	lbl_enabled = CTK_AddLabel(&inst);
+	CTK_SetWidgetText(&inst, lbl_enabled, "Enabled");
+	inst.rect[lbl_enabled].x = inst.rect[ckb_enabled].x +
+	                           inst.rect[ckb_enabled].w + MARGIN;
+	inst.rect[lbl_enabled].y = inst.rect[ckb_enabled].y;
+
+	ckb_visible = CTK_AddCheckbox(&inst);
+	inst.rect[ckb_visible].x = inst.rect[ckb_enabled].x;
+	inst.rect[ckb_visible].y = inst.rect[ckb_enabled].y +
+	                           inst.rect[ckb_enabled].h + MARGIN;
+	inst.on_click[ckb_visible] = ckbVisibleOnClick;
+
+	lbl_visible = CTK_AddLabel(&inst);
+	CTK_SetWidgetText(&inst, lbl_visible, "Visible");
+	inst.rect[lbl_visible].x = inst.rect[ckb_visible].x +
+	                           inst.rect[ckb_visible].w + MARGIN;
+	inst.rect[lbl_visible].y = inst.rect[ckb_visible].y;
+
 
 	btn_counter = CTK_AddButton(&inst);
 	CTK_SetWidgetText(&inst, btn_counter, "Count");
-	inst.rect[btn_counter].y = 30;
+	inst.rect[btn_counter].x = MARGIN;
+	inst.rect[btn_counter].y = inst.rect[lbl_visible].y +
+	                           inst.rect[lbl_visible].h + (MARGIN * 4);
 	inst.on_click[btn_counter] = btnCounterOnClick;
 	inst.on_click_data[btn_counter] = &lbl_counter;
 
 	lbl_counter = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_counter, "0");
-	inst.rect[lbl_counter].x = 100;
-	inst.rect[lbl_counter].y = 30;
+	inst.rect[lbl_counter].x = inst.rect[btn_counter].x +
+	                           inst.rect[btn_counter].w + MARGIN;
+	inst.rect[lbl_counter].y = inst.rect[btn_counter].y;
 
 	txt = CTK_AddEntry(&inst);
-	inst.rect[txt].y = 60;
+	inst.rect[txt].x = MARGIN;
+	inst.rect[txt].y = inst.rect[lbl_counter].y +
+	                   inst.rect[lbl_counter].h + MARGIN;
 
 	ckb = CTK_AddCheckbox(&inst);
-	inst.rect[ckb].y = 90;
+	inst.rect[ckb].x = MARGIN;
+	inst.rect[ckb].y = inst.rect[txt].y +
+	                   inst.rect[txt].h + MARGIN;
 
 	rbn_cheese = CTK_AddRadiobutton(&inst);
-	inst.rect[rbn_cheese].y = 120;
+	inst.rect[rbn_cheese].x = MARGIN;
+	inst.rect[rbn_cheese].y = inst.rect[ckb].y +
+	                          inst.rect[ckb].h + MARGIN;
 
 	lbl_cheese = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_cheese, "Pizza with extra cheese");
-	inst.rect[lbl_cheese].x = inst.rect[rbn_cheese].x + 50;
+	inst.rect[lbl_cheese].x = inst.rect[rbn_cheese].x +
+	                          inst.rect[rbn_cheese].w + MARGIN;
 	inst.rect[lbl_cheese].y = inst.rect[rbn_cheese].y;
 
 	rbn_pepperoni = CTK_AddRadiobutton(&inst);
-	inst.rect[rbn_pepperoni].y = inst.rect[rbn_cheese].y + 30;
+	inst.rect[rbn_pepperoni].x = MARGIN;
+	inst.rect[rbn_pepperoni].y = inst.rect[rbn_cheese].y +
+	                             inst.rect[rbn_cheese].h + MARGIN;
 
 	lbl_pepperoni = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_pepperoni, "Pizza with pepperoni");
-	inst.rect[lbl_pepperoni].x = inst.rect[rbn_pepperoni].x + 50;
+	inst.rect[lbl_pepperoni].x = inst.rect[rbn_pepperoni].x +
+	                             inst.rect[rbn_pepperoni].w + MARGIN;
 	inst.rect[lbl_pepperoni].y = inst.rect[rbn_pepperoni].y;
 
 	scl = CTK_AddScale(&inst);
 	CTK_SetWidgetValue(&inst, scl, (rand() % 100) / 100.0);
-	inst.rect[scl].y = inst.rect[lbl_pepperoni].y + 30;
+	inst.rect[scl].x = MARGIN;
+	inst.rect[scl].y = inst.rect[lbl_pepperoni].y +
+	                   inst.rect[lbl_pepperoni].h + MARGIN;
 	inst.on_click[scl] = sclOnClick;
 	inst.on_click_data[scl] = &pgb;
 
 	pgb = CTK_AddProgressbar(&inst);
 	CTK_SetWidgetValue(&inst, pgb, inst.value[scl]);
-	inst.rect[pgb].x = inst.rect[scl].x + 100;
+	inst.rect[pgb].x = inst.rect[scl].x + inst.rect[scl].w + MARGIN;
 	inst.rect[pgb].y = inst.rect[scl].y;
 
 	CTK_SetFocusedWidget(&inst, txt);

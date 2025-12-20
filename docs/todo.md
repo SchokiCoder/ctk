@@ -107,15 +107,24 @@ This practically merges the focusable property and taborder
 - [x] add instance cache for enabled widgets
 This eliminates the if in `CTK_TickInstance` for each widget.
 
-- [ ] add cache kick-outs
+- [x] add cache kick-outs
 A widget turning invisible can't stay enabled.
 A widget turning invisible can't stay focusable.
-A widget turning invisible can't stay focused.
 A widget turning disabled can't stay focusable.
 A widget turning disabled can't stay focused.
-A widget turning unfocusable can't stay focused.
 
-- [ ] missing "enabled" check in set focus?
+- [ ] add cache kick-ins
+A widget turning focusable is expected to turn enabled.
+A widget turning focusable is expected to turn visible.
+A widget turning enabled is expected to turn visible.
+
+- [ ] a widget turning focusable might change focused widget?
+
+- [ ] add proper bool toggle for checkboxes and radiobuttons
+hacky use of value causes issues see example top control checkboxes
+
+- [ ] add top checkboxes to example for changing visible, enabled and focusable of all widgets
+
 - [ ] pgb and btn lack create texture in add widget func??
 
 - [ ] add bg for each widget in style

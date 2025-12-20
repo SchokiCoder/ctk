@@ -1195,6 +1195,8 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
 	if (true == enabled) {
 		inst->enabled_w[inst->enabled_ws] = widget;
 		inst->enabled_ws++;
+
+		CTK_SetWidgetVisible(inst, widget, true);
 	} else {
 		for (i = enabledId; i < inst->enabled_ws - 1; i++) {
 			inst->enabled_w[i] = inst->enabled_w[i + 1];
@@ -1225,6 +1227,9 @@ CTK_SetWidgetFocusable(CTK_Instance       *inst,
 	if (true == focusable) {
 		inst->focusable_w[inst->focusable_ws] = widget;
 		inst->focusable_ws++;
+
+		CTK_SetWidgetVisible(inst, widget, true);
+		CTK_SetWidgetEnabled(inst, widget, true);
 	} else {
 		for (i = focusableId; i < inst->focusable_ws - 1; i++) {
 			inst->focusable_w[i] = inst->focusable_w[i + 1];

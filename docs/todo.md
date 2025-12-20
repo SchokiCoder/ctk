@@ -113,7 +113,7 @@ A widget turning invisible can't stay focusable.
 A widget turning disabled can't stay focusable.
 A widget turning disabled can't stay focused.
 
-- [ ] add cache kick-ins
+- [x] add cache kick-ins
 A widget turning focusable is expected to turn enabled.
 A widget turning focusable is expected to turn visible.
 A widget turning enabled is expected to turn visible.

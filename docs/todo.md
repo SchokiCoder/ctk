@@ -118,17 +118,15 @@ A widget turning focusable is expected to turn enabled.
 A widget turning focusable is expected to turn visible.
 A widget turning enabled is expected to turn visible.
 
+- [x] add proper bool toggle for widgets and switch order of event handling
+First process the event *then* start any associated callbacks.
+
 - [ ] a widget turning focusable might change focused widget?
-
-- [ ] add proper bool toggle for checkboxes and radiobuttons
-hacky use of value causes issues see example top control checkboxes
-
-- [ ] add top checkboxes to example for changing visible, enabled and focusable of all widgets
 
 - [ ] pgb and btn lack create texture in add widget func??
 
 - [ ] add bg for each widget in style
-- [ ] add a content fitting resize (just initially?)
+- [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] add `value_step` variable for widgets
 Thus also update input handling of scale.

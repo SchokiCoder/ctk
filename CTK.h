@@ -118,6 +118,7 @@ typedef struct CTK_Instance {
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
+	bool               toggle[CTK_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_MAX_WIDGETS];
 	float              value[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
@@ -279,6 +280,11 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
                            const char         *text);
 
 void
+CTK_SetWidgetToggle(CTK_Instance       *inst,
+                    const CTK_WidgetId  widget,
+                    const bool          toggle);
+
+void
 CTK_SetWidgetValue(CTK_Instance       *inst,
                    const CTK_WidgetId  widget,
                    const float         value);
@@ -290,6 +296,10 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 
 void
 CTK_TickInstance(CTK_Instance *inst);
+
+void
+CTK_ToggleCheckbox(CTK_Instance *inst,
+                   CTK_WidgetId  widget);
 
 void
 CTK_ToggleRadiobutton(CTK_Instance *inst,
@@ -556,6 +566,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->scroll[ret] = 0;
 	inst->text[ret][0] = '\0';
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
+	inst->toggle[ret] = false;
 	inst->type[ret] = CTK_WTYPE_UNKNOWN;
 	inst->rect[ret].x = 0;
 	inst->rect[ret].y = 0;
@@ -696,7 +707,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_CHECKBOX:
-		if (inst->value[widget]) {
+		if (inst->toggle[widget]) {
 			rect.x = (inst->rect[widget].w -
 			          inst->rect[widget].w *
 			          CTK_DEFAULT_CHECKBOX_FILL) / 2.0;
@@ -755,7 +766,7 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		v[2].color = CTK_ColorIntToFColor(inst->style.radiobutton);
 		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 
-		if (inst->value[widget]) {
+		if (inst->toggle[widget]) {
 			v[0].position.x = (inst->rect[widget].w -
 			                  inst->rect[widget].w *
 			                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
@@ -883,11 +894,6 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 	case SDLK_SPACE:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (NULL != inst->on_click[fw]) {
-			inst->on_click[fw](inst,
-				           fw,
-				           inst->on_click_data[fw]);
-		}
 		switch (inst->type[fw]) {
 		case CTK_WTYPE_UNKNOWN:
 		case CTK_WTYPE_BUTTON:
@@ -898,16 +904,22 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 			break;
 
 		case CTK_WTYPE_CHECKBOX:
-			if (inst->value[fw] != true)
-				inst->value[fw] = true;
+			if (inst->toggle[fw] != true)
+				inst->toggle[fw] = true;
 			else
-				inst->value[fw] = false;
+				inst->toggle[fw] = false;
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
 		case CTK_WTYPE_RADIOBUTTON:
 			CTK_ToggleRadiobutton(inst, fw);
 			break;
+		}
+
+		if (NULL != inst->on_click[fw]) {
+			inst->on_click[fw](inst,
+				           fw,
+				           inst->on_click_data[fw]);
 		}
 		break;
 
@@ -977,11 +989,6 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
 		    CTK_IsWidgetVisible(inst, i) &&
 		    CTK_IsWidgetEnabled(inst, i)) {
-			if (NULL != inst->on_click[i]) {
-				inst->on_click[i](inst,
-				                  i,
-				                  inst->on_click_data[i]);
-			}
 			switch (inst->type[i]) {
 			case CTK_WTYPE_UNKNOWN:
 			case CTK_WTYPE_BUTTON:
@@ -992,16 +999,22 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 				break;
 
 			case CTK_WTYPE_CHECKBOX:
-				if (inst->value[i] != true)
-					inst->value[i] = true;
+				if (inst->toggle[i] != true)
+					inst->toggle[i] = true;
 				else
-					inst->value[i] = false;
+					inst->toggle[i] = false;
 				CTK_CreateWidgetTexture(inst, i);
 				break;
 
 			case CTK_WTYPE_RADIOBUTTON:
 				CTK_ToggleRadiobutton(inst, i);
 				break;
+			}
+
+			if (NULL != inst->on_click[i]) {
+				inst->on_click[i](inst,
+				                  i,
+				                  inst->on_click_data[i]);
 			}
 		}
 	}
@@ -1294,6 +1307,15 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
 }
 
 void
+CTK_SetWidgetToggle(CTK_Instance       *inst,
+                    const CTK_WidgetId  widget,
+                    const bool          toggle)
+{
+	inst->toggle[widget] = toggle;
+	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
 CTK_SetWidgetValue(CTK_Instance       *inst,
                    const CTK_WidgetId  widget,
                    const float         value)
@@ -1385,21 +1407,33 @@ CTK_TickInstance(CTK_Instance *inst)
 }
 
 void
+CTK_ToggleCheckbox(CTK_Instance *inst,
+                   CTK_WidgetId  widget)
+{
+	if (true == inst->toggle[widget])
+		inst->toggle[widget] = false;
+	else
+		inst->toggle[widget] = true;
+
+	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
 CTK_ToggleRadiobutton(CTK_Instance *inst,
                       CTK_WidgetId  widget)
 {
 	int i;
 
-	if (inst->value[widget])
+	if (inst->toggle[widget])
 		return;
 
 	for (i = 0; i < inst->count; i++) {
 		if (inst->group[i] == inst->group[widget]) {
-			inst->value[i] = false;
+			inst->toggle[i] = false;
 			CTK_CreateWidgetTexture(inst, i);
 		}
 	}
-	inst->value[widget] = true;
+	inst->toggle[widget] = true;
 	CTK_CreateWidgetTexture(inst, widget);
 }
 

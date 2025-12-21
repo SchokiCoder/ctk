@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
+
 void
 btnCounterOnClick(CTK_Instance       *inst,
                   const CTK_WidgetId  widget,
@@ -36,7 +38,13 @@ ckbEnabledOnClick(CTK_Instance       *inst,
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
-		CTK_SetWidgetEnabled(inst, i, (bool) inst->value[widget]);
+		CTK_SetWidgetEnabled(inst, i, inst->toggle[widget]);
+	}
+
+	if (inst->toggle[widget]) {
+		CTK_SetWidgetToggle(inst, ckb_visible, true);
+	} else {
+		CTK_SetWidgetToggle(inst, ckb_focusable, false);
 	}
 }
 
@@ -50,7 +58,12 @@ ckbFocusableOnClick(CTK_Instance       *inst,
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
-		CTK_SetWidgetFocusable(inst, i, (bool) inst->value[widget]);
+		CTK_SetWidgetFocusable(inst, i, inst->toggle[widget]);
+	}
+
+	if (inst->toggle[widget]) {
+		CTK_SetWidgetToggle(inst, ckb_visible, true);
+		CTK_SetWidgetToggle(inst, ckb_enabled, true);
 	}
 }
 
@@ -64,7 +77,12 @@ ckbVisibleOnClick(CTK_Instance       *inst,
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
-		CTK_SetWidgetVisible(inst, i, (bool) inst->value[widget]);
+		CTK_SetWidgetVisible(inst, i, inst->toggle[widget]);
+	}
+
+	if (!inst->toggle[widget]) {
+		CTK_SetWidgetToggle(inst, ckb_enabled, false);
+		CTK_SetWidgetToggle(inst, ckb_focusable, false);
 	}
 }
 
@@ -87,9 +105,9 @@ main(int    argc,
 	const int MARGIN = 5;
 
 	CTK_Instance inst;
-	CTK_WidgetId ckb_focusable, lbl_focusable,
-	             ckb_enabled, lbl_enabled,
-	             ckb_visible, lbl_visible;
+	CTK_WidgetId lbl_focusable,
+	             lbl_enabled,
+	             lbl_visible;
 	CTK_WidgetId btn_counter, lbl_counter;
 	CTK_WidgetId txt;
 	CTK_WidgetId ckb;
@@ -120,6 +138,7 @@ main(int    argc,
 	inst.rect[ckb_focusable].x = MARGIN;
 	inst.rect[ckb_focusable].y = MARGIN;
 	inst.on_click[ckb_focusable] = ckbFocusableOnClick;
+	CTK_ToggleCheckbox(&inst, ckb_focusable);
 
 	lbl_focusable = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_focusable, "Focusable");
@@ -132,6 +151,7 @@ main(int    argc,
 	inst.rect[ckb_enabled].y = inst.rect[ckb_focusable].y +
 	                           inst.rect[ckb_focusable].h + MARGIN;
 	inst.on_click[ckb_enabled] = ckbEnabledOnClick;
+	CTK_ToggleCheckbox(&inst, ckb_enabled);
 
 	lbl_enabled = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_enabled, "Enabled");
@@ -144,6 +164,7 @@ main(int    argc,
 	inst.rect[ckb_visible].y = inst.rect[ckb_enabled].y +
 	                           inst.rect[ckb_enabled].h + MARGIN;
 	inst.on_click[ckb_visible] = ckbVisibleOnClick;
+	CTK_ToggleCheckbox(&inst, ckb_visible);
 
 	lbl_visible = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_visible, "Visible");

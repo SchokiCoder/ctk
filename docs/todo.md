@@ -1,13 +1,37 @@
+- compatibility tests
+(freebsd, abuse my relatives to test on their windows and apple machines)
+
+# 0.3.0
+
 - [ ] add more themes, especially a dark one
 - [ ] use `SDL_GetSystemTheme`
+- do themes contain default widget sizes?
+if so, move the default size values to the tcl-tk theme.
+adding a widget should set the rect once and then leave them alone.
+(do not restrict or interfere with later size changes.)
+if so, a theme change should change them.
+
+- [ ] add mnemonics
+
+- [ ] update version number
+
+# 0.2.0
 
 - [ ] add a way to grid widgets
-- [ ] add mnemonics
+- [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] add proper borders
 - [ ] add button click border change
 
-# basic
+- [ ] a widget turning (un)focusable might change focused widget?
+
+- [ ] add widget on hover callbacks
+- [ ] add background colors for widgets that are hovered on
+(tcl-tk = rgb(ededed))
+
+- [ ] update version number
+
+# 0.1.0
 
 - [x] add proper project name, license document, and README
 - [x] add font rendering
@@ -124,10 +148,7 @@ First process the event *then* start any associated callbacks.
 - [x] fix progressbar and button being invisible when value and text are unset
 Respectively that is.
 
-- [ ] a widget turning focusable might change focused widget?
-
 - [ ] add bg for each widget in style
-- [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] add `value_step` variable for widgets
 Thus also update input handling of scale.

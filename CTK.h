@@ -5,6 +5,8 @@
 #ifndef _CTK_H
 #define _CTK_H
 
+#include "CTK_style.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
@@ -72,23 +74,6 @@ typedef enum CTK_TextAlignment {
 	CTK_TEXT_ALIGNMENT_CENTER,
 	CTK_TEXT_ALIGNMENT_RIGHT,
 } CTK_TextAlignment;
-
-typedef struct CTK_Style {
-	SDL_Color bg;
-	SDL_Color bg_button;
-	SDL_Color bg_entry;
-	SDL_Color bg_label;
-	SDL_Color bg_progressbar;
-	SDL_Color bg_radiobutton;
-	SDL_Color bg_scale;
-	SDL_Color bg_widget;
-	SDL_Color border;
-	SDL_Color fg;
-	SDL_Color fg_disabled;
-	SDL_Color focus;
-	SDL_Color radiobutton;
-	SDL_Color scale_slider;
-} CTK_Style;
 
 typedef struct CTK_Instance {
 	bool               active;
@@ -307,78 +292,6 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 
 void
 CTK_Quit();
-
-const CTK_Style CTK_Theme_TclTk = {
-	.bg.r = 0xda,
-	.bg.g = 0xda,
-	.bg.b = 0xda,
-	.bg.a = 0xff,
-
-	.bg_button.r = 0xda,
-	.bg_button.g = 0xda,
-	.bg_button.b = 0xda,
-	.bg_button.a = 0xff,
-
-	.bg_entry.r = 0xff,
-	.bg_entry.g = 0xff,
-	.bg_entry.b = 0xff,
-	.bg_entry.a = 0xff,
-
-	.bg_label.r = 0xda,
-	.bg_label.g = 0xda,
-	.bg_label.b = 0xda,
-	.bg_label.a = 0xff,
-
-	.bg_progressbar.r = 0xc3,
-	.bg_progressbar.g = 0xc3,
-	.bg_progressbar.b = 0xc3,
-	.bg_progressbar.a = 0xff,
-
-	.bg_radiobutton.r = 0x00,
-	.bg_radiobutton.g = 0x00,
-	.bg_radiobutton.b = 0x00,
-	.bg_radiobutton.a = 0x00,
-
-	.bg_scale.r = 0xc3,
-	.bg_scale.g = 0xc3,
-	.bg_scale.b = 0xc3,
-	.bg_scale.a = 0xff,
-
-	.bg_widget.r = 0x00,
-	.bg_widget.g = 0x00,
-	.bg_widget.b = 0x00,
-	.bg_widget.a = 0x00,
-
-	.border.r = 0x83,
-	.border.g = 0x83,
-	.border.b = 0x83,
-	.border.a = 0xff,
-
-	.fg.r = 0x00,
-	.fg.g = 0x00,
-	.fg.b = 0x00,
-	.fg.a = 0xff,
-
-	.fg_disabled.r = 0xa4,
-	.fg_disabled.g = 0xa4,
-	.fg_disabled.b = 0xa4,
-	.fg_disabled.a = 0xff,
-
-	.focus.r = 0x48,
-	.focus.g = 0x68,
-	.focus.b = 0x87,
-	.focus.a = 0xff,
-
-	.radiobutton.r = 0xff,
-	.radiobutton.g = 0xff,
-	.radiobutton.b = 0xff,
-	.radiobutton.a = 0xff,
-
-	.scale_slider.r = 0xda,
-	.scale_slider.g = 0xda,
-	.scale_slider.b = 0xda,
-	.scale_slider.a = 0xff,
-};
 
 #define CTK_DEFAULT_BUTTON_W           80
 #define CTK_DEFAULT_BUTTON_H           27

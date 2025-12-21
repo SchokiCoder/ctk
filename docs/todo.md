@@ -121,9 +121,10 @@ A widget turning enabled is expected to turn visible.
 - [x] add proper bool toggle for widgets and switch order of event handling
 First process the event *then* start any associated callbacks.
 
-- [ ] a widget turning focusable might change focused widget?
+- [x] fix progressbar and button being invisible when value and text are unset
+Respectively that is.
 
-- [ ] pgb and btn lack create texture in add widget func??
+- [ ] a widget turning focusable might change focused widget?
 
 - [ ] add bg for each widget in style
 - [ ] add a content fitting window resize (just initially? (upon mainloop))

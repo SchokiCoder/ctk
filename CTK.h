@@ -423,6 +423,7 @@ CTK_AddButton(CTK_Instance *inst)
 	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
 	inst->rect[ret].h = CTK_DEFAULT_BUTTON_H;
 	CTK_SetWidgetVisible(inst, ret, true);
+	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
 }
@@ -503,6 +504,7 @@ CTK_AddProgressbar(CTK_Instance *inst)
 	inst->rect[ret].w = CTK_DEFAULT_PROGRESSBAR_W;
 	inst->rect[ret].h = CTK_DEFAULT_PROGRESSBAR_H;
 	CTK_SetWidgetVisible(inst, ret, true);
+	CTK_CreateWidgetTexture(inst, ret);
 
 	return ret;
 }

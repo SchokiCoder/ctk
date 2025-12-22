@@ -157,7 +157,7 @@ This also replaced floats with ints as far as values are concerned.
 Fuck floats.
 Me and my homies hate floats.
 
-- [ ] add key arrow handling for scale
+- [x] add arrow key handling for scale
 - [ ] add proper drag for scale
 This might result in a whole rework of mouse input handling bringing proper click as well.
 Right now a click is just button release event on a widget, which might confuse.

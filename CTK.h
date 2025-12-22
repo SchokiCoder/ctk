@@ -815,6 +815,21 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 	CTK_WidgetId fw;
 
 	switch (e->key.key) {
+	case SDLK_LEFT:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (CTK_WTYPE_SCALE == inst->type[fw] &&
+		    inst->value[fw] > 0)
+			CTK_SetWidgetValue(inst, fw, inst->value[fw] - 1);
+		break;
+
+	case SDLK_RIGHT:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (CTK_WTYPE_SCALE == inst->type[fw])
+			CTK_SetWidgetValue(inst, fw, inst->value[fw] + 1);
+		break;
+
 	case SDLK_SPACE:
 		fw = CTK_GetFocusedWidget(inst);
 

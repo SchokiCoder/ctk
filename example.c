@@ -220,7 +220,8 @@ main(int    argc,
 	inst.rect[lbl_pepperoni].y = inst.rect[rbn_pepperoni].y;
 
 	scl = CTK_AddScale(&inst);
-	CTK_SetWidgetValue(&inst, scl, (rand() % 100) / 100.0);
+	inst.value_max[scl] = 4;
+	CTK_SetWidgetValue(&inst, scl, (rand() % inst.value_max[scl]));
 	inst.rect[scl].x = MARGIN;
 	inst.rect[scl].y = inst.rect[lbl_pepperoni].y +
 	                   inst.rect[lbl_pepperoni].h + MARGIN;
@@ -228,6 +229,7 @@ main(int    argc,
 	inst.on_click_data[scl] = &pgb;
 
 	pgb = CTK_AddProgressbar(&inst);
+	inst.value_max[pgb] = inst.value_max[scl];
 	CTK_SetWidgetValue(&inst, pgb, inst.value[scl]);
 	inst.rect[pgb].x = inst.rect[scl].x + inst.rect[scl].w + MARGIN;
 	inst.rect[pgb].y = inst.rect[scl].y;

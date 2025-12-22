@@ -7,6 +7,7 @@
 
 #include "CTK_style.h"
 
+#include <math.h>
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
@@ -105,7 +106,8 @@ typedef struct CTK_Instance {
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
 	bool               toggle[CTK_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_MAX_WIDGETS];
-	float              value[CTK_MAX_WIDGETS];
+	unsigned int       value[CTK_MAX_WIDGETS];
+	unsigned int       value_max[CTK_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 
@@ -272,7 +274,7 @@ CTK_SetWidgetToggle(CTK_Instance       *inst,
 void
 CTK_SetWidgetValue(CTK_Instance       *inst,
                    const CTK_WidgetId  widget,
-                   const float         value);
+                   const unsigned int  value);
 
 void
 CTK_SetWidgetVisible(CTK_Instance       *inst,
@@ -414,6 +416,7 @@ CTK_AddProgressbar(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_progressbar;
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
+	inst->value_max[ret] = 100;
 	inst->rect[ret].w = CTK_DEFAULT_PROGRESSBAR_W;
 	inst->rect[ret].h = CTK_DEFAULT_PROGRESSBAR_H;
 	CTK_SetWidgetVisible(inst, ret, true);
@@ -459,6 +462,7 @@ CTK_AddScale(CTK_Instance *inst)
 	inst->bg[ret] = &inst->style.bg_scale;
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
+	inst->value_max[ret] = 100;
 	inst->rect[ret].w = CTK_DEFAULT_SCALE_W;
 	inst->rect[ret].h = CTK_DEFAULT_SCALE_H;
 	CTK_SetWidgetVisible(inst, ret, true);
@@ -487,7 +491,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].y = 0;
 	inst->rect[ret].w = 0;
 	inst->rect[ret].h = 0;
-	inst->value[ret] = 0.0;
+	inst->value[ret] = 0;
+	inst->value_max[ret] = 0;
 	inst->on_click[ret] = NULL;
 	inst->on_click_data[ret] = NULL;
 
@@ -643,7 +648,9 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	case CTK_WTYPE_PROGRESSBAR:
 		rect.x = 0;
 		rect.y = 0;
-		rect.w = inst->rect[widget].w * inst->value[widget];
+		rect.w = inst->rect[widget].w *
+		         ((float) inst->value[widget] /
+		          (float) inst->value_max[widget]);
 		rect.h = inst->rect[widget].h;
 		SDL_SetRenderDrawColor(r,
 				       inst->style.fg.r,
@@ -705,7 +712,9 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	case CTK_WTYPE_SCALE:
 		rect.w = CTK_GetScaleSliderWidth(inst, widget);
 		rect.h = inst->rect[widget].h;
-		rect.x = inst->value[widget] * (inst->rect[widget].w - rect.w);
+		rect.x = ((float) inst->value[widget] /
+		          (float) inst->value_max[widget]) *
+		         (inst->rect[widget].w - rect.w);
 		rect.y = 0;
 
 		SDL_SetRenderDrawColor(r,
@@ -863,6 +872,7 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 {
 	int i;
 	SDL_FPoint p;
+	float val_perc, raw_v;
 	float sw;
 	CTK_WidgetId w;
 
@@ -876,13 +886,18 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 
 			if (CTK_WTYPE_SCALE == inst->type[w]) {
 				sw = CTK_GetScaleSliderWidth(inst, w);
-				inst->value[w] = 1.0 /
-				                 (inst->rect[w].w - sw) *
-				                 (p.x - inst->rect[w].x - (sw / 2.0));
-				if (inst->value[w] < 0.0)
+				val_perc = 1.0 /
+				           (inst->rect[w].w - sw) *
+				           (p.x - inst->rect[w].x - (sw / 2.0));
+				raw_v = val_perc * inst->value_max[w];
+
+				if (raw_v > 0.0)
+					inst->value[w] = roundf(raw_v);
+				else
 					inst->value[w] = 0.0;
-				else if (inst->value[w] > 1.0)
-					inst->value[w] = 1.0;
+
+				if (inst->value[w] > inst->value_max[w])
+					inst->value[w] = inst->value_max[w];
 
 				CTK_CreateWidgetTexture(inst, w);
 			}
@@ -1233,9 +1248,13 @@ CTK_SetWidgetToggle(CTK_Instance       *inst,
 void
 CTK_SetWidgetValue(CTK_Instance       *inst,
                    const CTK_WidgetId  widget,
-                   const float         value)
+                   const unsigned int  value)
 {
-	inst->value[widget] = value;
+	if (value > inst->value_max[widget])
+		inst->value[widget] = inst->value_max[widget];
+	else
+		inst->value[widget] = value;
+
 	CTK_CreateWidgetTexture(inst, widget);
 }
 

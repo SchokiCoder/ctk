@@ -21,6 +21,7 @@ if so, a theme change should change them.
 - [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] add proper borders
+- [ ] make sure scale sliders are symmetric
 - [ ] add button click border change
 
 - [ ] a widget turning (un)focusable might change focused widget?
@@ -150,12 +151,21 @@ Respectively that is.
 
 - [x] add dedicated bg color for chechboxes
 
-- [ ] add `value_step` variable for widgets
-Thus also update input handling of scale.
+- [x] add `value_max` variable for widgets
+Thus also update mouse input handling of scale to only accept implied steps.
+This also replaced floats with ints as far as values are concerned.
+Fuck floats.
+Me and my homies hate floats.
+
 - [ ] add key arrow handling for scale
 - [ ] add proper drag for scale
 This might result in a whole rework of mouse input handling bringing proper click as well.
 Right now a click is just button release event on a widget, which might confuse.
+
+- [ ] purge floats
+In drawing, it's all definitive pixels anyway.
+SDL_FRect is needed by some Render functions.
+How can this be circumvented?
 
 - [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

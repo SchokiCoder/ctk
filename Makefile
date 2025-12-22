@@ -16,4 +16,4 @@ run: clean example
 
 example: example.c CTK.h
 	$(CC) -o $@ $(CFLAGS) $$(pkg-config --cflags sdl3 sdl3-ttf) \
-		$< $$(pkg-config --libs sdl3 sdl3-ttf)
+		$< $$(pkg-config --libs sdl3 sdl3-ttf) -lm

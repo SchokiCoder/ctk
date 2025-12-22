@@ -148,7 +148,7 @@ First process the event *then* start any associated callbacks.
 - [x] fix progressbar and button being invisible when value and text are unset
 Respectively that is.
 
-- [ ] add bg for each widget in style
+- [x] add dedicated bg color for chechboxes
 
 - [ ] add `value_step` variable for widgets
 Thus also update input handling of scale.

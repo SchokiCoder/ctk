@@ -10,6 +10,7 @@
 typedef struct CTK_Style {
 	SDL_Color bg;
 	SDL_Color bg_button;
+	SDL_Color bg_checkbox;
 	SDL_Color bg_entry;
 	SDL_Color bg_label;
 	SDL_Color bg_progressbar;
@@ -40,6 +41,11 @@ const CTK_Style CTK_Theme_TclTk = {
 	.bg_button.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.bg_button.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.bg_button.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+	.bg_checkbox.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.bg_checkbox.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.bg_checkbox.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.bg_checkbox.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
 
 	.bg_entry.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.bg_entry.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,

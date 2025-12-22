@@ -352,7 +352,7 @@ CTK_AddCheckbox(CTK_Instance *inst)
 	inst->focusable_w[inst->focusable_ws] = ret;
 	inst->focusable_ws++;
 
-	inst->bg[ret] = &inst->style.bg_entry;
+	inst->bg[ret] = &inst->style.bg_checkbox;
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_CHECKBOX;
 	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;

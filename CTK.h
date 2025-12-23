@@ -182,16 +182,16 @@ CTK_HandleDrag(CTK_Instance *inst,
                const float   x);
 
 void
-CTK_HandleKeyDown(CTK_Instance *inst,
-                  SDL_Event    *e);
+CTK_HandleKeyDown(CTK_Instance            *inst,
+                  const SDL_KeyboardEvent  e);
 
 void
-CTK_HandleMouseButtonDown(CTK_Instance *inst,
-                          SDL_Event    *e);
+CTK_HandleMouseButtonDown(CTK_Instance               *inst,
+                          const SDL_MouseButtonEvent  e);
 
 void
-CTK_HandleMouseButtonUp(CTK_Instance *inst,
-                        SDL_Event    *e);
+CTK_HandleMouseButtonUp(CTK_Instance               *inst,
+                        const SDL_MouseButtonEvent  e);
 
 void
 CTK_HandleMouseWheel(CTK_Instance *inst,
@@ -858,12 +858,12 @@ CTK_HandleDrag(CTK_Instance *inst,
 }
 
 void
-CTK_HandleKeyDown(CTK_Instance *inst,
-                  SDL_Event    *e)
+CTK_HandleKeyDown(CTK_Instance            *inst,
+                  const SDL_KeyboardEvent  e)
 {
 	CTK_WidgetId fw;
 
-	switch (e->key.key) {
+	switch (e.key) {
 	case SDLK_LEFT:
 		fw = CTK_GetFocusedWidget(inst);
 
@@ -904,16 +904,17 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 			break;
 		}
 
+		/* TODO this is impossible now
 		if (NULL != inst->button_release[fw]) {
 			inst->button_release[fw](inst,
 			                         e->button,
 				                 fw,
 				                 inst->button_release_data[fw]);
-		}
+		}*/
 		break;
 
 	case SDLK_TAB:
-		if (SDL_KMOD_SHIFT & e->key.mod) {
+		if (SDL_KMOD_SHIFT & e.mod) {
 			inst->focused_w--;
 			if (inst->focused_w < 0) {
 				inst->focused_w = inst->focusable_ws - 1;
@@ -932,8 +933,8 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 }
 
 void
-CTK_HandleMouseButtonDown(CTK_Instance *inst,
-                          SDL_Event    *e)
+CTK_HandleMouseButtonDown(CTK_Instance               *inst,
+                          const SDL_MouseButtonEvent  e)
 {
 	int i;
 	SDL_FPoint p;
@@ -942,8 +943,8 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 
-		p.x = e->button.x;
-		p.y = e->button.y;
+		p.x = e.x;
+		p.y = e.y;
 		if (SDL_PointInRectFloat(&p, &inst->rect[w])) {
 			CTK_SetFocusedWidget(inst, w);
 
@@ -954,7 +955,7 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 
 			if (NULL != inst->button_press[w]) {
 				inst->button_press[w](inst,
-				                      e->button,
+				                      e,
 				                      w,
 				                      inst->button_press_data[w]);
 			}
@@ -964,8 +965,8 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 }
 
 void
-CTK_HandleMouseButtonUp(CTK_Instance *inst,
-                        SDL_Event    *e)
+CTK_HandleMouseButtonUp(CTK_Instance               *inst,
+                        const SDL_MouseButtonEvent  e)
 {
 	int i;
 	SDL_FPoint p;
@@ -975,8 +976,8 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
-		p.x = e->button.x;
-		p.y = e->button.y;
+		p.x = e.x;
+		p.y = e.y;
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
@@ -1005,7 +1006,7 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 
 		if (NULL != inst->button_release[w]) {
 			inst->button_release[w](inst,
-			                        e->button,
+			                        e,
 			                        w,
 			                        inst->button_release_data[w]);
 		}
@@ -1388,11 +1389,11 @@ CTK_TickInstance(CTK_Instance *inst)
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			CTK_HandleMouseButtonDown(inst, &e);
+			CTK_HandleMouseButtonDown(inst, e.button);
 			break;
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			CTK_HandleMouseButtonUp(inst, &e);
+			CTK_HandleMouseButtonUp(inst, e.button);
 			break;
 
 		case SDL_EVENT_MOUSE_MOTION:
@@ -1405,7 +1406,7 @@ CTK_TickInstance(CTK_Instance *inst)
 			break;
 
 		case SDL_EVENT_KEY_DOWN:
-			CTK_HandleKeyDown(inst, &e);
+			CTK_HandleKeyDown(inst, e.key);
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:

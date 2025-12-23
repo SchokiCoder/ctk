@@ -173,9 +173,12 @@ Me and my homies hate floats.
 - [x] add scale value editing upon mouse wheel
 - [x] fix `CTK_HandleMouseButtonUp` not using enabled widget cache array
 Also do a bit of rearranging for a dedent.
-- [ ] `CTK_HandleKeyDown`, `CTK_HandleMouseButtonUp` and `CTK_HandleMouseButtonDown`
-use SDL_Event* instead of typed event and
+- [x] fix older event handler funcs using SDL_Event* instead of typed event
+`CTK_HandleKeyDown`, `CTK_HandleMouseButtonUp` and `CTK_HandleMouseButtonDown`
+in particular.
 
+- [ ] add widget "trigger" callback
+Which replaces the old triggering of button release upon space key
 - [ ] add widget "mouse wheel" callback
 - [ ] add widget "edit" callback
 

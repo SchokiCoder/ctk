@@ -12,6 +12,17 @@
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
 void
+btnCounterButtonPress(CTK_Instance       *inst,
+                      const CTK_WidgetId  widget,
+                      void               *data)
+{
+	(void) inst;
+	(void) data;
+
+	printf("%i is about to count\n", widget);
+}
+
+void
 btnCounterButtonRelease(CTK_Instance       *inst,
                         const CTK_WidgetId  widget,
                         void               *data)
@@ -178,6 +189,7 @@ main(int    argc,
 	inst.rect[btn_counter].x = MARGIN;
 	inst.rect[btn_counter].y = inst.rect[lbl_visible].y +
 	                           inst.rect[lbl_visible].h + (MARGIN * 4);
+	inst.button_press[btn_counter] = btnCounterButtonPress;
 	inst.button_release[btn_counter] = btnCounterButtonRelease;
 	inst.button_release_data[btn_counter] = &lbl_counter;
 

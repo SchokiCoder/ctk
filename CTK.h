@@ -113,6 +113,10 @@ typedef struct CTK_Instance {
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 
 	/* widget events */
+	void (*button_press[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                      const CTK_WidgetId,
+	                                      void*);
+	void *button_press_data[CTK_MAX_WIDGETS];
 	void (*button_release[CTK_MAX_WIDGETS])(struct CTK_Instance*,
 	                                        const CTK_WidgetId,
 	                                        void*);
@@ -498,6 +502,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].h = 0;
 	inst->value[ret] = 0;
 	inst->value_max[ret] = 0;
+	inst->button_press[ret] = NULL;
+	inst->button_press_data[ret] = NULL;
 	inst->button_release[ret] = NULL;
 	inst->button_release_data[ret] = NULL;
 
@@ -937,6 +943,12 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 			if (CTK_WTYPE_SCALE == inst->type[w]) {
 				inst->drag = true;
 				CTK_HandleDrag(inst, p.x);
+			}
+
+			if (NULL != inst->button_press[w]) {
+				inst->button_press[w](inst,
+				                      w,
+				                      inst->button_press_data[w]);
 			}
 			break;
 		}

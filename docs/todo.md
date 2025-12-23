@@ -167,12 +167,12 @@ Me and my homies hate floats.
 - [x] add proper drag for scale
 
 - [x] replace widget "on click" with "button release" callback
-- [ ] add widget "button press" callback
+- [x] add widget "button press" callback
 - [ ] add scale value editing upon mouse wheel
 - [ ] add widget "mouse wheel" callback
 - [ ] add widget "edit" callback
 
-- [ ] replace instance "on quit" with "destroy" callback
+- [ ] rename instance "on quit" to "quit" callback
 - [ ] add instance "draw" callback
 - [ ] add instance "motion" callback
 - [ ] add instance "enter" callback

@@ -1,6 +1,9 @@
 - compatibility tests
 (freebsd, abuse my relatives to test on their windows and apple machines)
 
+- add proper click?
+Right now a click is just button release event on a widget, which might confuse.
+
 # 0.3.0
 
 - [ ] add more themes, especially a dark one
@@ -158,11 +161,9 @@ Fuck floats.
 Me and my homies hate floats.
 
 - [x] add arrow key handling for scale
-- [ ] add proper drag for scale
-This might result in a whole rework of mouse input handling bringing proper click as well.
-Right now a click is just button release event on a widget, which might confuse.
+- [x] add proper drag for scale
 
-- [ ] purge floats
+- [ ] purge floats from long term storage
 In drawing, it's all definitive pixels anyway.
 SDL_FRect is needed by some Render functions.
 How can this be circumvented?

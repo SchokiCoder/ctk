@@ -78,6 +78,7 @@ typedef enum CTK_TextAlignment {
 
 typedef struct CTK_Instance {
 	bool               active;
+	bool               drag;
 	int                focused_w;
 	bool               redraw;
 	CTK_Style          style;
@@ -169,6 +170,10 @@ CTK_DestroyInstance(CTK_Instance *inst);
 
 void
 CTK_DrawInstance(CTK_Instance *inst);
+
+void
+CTK_HandleDrag(CTK_Instance *inst,
+               const float   x);
 
 void
 CTK_HandleKeyDown(CTK_Instance *inst,
@@ -523,6 +528,7 @@ CTK_CreateInstance(CTK_Instance          *inst,
 	SDL_Renderer *r;
 
 	inst->active = true;
+	inst->drag = false;
 	inst->focused_w = 0;
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
@@ -809,6 +815,37 @@ CTK_DrawInstance(CTK_Instance *inst)
 }
 
 void
+CTK_HandleDrag(CTK_Instance *inst,
+               const float   x)
+{
+	CTK_WidgetId fw;
+	float raw_v;
+	float slider_w;
+	float val_perc;
+
+	fw = CTK_GetFocusedWidget(inst);
+
+	if (inst->type[fw] != CTK_WTYPE_SCALE)
+		return;
+
+	slider_w = CTK_GetScaleSliderWidth(inst, fw);
+	val_perc = 1.0 /
+	           (inst->rect[fw].w - slider_w) *
+	           (x - inst->rect[fw].x - (slider_w / 2.0));
+	raw_v = val_perc * inst->value_max[fw];
+
+	if (raw_v > 0.0)
+		inst->value[fw] = roundf(raw_v);
+	else
+		inst->value[fw] = 0.0;
+
+	if (inst->value[fw] > inst->value_max[fw])
+		inst->value[fw] = inst->value_max[fw];
+
+	CTK_CreateWidgetTexture(inst, fw);
+}
+
+void
 CTK_HandleKeyDown(CTK_Instance *inst,
                   SDL_Event    *e)
 {
@@ -887,8 +924,6 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 {
 	int i;
 	SDL_FPoint p;
-	float val_perc, raw_v;
-	float sw;
 	CTK_WidgetId w;
 
 	for (i = 0; i < inst->enabled_ws; i++) {
@@ -900,21 +935,8 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 			CTK_SetFocusedWidget(inst, w);
 
 			if (CTK_WTYPE_SCALE == inst->type[w]) {
-				sw = CTK_GetScaleSliderWidth(inst, w);
-				val_perc = 1.0 /
-				           (inst->rect[w].w - sw) *
-				           (p.x - inst->rect[w].x - (sw / 2.0));
-				raw_v = val_perc * inst->value_max[w];
-
-				if (raw_v > 0.0)
-					inst->value[w] = roundf(raw_v);
-				else
-					inst->value[w] = 0.0;
-
-				if (inst->value[w] > inst->value_max[w])
-					inst->value[w] = inst->value_max[w];
-
-				CTK_CreateWidgetTexture(inst, w);
+				inst->drag = true;
+				CTK_HandleDrag(inst, p.x);
 			}
 			break;
 		}
@@ -927,6 +949,8 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 {
 	int i;
 	SDL_FPoint p;
+
+	inst->drag = false;
 
 	for (i = 0; i < inst->count; i++) {
 		p.x = e->button.x;
@@ -1316,6 +1340,11 @@ CTK_TickInstance(CTK_Instance *inst)
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
 			CTK_HandleMouseButtonUp(inst, &e);
+			break;
+
+		case SDL_EVENT_MOUSE_MOTION:
+			if (inst->drag)
+				CTK_HandleDrag(inst, e.motion.x);
 			break;
 
 		case SDL_EVENT_KEY_DOWN:

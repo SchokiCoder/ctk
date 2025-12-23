@@ -193,6 +193,10 @@ void
 CTK_HandleMouseButtonUp(CTK_Instance *inst,
                         SDL_Event    *e);
 
+void
+CTK_HandleMouseWheel(CTK_Instance *inst,
+                     const SDL_MouseWheelEvent e);
+
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
 
@@ -1006,6 +1010,36 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 	}
 }
 
+void
+CTK_HandleMouseWheel(CTK_Instance *inst,
+                     const SDL_MouseWheelEvent e)
+{
+	int i;
+	SDL_FPoint p;
+	CTK_WidgetId w;
+
+	for (i = 0; i < inst->enabled_ws; i++) {
+		w = inst->enabled_w[i];
+		p.x = e.mouse_x;
+		p.y = e.mouse_y;
+
+		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
+			continue;
+
+		if (inst->type[w] == CTK_WTYPE_SCALE) {
+			if (e.x > 0 || e.y > 0) {
+				if (inst->value[w] > 0) {
+					CTK_SetWidgetValue(inst,
+					                   w,
+					                   inst->value[w] - 1);
+				}
+			} else {
+				CTK_SetWidgetValue(inst, w, inst->value[w] + 1);
+			}
+		}
+	}
+}
+
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
@@ -1362,6 +1396,10 @@ CTK_TickInstance(CTK_Instance *inst)
 		case SDL_EVENT_MOUSE_MOTION:
 			if (inst->drag)
 				CTK_HandleDrag(inst, e.motion.x);
+			break;
+
+		case SDL_EVENT_MOUSE_WHEEL:
+			CTK_HandleMouseWheel(inst, e.wheel);
 			break;
 
 		case SDL_EVENT_KEY_DOWN:

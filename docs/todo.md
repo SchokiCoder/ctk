@@ -170,7 +170,10 @@ Me and my homies hate floats.
 - [x] add widget "button press" callback
 
 - [x] add sdl event of type as param to button callbacks
-- [ ] add scale value editing upon mouse wheel
+- [x] add scale value editing upon mouse wheel
+- [ ] `CTK_HandleKeyDown`, `CTK_HandleMouseButtonUp` and `CTK_HandleMouseButtonDown`
+use SDL_Event* instead of typed event and
+`CTK_HandleMouseButtonUp` inefficiently checks for enabled instead of using cache
 
 - [ ] add widget "mouse wheel" callback
 - [ ] add widget "edit" callback

@@ -114,10 +114,12 @@ typedef struct CTK_Instance {
 
 	/* widget events */
 	void (*button_press[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                      const SDL_MouseButtonEvent,
 	                                      const CTK_WidgetId,
 	                                      void*);
 	void *button_press_data[CTK_MAX_WIDGETS];
 	void (*button_release[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                        const SDL_MouseButtonEvent,
 	                                        const CTK_WidgetId,
 	                                        void*);
 	void *button_release_data[CTK_MAX_WIDGETS];
@@ -900,8 +902,9 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 
 		if (NULL != inst->button_release[fw]) {
 			inst->button_release[fw](inst,
-				           fw,
-				           inst->button_release_data[fw]);
+			                         e->button,
+				                 fw,
+				                 inst->button_release_data[fw]);
 		}
 		break;
 
@@ -947,6 +950,7 @@ CTK_HandleMouseButtonDown(CTK_Instance *inst,
 
 			if (NULL != inst->button_press[w]) {
 				inst->button_press[w](inst,
+				                      e->button,
 				                      w,
 				                      inst->button_press_data[w]);
 			}
@@ -994,8 +998,9 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 
 			if (NULL != inst->button_release[i]) {
 				inst->button_release[i](inst,
-				                  i,
-				                  inst->button_release_data[i]);
+				                        e->button,
+				                        i,
+				                        inst->button_release_data[i]);
 			}
 		}
 	}

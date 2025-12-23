@@ -12,25 +12,29 @@
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
 void
-btnCounterButtonPress(CTK_Instance       *inst,
-                      const CTK_WidgetId  widget,
-                      void               *data)
+btnCounterButtonPress(CTK_Instance               *inst,
+                      const SDL_MouseButtonEvent  e,
+                      const CTK_WidgetId          widget,
+                      void                       *data)
 {
 	(void) inst;
+	(void) e;
 	(void) data;
 
 	printf("%i is about to count\n", widget);
 }
 
 void
-btnCounterButtonRelease(CTK_Instance       *inst,
-                        const CTK_WidgetId  widget,
-                        void               *data)
+btnCounterButtonRelease(CTK_Instance               *inst,
+                        const SDL_MouseButtonEvent  e,
+                        const CTK_WidgetId          widget,
+                        void                       *data)
 {
 	long i;
 	CTK_WidgetId lbl_counter = *((CTK_WidgetId*) (data));
 	char str[CTK_MAX_TEXTLEN];
 
+	(void) e;
 	(void) widget;
 
 	i = strtol(inst->text[lbl_counter], NULL, 10);
@@ -40,12 +44,14 @@ btnCounterButtonRelease(CTK_Instance       *inst,
 }
 
 void
-ckbEnabledButtonRelease(CTK_Instance       *inst,
-                        const CTK_WidgetId  widget,
-                        void               *data)
+ckbEnabledButtonRelease(CTK_Instance               *inst,
+                        const SDL_MouseButtonEvent  e,
+                        const CTK_WidgetId          widget,
+                        void                       *data)
 {
 	int i;
 
+	(void) e;
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
@@ -60,12 +66,14 @@ ckbEnabledButtonRelease(CTK_Instance       *inst,
 }
 
 void
-ckbFocusableButtonRelease(CTK_Instance       *inst,
-                          const CTK_WidgetId  widget,
-                          void               *data)
+ckbFocusableButtonRelease(CTK_Instance               *inst,
+                          const SDL_MouseButtonEvent  e,
+                          const CTK_WidgetId          widget,
+                          void                       *data)
 {
 	int i;
 
+	(void) e;
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
@@ -79,12 +87,14 @@ ckbFocusableButtonRelease(CTK_Instance       *inst,
 }
 
 void
-ckbVisibleButtonRelease(CTK_Instance       *inst,
-                        const CTK_WidgetId  widget,
-                        void               *data)
+ckbVisibleButtonRelease(CTK_Instance               *inst,
+                        const SDL_MouseButtonEvent  e,
+                        const CTK_WidgetId          widget,
+                        void                       *data)
 {
 	int i;
 
+	(void) e;
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
@@ -98,12 +108,14 @@ ckbVisibleButtonRelease(CTK_Instance       *inst,
 }
 
 void
-sclButtonRelease(CTK_Instance       *inst,
-                 const CTK_WidgetId  widget,
-                 void               *data)
+sclButtonRelease(CTK_Instance               *inst,
+                 const SDL_MouseButtonEvent  e,
+                 const CTK_WidgetId          widget,
+                 void                       *data)
 {
 	CTK_WidgetId pgb = *((CTK_WidgetId*) (data));
 
+	(void) e;
 	(void) widget;
 
 	CTK_SetWidgetValue(inst, pgb, inst->value[widget]);

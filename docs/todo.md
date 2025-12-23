@@ -168,7 +168,10 @@ Me and my homies hate floats.
 
 - [x] replace widget "on click" with "button release" callback
 - [x] add widget "button press" callback
+
+- [x] add sdl event of type as param to button callbacks
 - [ ] add scale value editing upon mouse wheel
+
 - [ ] add widget "mouse wheel" callback
 - [ ] add widget "edit" callback
 

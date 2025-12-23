@@ -111,6 +111,21 @@ sclTrigger(CTK_Instance               *inst,
 	CTK_SetWidgetValue(inst, pgb, inst->value[widget]);
 }
 
+void
+sclMouseWheel(CTK_Instance              *inst,
+              const SDL_MouseWheelEvent  e,
+              const CTK_WidgetId         widget,
+              void                      *data)
+{
+	(void) inst;
+	(void) e;
+	(void) widget;
+	(void) data;
+
+	printf("Uppies or downies!\n");
+	/* Too lazy to find out */
+}
+
 int
 main(int    argc,
      char **argv)
@@ -239,6 +254,7 @@ main(int    argc,
 	inst.rect[scl].x = MARGIN;
 	inst.rect[scl].y = inst.rect[lbl_pepperoni].y +
 	                   inst.rect[lbl_pepperoni].h + MARGIN;
+	inst.mouse_wheel[scl] = sclMouseWheel;
 	inst.trigger[scl] = sclTrigger;
 	inst.trigger_data[scl] = &pgb;
 

@@ -179,7 +179,10 @@ in particular.
 
 - [x] add widget "trigger" callback
 Which replaces the old triggering of "button release" upon space key
-- [ ] add widget "mouse wheel" callback
+- [x] add widget "mouse wheel" callback
+- [ ] rename "button *" callbacks into "mouse *"
+This is for consistency with "mouse wheel",
+and to not confuse with the button widget.
 - [ ] add widget "edit" callback
 
 - [ ] rename instance "on quit" to "quit" callback

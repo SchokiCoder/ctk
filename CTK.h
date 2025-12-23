@@ -969,43 +969,45 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 {
 	int i;
 	SDL_FPoint p;
+	CTK_WidgetId w;
 
 	inst->drag = false;
 
-	for (i = 0; i < inst->count; i++) {
+	for (i = 0; i < inst->enabled_ws; i++) {
+		w = inst->enabled_w[i];
 		p.x = e->button.x;
 		p.y = e->button.y;
-		if (SDL_PointInRectFloat(&p, &inst->rect[i]) &&
-		    CTK_IsWidgetVisible(inst, i) &&
-		    CTK_IsWidgetEnabled(inst, i)) {
-			switch (inst->type[i]) {
-			case CTK_WTYPE_UNKNOWN:
-			case CTK_WTYPE_BUTTON:
-			case CTK_WTYPE_ENTRY:
-			case CTK_WTYPE_LABEL:
-			case CTK_WTYPE_PROGRESSBAR:
-			case CTK_WTYPE_SCALE:
-				break;
 
-			case CTK_WTYPE_CHECKBOX:
-				if (inst->toggle[i] != true)
-					inst->toggle[i] = true;
-				else
-					inst->toggle[i] = false;
-				CTK_CreateWidgetTexture(inst, i);
-				break;
+		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
+			continue;
 
-			case CTK_WTYPE_RADIOBUTTON:
-				CTK_ToggleRadiobutton(inst, i);
-				break;
-			}
+		switch (inst->type[w]) {
+		case CTK_WTYPE_UNKNOWN:
+		case CTK_WTYPE_BUTTON:
+		case CTK_WTYPE_ENTRY:
+		case CTK_WTYPE_LABEL:
+		case CTK_WTYPE_PROGRESSBAR:
+		case CTK_WTYPE_SCALE:
+			break;
 
-			if (NULL != inst->button_release[i]) {
-				inst->button_release[i](inst,
-				                        e->button,
-				                        i,
-				                        inst->button_release_data[i]);
-			}
+		case CTK_WTYPE_CHECKBOX:
+			if (inst->toggle[w] != true)
+				inst->toggle[w] = true;
+			else
+				inst->toggle[w] = false;
+			CTK_CreateWidgetTexture(inst, w);
+			break;
+
+		case CTK_WTYPE_RADIOBUTTON:
+			CTK_ToggleRadiobutton(inst, w);
+			break;
+		}
+
+		if (NULL != inst->button_release[w]) {
+			inst->button_release[w](inst,
+			                        e->button,
+			                        w,
+			                        inst->button_release_data[w]);
 		}
 	}
 }

@@ -77,16 +77,16 @@ typedef enum CTK_TextAlignment {
 } CTK_TextAlignment;
 
 typedef struct CTK_Instance {
-	bool               active;
-	bool               drag;
-	int                focused_w;
-	bool               redraw;
-	CTK_Style          style;
-	SDL_Window        *win;
+	bool        active;
+	bool        drag;
+	int         focused_w;
+	bool        redraw;
+	CTK_Style   style;
+	SDL_Window *win;
 
 	/* instance events */
-	void              (*on_quit)(struct CTK_Instance*, void*);
-	void              *on_quit_data;
+	void (*on_quit)(struct CTK_Instance*, void*);
+	void *on_quit_data;
 
 	/* widget cache */
 	int                enabled_ws;
@@ -113,10 +113,10 @@ typedef struct CTK_Instance {
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 
 	/* widget events */
-	void              (*on_click[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                               const CTK_WidgetId,
-	                                               void*);
-	void              *on_click_data[CTK_MAX_WIDGETS];
+	void (*button_release[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                        const CTK_WidgetId,
+	                                        void*);
+	void *button_release_data[CTK_MAX_WIDGETS];
 } CTK_Instance;
 
 CTK_WidgetId
@@ -498,8 +498,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].h = 0;
 	inst->value[ret] = 0;
 	inst->value_max[ret] = 0;
-	inst->on_click[ret] = NULL;
-	inst->on_click_data[ret] = NULL;
+	inst->button_release[ret] = NULL;
+	inst->button_release_data[ret] = NULL;
 
 	return ret;
 }
@@ -892,10 +892,10 @@ CTK_HandleKeyDown(CTK_Instance *inst,
 			break;
 		}
 
-		if (NULL != inst->on_click[fw]) {
-			inst->on_click[fw](inst,
+		if (NULL != inst->button_release[fw]) {
+			inst->button_release[fw](inst,
 				           fw,
-				           inst->on_click_data[fw]);
+				           inst->button_release_data[fw]);
 		}
 		break;
 
@@ -980,10 +980,10 @@ CTK_HandleMouseButtonUp(CTK_Instance *inst,
 				break;
 			}
 
-			if (NULL != inst->on_click[i]) {
-				inst->on_click[i](inst,
+			if (NULL != inst->button_release[i]) {
+				inst->button_release[i](inst,
 				                  i,
-				                  inst->on_click_data[i]);
+				                  inst->button_release_data[i]);
 			}
 		}
 	}

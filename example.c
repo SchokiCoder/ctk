@@ -12,9 +12,9 @@
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
 void
-btnCounterOnClick(CTK_Instance       *inst,
-                  const CTK_WidgetId  widget,
-                  void               *data)
+btnCounterButtonRelease(CTK_Instance       *inst,
+                        const CTK_WidgetId  widget,
+                        void               *data)
 {
 	long i;
 	CTK_WidgetId lbl_counter = *((CTK_WidgetId*) (data));
@@ -29,9 +29,9 @@ btnCounterOnClick(CTK_Instance       *inst,
 }
 
 void
-ckbEnabledOnClick(CTK_Instance       *inst,
-                  const CTK_WidgetId  widget,
-                  void               *data)
+ckbEnabledButtonRelease(CTK_Instance       *inst,
+                        const CTK_WidgetId  widget,
+                        void               *data)
 {
 	int i;
 
@@ -49,9 +49,9 @@ ckbEnabledOnClick(CTK_Instance       *inst,
 }
 
 void
-ckbFocusableOnClick(CTK_Instance       *inst,
-                    const CTK_WidgetId  widget,
-                    void               *data)
+ckbFocusableButtonRelease(CTK_Instance       *inst,
+                          const CTK_WidgetId  widget,
+                          void               *data)
 {
 	int i;
 
@@ -68,9 +68,9 @@ ckbFocusableOnClick(CTK_Instance       *inst,
 }
 
 void
-ckbVisibleOnClick(CTK_Instance       *inst,
-                  const CTK_WidgetId  widget,
-                  void               *data)
+ckbVisibleButtonRelease(CTK_Instance       *inst,
+                        const CTK_WidgetId  widget,
+                        void               *data)
 {
 	int i;
 
@@ -87,9 +87,9 @@ ckbVisibleOnClick(CTK_Instance       *inst,
 }
 
 void
-sclOnClick(CTK_Instance       *inst,
-           const CTK_WidgetId  widget,
-           void               *data)
+sclButtonRelease(CTK_Instance       *inst,
+                 const CTK_WidgetId  widget,
+                 void               *data)
 {
 	CTK_WidgetId pgb = *((CTK_WidgetId*) (data));
 
@@ -137,7 +137,7 @@ main(int    argc,
 	ckb_focusable = CTK_AddCheckbox(&inst);
 	inst.rect[ckb_focusable].x = MARGIN;
 	inst.rect[ckb_focusable].y = MARGIN;
-	inst.on_click[ckb_focusable] = ckbFocusableOnClick;
+	inst.button_release[ckb_focusable] = ckbFocusableButtonRelease;
 	CTK_ToggleCheckbox(&inst, ckb_focusable);
 
 	lbl_focusable = CTK_AddLabel(&inst);
@@ -150,7 +150,7 @@ main(int    argc,
 	inst.rect[ckb_enabled].x = inst.rect[ckb_focusable].x;
 	inst.rect[ckb_enabled].y = inst.rect[ckb_focusable].y +
 	                           inst.rect[ckb_focusable].h + MARGIN;
-	inst.on_click[ckb_enabled] = ckbEnabledOnClick;
+	inst.button_release[ckb_enabled] = ckbEnabledButtonRelease;
 	CTK_ToggleCheckbox(&inst, ckb_enabled);
 
 	lbl_enabled = CTK_AddLabel(&inst);
@@ -163,7 +163,7 @@ main(int    argc,
 	inst.rect[ckb_visible].x = inst.rect[ckb_enabled].x;
 	inst.rect[ckb_visible].y = inst.rect[ckb_enabled].y +
 	                           inst.rect[ckb_enabled].h + MARGIN;
-	inst.on_click[ckb_visible] = ckbVisibleOnClick;
+	inst.button_release[ckb_visible] = ckbVisibleButtonRelease;
 	CTK_ToggleCheckbox(&inst, ckb_visible);
 
 	lbl_visible = CTK_AddLabel(&inst);
@@ -178,8 +178,8 @@ main(int    argc,
 	inst.rect[btn_counter].x = MARGIN;
 	inst.rect[btn_counter].y = inst.rect[lbl_visible].y +
 	                           inst.rect[lbl_visible].h + (MARGIN * 4);
-	inst.on_click[btn_counter] = btnCounterOnClick;
-	inst.on_click_data[btn_counter] = &lbl_counter;
+	inst.button_release[btn_counter] = btnCounterButtonRelease;
+	inst.button_release_data[btn_counter] = &lbl_counter;
 
 	lbl_counter = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_counter, "0");
@@ -225,8 +225,8 @@ main(int    argc,
 	inst.rect[scl].x = MARGIN;
 	inst.rect[scl].y = inst.rect[lbl_pepperoni].y +
 	                   inst.rect[lbl_pepperoni].h + MARGIN;
-	inst.on_click[scl] = sclOnClick;
-	inst.on_click_data[scl] = &pgb;
+	inst.button_release[scl] = sclButtonRelease;
+	inst.button_release_data[scl] = &pgb;
 
 	pgb = CTK_AddProgressbar(&inst);
 	inst.value_max[pgb] = inst.value_max[scl];

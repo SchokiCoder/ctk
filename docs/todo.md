@@ -14,6 +14,9 @@ adding a widget should set the rect once and then leave them alone.
 (do not restrict or interfere with later size changes.)
 if so, a theme change should change them.
 
+- [ ] add menubar
+- [ ] add menubar accelerators
+
 - [ ] add mnemonics
 
 - [ ] update version number
@@ -163,10 +166,24 @@ Me and my homies hate floats.
 - [x] add arrow key handling for scale
 - [x] add proper drag for scale
 
+- [x] replace widget "on click" with "button release" callback
+- [ ] add widget "button press" callback
+- [ ] add scale value editing upon mouse wheel
+- [ ] add widget "mouse wheel" callback
+- [ ] add widget "edit" callback
+
+- [ ] replace instance "on quit" with "destroy" callback
+- [ ] add instance "draw" callback
+- [ ] add instance "motion" callback
+- [ ] add instance "enter" callback
+- [ ] add instance "leave" callback
+
 - [ ] purge floats from long term storage
 In drawing, it's all definitive pixels anyway.
 SDL_FRect is needed by some Render functions.
 How can this be circumvented?
+- [ ] only work with instance pointers
+make the create function return a pointer
+This eliminiates . vs -> case and is more inline with the SDL environment
 
-- [ ] add a way to bind keypresses to functions
 - [ ] set version to 0.1.0

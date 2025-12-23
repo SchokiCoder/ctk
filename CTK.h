@@ -123,6 +123,10 @@ typedef struct CTK_Instance {
 	                                        const CTK_WidgetId,
 	                                        void*);
 	void *button_release_data[CTK_MAX_WIDGETS];
+	void (*trigger[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                 const CTK_WidgetId,
+	                                 void*);
+	void *trigger_data[CTK_MAX_WIDGETS];
 } CTK_Instance;
 
 CTK_WidgetId
@@ -512,6 +516,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->button_press_data[ret] = NULL;
 	inst->button_release[ret] = NULL;
 	inst->button_release_data[ret] = NULL;
+	inst->trigger[ret] = NULL;
+	inst->trigger_data[ret] = NULL;
 
 	return ret;
 }
@@ -904,13 +910,11 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			break;
 		}
 
-		/* TODO this is impossible now
-		if (NULL != inst->button_release[fw]) {
-			inst->button_release[fw](inst,
-			                         e->button,
-				                 fw,
-				                 inst->button_release_data[fw]);
-		}*/
+		if (NULL != inst->trigger[fw]) {
+			inst->trigger[fw](inst,
+				          fw,
+				          inst->trigger_data[fw]);
+		}
 		break;
 
 	case SDLK_TAB:
@@ -1009,6 +1013,11 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 			                        e,
 			                        w,
 			                        inst->button_release_data[w]);
+		}
+		if (NULL != inst->trigger[w]) {
+			inst->trigger[w](inst,
+			                 w,
+			                 inst->trigger_data[w]);
 		}
 	}
 }

@@ -25,16 +25,14 @@ btnCounterButtonPress(CTK_Instance               *inst,
 }
 
 void
-btnCounterButtonRelease(CTK_Instance               *inst,
-                        const SDL_MouseButtonEvent  e,
-                        const CTK_WidgetId          widget,
-                        void                       *data)
+btnCounterTrigger(CTK_Instance               *inst,
+                  const CTK_WidgetId          widget,
+                  void                       *data)
 {
 	long i;
 	CTK_WidgetId lbl_counter = *((CTK_WidgetId*) (data));
 	char str[CTK_MAX_TEXTLEN];
 
-	(void) e;
 	(void) widget;
 
 	i = strtol(inst->text[lbl_counter], NULL, 10);
@@ -44,14 +42,12 @@ btnCounterButtonRelease(CTK_Instance               *inst,
 }
 
 void
-ckbEnabledButtonRelease(CTK_Instance               *inst,
-                        const SDL_MouseButtonEvent  e,
-                        const CTK_WidgetId          widget,
-                        void                       *data)
+ckbEnabledTrigger(CTK_Instance               *inst,
+                  const CTK_WidgetId          widget,
+                  void                       *data)
 {
 	int i;
 
-	(void) e;
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
@@ -66,14 +62,12 @@ ckbEnabledButtonRelease(CTK_Instance               *inst,
 }
 
 void
-ckbFocusableButtonRelease(CTK_Instance               *inst,
-                          const SDL_MouseButtonEvent  e,
-                          const CTK_WidgetId          widget,
-                          void                       *data)
+ckbFocusableTrigger(CTK_Instance               *inst,
+                    const CTK_WidgetId          widget,
+                    void                       *data)
 {
 	int i;
 
-	(void) e;
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
@@ -87,14 +81,12 @@ ckbFocusableButtonRelease(CTK_Instance               *inst,
 }
 
 void
-ckbVisibleButtonRelease(CTK_Instance               *inst,
-                        const SDL_MouseButtonEvent  e,
-                        const CTK_WidgetId          widget,
-                        void                       *data)
+ckbVisibleTrigger(CTK_Instance               *inst,
+                  const CTK_WidgetId          widget,
+                  void                       *data)
 {
 	int i;
 
-	(void) e;
 	(void) data;
 
 	for (i = 6; i < inst->count; i++) {
@@ -108,14 +100,12 @@ ckbVisibleButtonRelease(CTK_Instance               *inst,
 }
 
 void
-sclButtonRelease(CTK_Instance               *inst,
-                 const SDL_MouseButtonEvent  e,
-                 const CTK_WidgetId          widget,
-                 void                       *data)
+sclTrigger(CTK_Instance               *inst,
+           const CTK_WidgetId          widget,
+           void                       *data)
 {
 	CTK_WidgetId pgb = *((CTK_WidgetId*) (data));
 
-	(void) e;
 	(void) widget;
 
 	CTK_SetWidgetValue(inst, pgb, inst->value[widget]);
@@ -160,7 +150,7 @@ main(int    argc,
 	ckb_focusable = CTK_AddCheckbox(&inst);
 	inst.rect[ckb_focusable].x = MARGIN;
 	inst.rect[ckb_focusable].y = MARGIN;
-	inst.button_release[ckb_focusable] = ckbFocusableButtonRelease;
+	inst.trigger[ckb_focusable] = ckbFocusableTrigger;
 	CTK_ToggleCheckbox(&inst, ckb_focusable);
 
 	lbl_focusable = CTK_AddLabel(&inst);
@@ -173,7 +163,7 @@ main(int    argc,
 	inst.rect[ckb_enabled].x = inst.rect[ckb_focusable].x;
 	inst.rect[ckb_enabled].y = inst.rect[ckb_focusable].y +
 	                           inst.rect[ckb_focusable].h + MARGIN;
-	inst.button_release[ckb_enabled] = ckbEnabledButtonRelease;
+	inst.trigger[ckb_enabled] = ckbEnabledTrigger;
 	CTK_ToggleCheckbox(&inst, ckb_enabled);
 
 	lbl_enabled = CTK_AddLabel(&inst);
@@ -186,7 +176,7 @@ main(int    argc,
 	inst.rect[ckb_visible].x = inst.rect[ckb_enabled].x;
 	inst.rect[ckb_visible].y = inst.rect[ckb_enabled].y +
 	                           inst.rect[ckb_enabled].h + MARGIN;
-	inst.button_release[ckb_visible] = ckbVisibleButtonRelease;
+	inst.trigger[ckb_visible] = ckbVisibleTrigger;
 	CTK_ToggleCheckbox(&inst, ckb_visible);
 
 	lbl_visible = CTK_AddLabel(&inst);
@@ -202,8 +192,8 @@ main(int    argc,
 	inst.rect[btn_counter].y = inst.rect[lbl_visible].y +
 	                           inst.rect[lbl_visible].h + (MARGIN * 4);
 	inst.button_press[btn_counter] = btnCounterButtonPress;
-	inst.button_release[btn_counter] = btnCounterButtonRelease;
-	inst.button_release_data[btn_counter] = &lbl_counter;
+	inst.trigger[btn_counter] = btnCounterTrigger;
+	inst.trigger_data[btn_counter] = &lbl_counter;
 
 	lbl_counter = CTK_AddLabel(&inst);
 	CTK_SetWidgetText(&inst, lbl_counter, "0");
@@ -249,8 +239,8 @@ main(int    argc,
 	inst.rect[scl].x = MARGIN;
 	inst.rect[scl].y = inst.rect[lbl_pepperoni].y +
 	                   inst.rect[lbl_pepperoni].h + MARGIN;
-	inst.button_release[scl] = sclButtonRelease;
-	inst.button_release_data[scl] = &pgb;
+	inst.trigger[scl] = sclTrigger;
+	inst.trigger_data[scl] = &pgb;
 
 	pgb = CTK_AddProgressbar(&inst);
 	inst.value_max[pgb] = inst.value_max[scl];

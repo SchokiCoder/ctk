@@ -177,8 +177,8 @@ Also do a bit of rearranging for a dedent.
 `CTK_HandleKeyDown`, `CTK_HandleMouseButtonUp` and `CTK_HandleMouseButtonDown`
 in particular.
 
-- [ ] add widget "trigger" callback
-Which replaces the old triggering of button release upon space key
+- [x] add widget "trigger" callback
+Which replaces the old triggering of "button release" upon space key
 - [ ] add widget "mouse wheel" callback
 - [ ] add widget "edit" callback
 

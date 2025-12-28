@@ -196,12 +196,15 @@ You can feel special if you read this :)
 - [x] add instance "enter" callback
 - [x] add instance "leave" callback
 
-- [ ] purge floats from long term storage
-In drawing, it's all definitive pixels anyway.
+- [x] ~~purge floats from long term storage~~
+~~In drawing, it's all definitive pixels anyway.
 SDL_FRect is needed by some Render functions.
-How can this be circumvented?
-- [ ] only work with instance pointers
-make the create function return a pointer
-This eliminiates . vs -> case and is more inline with the SDL environment
+How can this be circumvented?~~
+Only drawing is left, which is heavily based on the SDL backend.
+Removing this doesn't do any good.
+We don't gain precision, since it needs to fit into the SDL mold anyway.
+
+- [x] change `CTK_CreateInstance` to return instance pointer
+This eliminiates `.` vs `->` case and is more inline with the SDL environment.
 
 - [ ] set version to 0.1.0

@@ -11,6 +11,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef ARRLEN
@@ -181,12 +182,11 @@ CTK_ColorIntToFColor(const SDL_Color c);
  * winw = Window width.
  * winh = Window height.
  * flags = SDL window flags. May be 0 to use defaults.
- * Returns true on success or false on failure.
+ * Returns valid instance or NULL on failure.
  * Call SDL_GetError() for more information.
  */
-bool
-CTK_CreateInstance(CTK_Instance          *inst,
-                   const char            *title,
+CTK_Instance*
+CTK_CreateInstance(const char            *title,
                    const int              winw,
                    const int              winh,
                    const SDL_WindowFlags  flags);
@@ -559,15 +559,21 @@ CTK_ColorIntToFColor(const SDL_Color c)
 	return ret;
 }
 
-bool
-CTK_CreateInstance(CTK_Instance          *inst,
-                   const char            *title,
+CTK_Instance*
+CTK_CreateInstance(const char            *title,
                    const int              winw,
                    const int              winh,
                    const SDL_WindowFlags  flags)
 {
 	SDL_WindowFlags f;
+	CTK_Instance *inst;
 	SDL_Renderer *r;
+
+	inst = malloc(sizeof(CTK_Instance));
+	if (NULL == inst) {
+		SDL_SetError("Could not allocate");
+		return NULL;
+	}
 
 	inst->active = true;
 	inst->drag = false;
@@ -598,17 +604,15 @@ CTK_CreateInstance(CTK_Instance          *inst,
 		f = flags;
 
 	if (!SDL_CreateWindowAndRenderer(title, winw, winh, f, &inst->win, &r)) {
-		inst->active = false;
-		return false;
+		return NULL;
 	}
 
 	if (!SDL_SetRenderLogicalPresentation(r, winw, winh,
 	                                      SDL_LOGICAL_PRESENTATION_DISABLED)) {
-		inst->active = false;
-		return false;
+		return NULL;
 	}
 
-	return true;
+	return inst;
 }
 
 void
@@ -823,6 +827,7 @@ CTK_DestroyInstance(CTK_Instance *inst)
 		SDL_DestroyTexture(inst->texture[i]);
 	}
 	SDL_DestroyWindow(inst->win);
+	free(inst);
 }
 
 void

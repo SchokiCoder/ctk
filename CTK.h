@@ -87,6 +87,8 @@ typedef struct CTK_Instance {
 	/* instance events */
 	void (*draw)(struct CTK_Instance*, void*);
 	void *draw_data;
+	void (*enter)(struct CTK_Instance*, void*);
+	void *enter_data;
 	void (*motion)(struct CTK_Instance*,
 	               const float x,
 	               const float y,
@@ -573,6 +575,8 @@ CTK_CreateInstance(CTK_Instance          *inst,
 
 	inst->draw = NULL;
 	inst->draw_data = NULL;
+	inst->enter = NULL;
+	inst->enter_data = NULL;
 	inst->motion = NULL;
 	inst->motion_data = NULL;
 	inst->quit = CTK_InstanceDefaultQuit;
@@ -1491,6 +1495,11 @@ CTK_TickInstance(CTK_Instance *inst)
 				inst->cursor[fw]++;
 				CTK_CreateWidgetTexture(inst, fw);
 			}
+			break;
+
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+			if (inst->enter)
+				inst->enter(inst, inst->enter_data);
 			break;
 
 		case SDL_EVENT_WINDOW_SHOWN:

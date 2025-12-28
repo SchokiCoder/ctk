@@ -194,7 +194,7 @@ It should also be more fine since binding motion is already special...
 You can feel special if you read this :)
 
 - [x] add instance "enter" callback
-- [ ] add instance "leave" callback
+- [x] add instance "leave" callback
 
 - [ ] purge floats from long term storage
 In drawing, it's all definitive pixels anyway.

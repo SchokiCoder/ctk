@@ -120,6 +120,16 @@ enter(CTK_Instance *inst,
 }
 
 void
+leave(CTK_Instance *inst,
+      void         *data)
+{
+	(void) inst;
+	(void) data;
+
+	printf("leave\n");
+}
+
+void
 motion(CTK_Instance *inst,
        const float   x,
        const float   y,
@@ -196,6 +206,7 @@ main(int    argc,
 
 	inst.draw = draw;
 	inst.enter = enter;
+	inst.leave = leave;
 	inst.motion = motion;
 
 	ckb_focusable = CTK_AddCheckbox(&inst);

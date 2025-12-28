@@ -85,8 +85,8 @@ typedef struct CTK_Instance {
 	SDL_Window *win;
 
 	/* instance events */
-	void (*on_quit)(struct CTK_Instance*, void*);
-	void *on_quit_data;
+	void (*quit)(struct CTK_Instance*, void*);
+	void *quit_data;
 
 	/* widget cache */
 	int                enabled_ws;
@@ -262,8 +262,8 @@ void
 CTK_MainloopInstance(CTK_Instance *inst);
 
 void
-CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
-                          void         *dummy);
+CTK_InstanceDefaultQuit(CTK_Instance *inst,
+                        void         *dummy);
 
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
@@ -564,8 +564,8 @@ CTK_CreateInstance(CTK_Instance          *inst,
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
 
-	inst->on_quit = CTK_InstanceDefaultOnQuit;
-	inst->on_quit_data = NULL;
+	inst->quit = CTK_InstanceDefaultQuit;
+	inst->quit_data = NULL;
 
 	inst->enabled_ws = 0;
 	inst->focusable_ws = 0;
@@ -1237,8 +1237,8 @@ CTK_MainloopInstance(CTK_Instance *inst)
 }
 
 void
-CTK_InstanceDefaultOnQuit(CTK_Instance *inst,
-                          void         *dummy)
+CTK_InstanceDefaultQuit(CTK_Instance *inst,
+                        void         *dummy)
 {
 	(void) dummy;
 
@@ -1488,8 +1488,8 @@ CTK_TickInstance(CTK_Instance *inst)
 			break;
 
 		case SDL_EVENT_QUIT:
-			if (NULL != inst->on_quit) {
-				inst->on_quit(inst, inst->on_quit_data);
+			if (NULL != inst->quit) {
+				inst->quit(inst, inst->quit_data);
 			}
 			break;
 		}

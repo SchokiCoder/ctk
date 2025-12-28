@@ -185,7 +185,7 @@ This is for consistency with "mouse wheel",
 and to not confuse with the button widget.
 - [x] add widget "edit" callback
 
-- [ ] rename instance "on quit" to "quit" callback
+- [x] rename instance "on quit" to "quit" callback
 - [ ] add instance "draw" callback
 - [ ] add instance "motion" callback
 - [ ] add instance "enter" callback

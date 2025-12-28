@@ -87,6 +87,11 @@ typedef struct CTK_Instance {
 	/* instance events */
 	void (*draw)(struct CTK_Instance*, void*);
 	void *draw_data;
+	void (*motion)(struct CTK_Instance*,
+	               const float x,
+	               const float y,
+	               void*);
+	void *motion_data;
 	void (*quit)(struct CTK_Instance*, void*);
 	void *quit_data;
 
@@ -568,6 +573,8 @@ CTK_CreateInstance(CTK_Instance          *inst,
 
 	inst->draw = NULL;
 	inst->draw_data = NULL;
+	inst->motion = NULL;
+	inst->motion_data = NULL;
 	inst->quit = CTK_InstanceDefaultQuit;
 	inst->quit_data = NULL;
 
@@ -1460,6 +1467,13 @@ CTK_TickInstance(CTK_Instance *inst)
 		case SDL_EVENT_MOUSE_MOTION:
 			if (inst->drag)
 				CTK_HandleDrag(inst, e.motion.x);
+
+			if (inst->motion) {
+				inst->motion(inst,
+				             e.motion.x,
+				             e.motion.y,
+				             inst->motion_data);
+			}
 			break;
 
 		case SDL_EVENT_MOUSE_WHEEL:

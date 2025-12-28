@@ -187,7 +187,12 @@ and to not confuse with the button widget.
 
 - [x] rename instance "on quit" to "quit" callback
 - [x] add instance "draw" callback
-- [ ] add instance "motion" callback
+- [x] add instance "motion" callback
+Having this callback per instance rather than per widget should save us a loop.
+That's why it's not per widget.
+It should also be more fine since binding motion is already special...
+You can feel special if you read this :)
+
 - [ ] add instance "enter" callback
 - [ ] add instance "leave" callback
 

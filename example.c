@@ -110,6 +110,18 @@ draw(CTK_Instance *inst,
 }
 
 void
+motion(CTK_Instance *inst,
+       const float   x,
+       const float   y,
+       void         *data)
+{
+	(void) inst;
+	(void) data;
+
+	printf("mouse at %i %i\n", (int) x, (int) y);
+}
+
+void
 sclEdit(CTK_Instance               *inst,
         const CTK_WidgetId          widget,
         void                       *data)
@@ -173,6 +185,7 @@ main(int    argc,
 	}
 
 	inst.draw = draw;
+	inst.motion = motion;
 
 	ckb_focusable = CTK_AddCheckbox(&inst);
 	inst.rect[ckb_focusable].x = MARGIN;

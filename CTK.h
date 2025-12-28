@@ -113,6 +113,10 @@ typedef struct CTK_Instance {
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 
 	/* widget events */
+	void (*edit[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                              const CTK_WidgetId,
+	                              void*);
+	void *edit_data[CTK_MAX_WIDGETS];
 	void (*mouse_press[CTK_MAX_WIDGETS])(struct CTK_Instance*,
 	                                     const SDL_MouseButtonEvent,
 	                                     const CTK_WidgetId,
@@ -517,6 +521,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].h = 0;
 	inst->value[ret] = 0;
 	inst->value_max[ret] = 0;
+	inst->edit[ret] = NULL;
+	inst->edit_data[ret] = NULL;
 	inst->mouse_press[ret] = NULL;
 	inst->mouse_press_data[ret] = NULL;
 	inst->mouse_release[ret] = NULL;
@@ -868,6 +874,9 @@ CTK_HandleDrag(CTK_Instance *inst,
 		inst->value[fw] = inst->value_max[fw];
 
 	CTK_CreateWidgetTexture(inst, fw);
+
+	if (NULL != inst->edit[fw])
+		inst->edit[fw](inst, fw, inst->edit_data[fw]);
 }
 
 void
@@ -881,15 +890,25 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		fw = CTK_GetFocusedWidget(inst);
 
 		if (CTK_WTYPE_SCALE == inst->type[fw] &&
-		    inst->value[fw] > 0)
+		    inst->value[fw] > 0) {
 			CTK_SetWidgetValue(inst, fw, inst->value[fw] - 1);
+
+			if (NULL != inst->edit[fw]) {
+				inst->edit[fw](inst, fw, inst->edit_data[fw]);
+			}
+		}
 		break;
 
 	case SDLK_RIGHT:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (CTK_WTYPE_SCALE == inst->type[fw])
+		if (CTK_WTYPE_SCALE == inst->type[fw]) {
 			CTK_SetWidgetValue(inst, fw, inst->value[fw] + 1);
+
+			if (NULL != inst->edit[fw]) {
+				inst->edit[fw](inst, fw, inst->edit_data[fw]);
+			}
+		}
 		break;
 
 	case SDLK_SPACE:
@@ -910,6 +929,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			else
 				inst->toggle[fw] = false;
 			CTK_CreateWidgetTexture(inst, fw);
+
+			if (NULL != inst->edit[fw]) {
+				inst->edit[fw](inst, fw, inst->edit_data[fw]);
+			}
 			break;
 
 		case CTK_WTYPE_RADIOBUTTON:
@@ -1008,6 +1031,10 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 			else
 				inst->toggle[w] = false;
 			CTK_CreateWidgetTexture(inst, w);
+
+			if (NULL != inst->edit[w]) {
+				inst->edit[w](inst, w, inst->edit_data[w]);
+			}
 			break;
 
 		case CTK_WTYPE_RADIOBUTTON:
@@ -1054,6 +1081,10 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 				}
 			} else {
 				CTK_SetWidgetValue(inst, w, inst->value[w] + 1);
+			}
+
+			if (NULL != inst->edit[w]) {
+				inst->edit[w](inst, w, inst->edit_data[w]);
 			}
 		}
 
@@ -1494,6 +1525,10 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 	}
 	inst->toggle[widget] = true;
 	CTK_CreateWidgetTexture(inst, widget);
+
+	if (NULL != inst->edit[widget]) {
+		inst->edit[widget](inst, widget, inst->edit_data[widget]);
+	}
 }
 
 void

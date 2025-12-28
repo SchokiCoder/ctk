@@ -100,9 +100,9 @@ ckbVisibleTrigger(CTK_Instance               *inst,
 }
 
 void
-sclTrigger(CTK_Instance               *inst,
-           const CTK_WidgetId          widget,
-           void                       *data)
+sclEdit(CTK_Instance               *inst,
+        const CTK_WidgetId          widget,
+        void                       *data)
 {
 	CTK_WidgetId pgb = *((CTK_WidgetId*) (data));
 
@@ -255,8 +255,8 @@ main(int    argc,
 	inst.rect[scl].y = inst.rect[lbl_pepperoni].y +
 	                   inst.rect[lbl_pepperoni].h + MARGIN;
 	inst.mouse_wheel[scl] = sclMouseWheel;
-	inst.trigger[scl] = sclTrigger;
-	inst.trigger_data[scl] = &pgb;
+	inst.edit[scl] = sclEdit;
+	inst.edit_data[scl] = &pgb;
 
 	pgb = CTK_AddProgressbar(&inst);
 	inst.value_max[pgb] = inst.value_max[scl];

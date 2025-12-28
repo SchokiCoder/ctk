@@ -183,7 +183,7 @@ Which replaces the old triggering of "button release" upon space key
 - [x] rename "button" callbacks into "mouse"
 This is for consistency with "mouse wheel",
 and to not confuse with the button widget.
-- [ ] add widget "edit" callback
+- [x] add widget "edit" callback
 
 - [ ] rename instance "on quit" to "quit" callback
 - [ ] add instance "draw" callback

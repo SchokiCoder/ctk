@@ -85,6 +85,8 @@ typedef struct CTK_Instance {
 	SDL_Window *win;
 
 	/* instance events */
+	void (*draw)(struct CTK_Instance*, void*);
+	void *draw_data;
 	void (*quit)(struct CTK_Instance*, void*);
 	void *quit_data;
 
@@ -564,6 +566,8 @@ CTK_CreateInstance(CTK_Instance          *inst,
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
 
+	inst->draw = NULL;
+	inst->draw_data = NULL;
 	inst->quit = CTK_InstanceDefaultQuit;
 	inst->quit_data = NULL;
 
@@ -843,6 +847,9 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	SDL_RenderPresent(r);
 	inst->redraw = false;
+
+	if (NULL != inst->draw)
+		inst->draw(inst, inst->draw_data);
 }
 
 void

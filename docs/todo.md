@@ -186,7 +186,7 @@ and to not confuse with the button widget.
 - [x] add widget "edit" callback
 
 - [x] rename instance "on quit" to "quit" callback
-- [ ] add instance "draw" callback
+- [x] add instance "draw" callback
 - [ ] add instance "motion" callback
 - [ ] add instance "enter" callback
 - [ ] add instance "leave" callback

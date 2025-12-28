@@ -100,6 +100,16 @@ ckbVisibleTrigger(CTK_Instance               *inst,
 }
 
 void
+draw(CTK_Instance *inst,
+     void         *data)
+{
+	(void) inst;
+	(void) data;
+
+	printf("draw\n");
+}
+
+void
 sclEdit(CTK_Instance               *inst,
         const CTK_WidgetId          widget,
         void                       *data)
@@ -161,6 +171,8 @@ main(int    argc,
 		fprintf(stderr, "%s\n", SDL_GetError());
 		return 0;
 	}
+
+	inst.draw = draw;
 
 	ckb_focusable = CTK_AddCheckbox(&inst);
 	inst.rect[ckb_focusable].x = MARGIN;

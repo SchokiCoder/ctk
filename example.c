@@ -12,10 +12,10 @@
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
 void
-btnCounterButtonPress(CTK_Instance               *inst,
-                      const SDL_MouseButtonEvent  e,
-                      const CTK_WidgetId          widget,
-                      void                       *data)
+btnCounterMousePress(CTK_Instance               *inst,
+                     const SDL_MouseButtonEvent  e,
+                     const CTK_WidgetId          widget,
+                     void                       *data)
 {
 	(void) inst;
 	(void) e;
@@ -206,7 +206,7 @@ main(int    argc,
 	inst.rect[btn_counter].x = MARGIN;
 	inst.rect[btn_counter].y = inst.rect[lbl_visible].y +
 	                           inst.rect[lbl_visible].h + (MARGIN * 4);
-	inst.button_press[btn_counter] = btnCounterButtonPress;
+	inst.mouse_press[btn_counter] = btnCounterMousePress;
 	inst.trigger[btn_counter] = btnCounterTrigger;
 	inst.trigger_data[btn_counter] = &lbl_counter;
 

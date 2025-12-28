@@ -113,16 +113,16 @@ typedef struct CTK_Instance {
 	SDL_Texture       *texture[CTK_MAX_WIDGETS];
 
 	/* widget events */
-	void (*button_press[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                      const SDL_MouseButtonEvent,
-	                                      const CTK_WidgetId,
-	                                      void*);
-	void *button_press_data[CTK_MAX_WIDGETS];
-	void (*button_release[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                        const SDL_MouseButtonEvent,
-	                                        const CTK_WidgetId,
-	                                        void*);
-	void *button_release_data[CTK_MAX_WIDGETS];
+	void (*mouse_press[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                     const SDL_MouseButtonEvent,
+	                                     const CTK_WidgetId,
+	                                     void*);
+	void *mouse_press_data[CTK_MAX_WIDGETS];
+	void (*mouse_release[CTK_MAX_WIDGETS])(struct CTK_Instance*,
+	                                       const SDL_MouseButtonEvent,
+	                                       const CTK_WidgetId,
+	                                       void*);
+	void *mouse_release_data[CTK_MAX_WIDGETS];
 	void (*mouse_wheel[CTK_MAX_WIDGETS])(struct CTK_Instance*,
 	                                     const SDL_MouseWheelEvent,
 	                                     const CTK_WidgetId,
@@ -517,10 +517,10 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].h = 0;
 	inst->value[ret] = 0;
 	inst->value_max[ret] = 0;
-	inst->button_press[ret] = NULL;
-	inst->button_press_data[ret] = NULL;
-	inst->button_release[ret] = NULL;
-	inst->button_release_data[ret] = NULL;
+	inst->mouse_press[ret] = NULL;
+	inst->mouse_press_data[ret] = NULL;
+	inst->mouse_release[ret] = NULL;
+	inst->mouse_release_data[ret] = NULL;
 	inst->mouse_wheel[ret] = NULL;
 	inst->mouse_wheel_data[ret] = NULL;
 	inst->trigger[ret] = NULL;
@@ -964,11 +964,11 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 				CTK_HandleDrag(inst, p.x);
 			}
 
-			if (NULL != inst->button_press[w]) {
-				inst->button_press[w](inst,
-				                      e,
-				                      w,
-				                      inst->button_press_data[w]);
+			if (NULL != inst->mouse_press[w]) {
+				inst->mouse_press[w](inst,
+				                     e,
+				                     w,
+				                     inst->mouse_press_data[w]);
 			}
 			break;
 		}
@@ -1015,11 +1015,11 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 			break;
 		}
 
-		if (NULL != inst->button_release[w]) {
-			inst->button_release[w](inst,
-			                        e,
-			                        w,
-			                        inst->button_release_data[w]);
+		if (NULL != inst->mouse_release[w]) {
+			inst->mouse_release[w](inst,
+			                       e,
+			                       w,
+			                       inst->mouse_release_data[w]);
 		}
 		if (NULL != inst->trigger[w]) {
 			inst->trigger[w](inst,

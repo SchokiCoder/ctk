@@ -23,6 +23,16 @@ if so, a theme change should change them.
 
 # 0.2.0
 
+- [ ] if sdl3-gfx is available yet, use it for radiobutton circles
+if not, postpone this task
+
+- [ ] make all the data needed for drawing available in a "style" property
+Thus drawing will be fully declarative.
+- [ ] add text drawing to checkbox and radiobutton
+This also works as a hitbox of course.
+Many expect the text next to a checkbox or radiobutton to register clicks too.
+`text_alignment` will tell which side the text is on.
+
 - [ ] add a way to grid widgets
 - [ ] add a content fitting window resize (just initially? (upon mainloop))
 
@@ -206,5 +216,11 @@ We don't gain precision, since it needs to fit into the SDL mold anyway.
 
 - [x] change `CTK_CreateInstance` to return instance pointer
 This eliminiates `.` vs `->` case and is more inline with the SDL environment.
+
+- [x] add "max_framerate" variable to instance
+
+- [ ] add backspace key support to entry input handling
+- [ ] add proper cursor to entry
+- [ ] add selection to entry
 
 - [ ] set version to 0.1.0

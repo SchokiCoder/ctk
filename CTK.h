@@ -26,10 +26,6 @@
 #define CTK_MAX_WIDGETS 64
 #endif
 
-#ifndef CTK_MAX_TICKRATE
-#define CTK_MAX_TICKRATE 60
-#endif
-
 #define CTK_VERSION "0.0.0"
 
 #if defined(__linux__)
@@ -81,6 +77,7 @@ typedef struct CTK_Instance {
 	bool        active;
 	bool        drag;
 	int         focused_w;
+	Uint64      max_framerate;
 	bool        redraw;
 	CTK_Style   style;
 	SDL_Window *win;
@@ -347,13 +344,14 @@ CTK_Quit();
 #define CTK_DEFAULT_PROGRESSBAR_H      CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_RADIOBUTTON_W      CTK_DEFAULT_CHECKBOX_W
 #define CTK_DEFAULT_RADIOBUTTON_H      CTK_DEFAULT_CHECKBOX_H
+#define CTK_DEFAULT_RADIOBUTTON_FILL   CTK_DEFAULT_CHECKBOX_FILL
 #define CTK_DEFAULT_SCALE_W            CTK_DEFAULT_BUTTON_W
 #define CTK_DEFAULT_SCALE_H            CTK_DEFAULT_BUTTON_H
 #define CTK_SCALE_SLIDER_SIZE_FRACTION 0.3
 
-#define CTK_DEFAULT_RADIOBUTTON_FILL CTK_DEFAULT_CHECKBOX_FILL
 #define CTK_DEFAULT_THEME            CTK_Theme_TclTk
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
+#define CTK_DEFAULT_MAX_FRAMERATE    60
 
 static TTF_Font *CTK_font = NULL;
 
@@ -578,6 +576,7 @@ CTK_CreateInstance(const char            *title,
 	inst->active = true;
 	inst->drag = false;
 	inst->focused_w = 0;
+	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
 
@@ -1254,7 +1253,7 @@ CTK_MainloopInstance(CTK_Instance *inst)
 		SDL_WaitEvent(NULL);
 
 		now = SDL_GetTicks();
-		if (now - last > 1000 / CTK_MAX_TICKRATE) {
+		if (now - last > 1000 / inst->max_framerate) {
 			last = now;
 
 			CTK_TickInstance(inst);

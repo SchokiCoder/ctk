@@ -223,7 +223,8 @@ This eliminiates `.` vs `->` case and is more inline with the SDL environment.
 - [x] add backspace key support to entry input handling
 This also touches the previous string termination fix.
 
-- [ ] add proper cursor to entry
+- [x] add cursor drawing to entry
+- [ ] add cursor navigation to entry
 - [ ] add selection to entry
 
 - [ ] set version to 0.1.0

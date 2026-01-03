@@ -836,6 +836,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 	int i;
 	CTK_WidgetId fw;
 	SDL_Renderer *r;
+	int          w;
 
 	fw = CTK_GetFocusedWidget(inst);
 
@@ -844,6 +845,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	r = SDL_GetRenderer(inst->win);
 
+	/* bg */
 	SDL_SetRenderDrawColor(r,
 	                       inst->style.bg.r,
 	                       inst->style.bg.g,
@@ -851,6 +853,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 	                       inst->style.bg.a);
 	SDL_RenderClear(r);
 
+	/* widgets */
 	for (i = 0; i < inst->visible_ws; i++) {
 		SDL_RenderTexture(r,
 		                  inst->texture[inst->visible_w[i]],
@@ -858,6 +861,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 		                  &inst->rect[inst->visible_w[i]]);
 	}
 
+	/* focus ring */
 	SDL_SetRenderDrawColor(r,
 	                       inst->style.focus.r,
 	                       inst->style.focus.g,
@@ -865,6 +869,25 @@ CTK_DrawInstance(CTK_Instance *inst)
 	                       inst->style.focus.a);
 	SDL_RenderRect(r, &inst->rect[fw]);
 
+	/* cursor */
+	if (CTK_WTYPE_ENTRY == inst->type[fw]) {
+		TTF_GetStringSize(CTK_font,
+	                  inst->text[fw],
+	                  inst->cursor[fw],
+	                  &w, NULL);
+		SDL_SetRenderDrawColor(r,
+			               inst->style.fg.r,
+			               inst->style.fg.g,
+			               inst->style.fg.b,
+			               inst->style.fg.a);
+		SDL_RenderLine(r,
+		               inst->rect[fw].x + w,
+		               inst->rect[fw].y + 2,
+		               inst->rect[fw].x + w,
+		               inst->rect[fw].y + inst->rect[fw].h - 3);
+	}
+
+	/* final */
 	SDL_RenderPresent(r);
 	inst->redraw = false;
 

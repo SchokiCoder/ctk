@@ -1501,6 +1501,7 @@ CTK_TickInstance(CTK_Instance *inst)
 			if (inst->cursor[fw] < CTK_MAX_TEXTLEN) {
 				inst->text[fw][inst->cursor[fw]] = e.text.text[0];
 				inst->cursor[fw]++;
+				inst->text[fw][inst->cursor[fw]] = '\0';
 				CTK_CreateWidgetTexture(inst, fw);
 			}
 			break;

@@ -220,7 +220,9 @@ This eliminiates `.` vs `->` case and is more inline with the SDL environment.
 - [x] add "max_framerate" variable to instance
 
 - [x] fix entry input not terminating the string
-- [ ] add backspace key support to entry input handling
+- [x] add backspace key support to entry input handling
+This also touches the previous string termination fix.
+
 - [ ] add proper cursor to entry
 - [ ] add selection to entry
 

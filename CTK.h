@@ -520,7 +520,6 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->cursor[ret] = 0;
 	inst->group[ret] = -1;
 	inst->scroll[ret] = 0;
-	inst->text[ret][0] = '\0';
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
 	inst->toggle[ret] = false;
 	inst->type[ret] = CTK_WTYPE_UNKNOWN;
@@ -540,6 +539,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->mouse_wheel_data[ret] = NULL;
 	inst->trigger[ret] = NULL;
 	inst->trigger_data[ret] = NULL;
+
+	memset(inst->text[ret], '\0', CTK_MAX_TEXTLEN);
 
 	return ret;
 }
@@ -909,9 +910,24 @@ void
 CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
+	size_t i;
 	CTK_WidgetId fw;
 
 	switch (e.key) {
+	case SDLK_BACKSPACE:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (CTK_WTYPE_ENTRY != inst->type[fw])
+			return;
+
+		for (i = inst->cursor[fw]; i < strlen(inst->text[fw]); i++) {
+			inst->text[fw][i - 1] = inst->text[fw][i];
+		}
+		inst->text[fw][i - 1] = '\0';
+		inst->cursor[fw]--;
+		CTK_CreateWidgetTexture(inst, fw);
+		break;
+
 	case SDLK_LEFT:
 		fw = CTK_GetFocusedWidget(inst);
 
@@ -1465,6 +1481,7 @@ CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
 	CTK_WidgetId fw;
+	int i;
 
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
@@ -1498,12 +1515,18 @@ CTK_TickInstance(CTK_Instance *inst)
 
 		case SDL_EVENT_TEXT_INPUT:
 			fw = CTK_GetFocusedWidget(inst);
-			if (inst->cursor[fw] < CTK_MAX_TEXTLEN) {
-				inst->text[fw][inst->cursor[fw]] = e.text.text[0];
-				inst->cursor[fw]++;
-				inst->text[fw][inst->cursor[fw]] = '\0';
-				CTK_CreateWidgetTexture(inst, fw);
+
+			if (inst->cursor[fw] >= CTK_MAX_TEXTLEN ||
+			    strlen(inst->text[fw]) >= CTK_MAX_TEXTLEN)
+				break;
+
+			for (i = strlen(inst->text[fw]); i > inst->cursor[fw]; i--) {
+				inst->text[fw][i] = inst->text[fw][i - 1];
 			}
+
+			inst->text[fw][inst->cursor[fw]] = e.text.text[0];
+			inst->cursor[fw]++;
+			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
 		case SDL_EVENT_WINDOW_MOUSE_ENTER:

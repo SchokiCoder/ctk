@@ -224,7 +224,8 @@ This eliminiates `.` vs `->` case and is more inline with the SDL environment.
 This also touches the previous string termination fix.
 
 - [x] add cursor drawing to entry
-- [ ] add cursor navigation to entry
+- [x] add cursor navigation to entry
+- [ ] fix cursor drawing at entry end, when cursor 0 and text not empty
 - [ ] add selection to entry
 
 - [ ] set version to 0.1.0

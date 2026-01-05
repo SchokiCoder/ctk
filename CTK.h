@@ -954,25 +954,60 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	case SDLK_LEFT:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (CTK_WTYPE_SCALE == inst->type[fw] &&
-		    inst->value[fw] > 0) {
+		switch (inst->type[fw]) {
+		case CTK_WTYPE_ENTRY:
+			if (inst->cursor[fw] <= 0) {
+				break;
+			}
+
+			inst->cursor[fw]--;
+			CTK_CreateWidgetTexture(inst, fw);
+			break;
+
+		case CTK_WTYPE_SCALE:
+			if (inst->value[fw] <= 0) {
+				break;
+			}
+
 			CTK_SetWidgetValue(inst, fw, inst->value[fw] - 1);
 
 			if (NULL != inst->edit[fw]) {
 				inst->edit[fw](inst, fw, inst->edit_data[fw]);
 			}
+			break;
+
+		default:
+			break;
 		}
 		break;
 
 	case SDLK_RIGHT:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (CTK_WTYPE_SCALE == inst->type[fw]) {
+		switch (inst->type[fw]) {
+		case CTK_WTYPE_ENTRY:
+			if ((size_t) inst->cursor[fw] >= strlen(inst->text[fw])) {
+				break;
+			}
+
+			inst->cursor[fw]++;
+			CTK_CreateWidgetTexture(inst, fw);
+			break;
+
+		case CTK_WTYPE_SCALE:
+			if (inst->value[fw] >= inst->value_max[fw]) {
+				break;
+			}
+
 			CTK_SetWidgetValue(inst, fw, inst->value[fw] + 1);
 
 			if (NULL != inst->edit[fw]) {
 				inst->edit[fw](inst, fw, inst->edit_data[fw]);
 			}
+			break;
+
+		default:
+			break;
 		}
 		break;
 

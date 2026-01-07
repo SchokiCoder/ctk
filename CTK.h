@@ -871,10 +871,14 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	/* cursor */
 	if (CTK_WTYPE_ENTRY == inst->type[fw]) {
-		TTF_GetStringSize(CTK_font,
-	                  inst->text[fw],
-	                  inst->cursor[fw],
-	                  &w, NULL);
+		if (inst->cursor[fw] <= 0) {
+			w = 0;
+		} else {
+			TTF_GetStringSize(CTK_font,
+			          inst->text[fw],
+			          inst->cursor[fw],
+			          &w, NULL);
+	        }
 		SDL_SetRenderDrawColor(r,
 			               inst->style.fg.r,
 			               inst->style.fg.g,

@@ -225,7 +225,10 @@ This also touches the previous string termination fix.
 
 - [x] add cursor drawing to entry
 - [x] add cursor navigation to entry
-- [ ] fix cursor drawing at entry end, when cursor 0 and text not empty
+- [x] fix cursor drawing at entry end, when cursor 0 and text not empty
+`TTF_GetStringSize` uses the entire string when len parameter (cursor) is 0.
+Fixed.
+
 - [ ] add selection to entry
 
 - [ ] set version to 0.1.0

@@ -229,6 +229,19 @@ This also touches the previous string termination fix.
 `TTF_GetStringSize` uses the entire string when len parameter (cursor) is 0.
 Fixed.
 
-- [ ] add selection to entry
+- [x] add keyboard based selection to entry
+- [ ] fix selection going from or to left corner
+
+- [ ] add entry text input case while selection
+- [ ] add entry backspace key case while selection
+- [ ] add entry delete key support
+- [ ] add entry delete key case while selection
+- [ ] add entry text paste via ctrl + v
+- [ ] add entry text copy via ctrl + c
+
+- [ ] fix entry cursor going past right border
+So we need to scroll text then
+
+- [ ] add mouse based selection to entry
 
 - [ ] set version to 0.1.0

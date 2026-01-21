@@ -111,6 +111,7 @@ typedef struct CTK_Instance {
 	bool               border[CTK_MAX_WIDGETS];
 	int                cursor[CTK_MAX_WIDGETS];
 	int                group[CTK_MAX_WIDGETS];
+	int                selection[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
 	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
@@ -187,6 +188,13 @@ CTK_CreateInstance(const char            *title,
                    const int              winw,
                    const int              winh,
                    const SDL_WindowFlags  flags);
+
+SDL_Texture*
+CTK_CreateText(SDL_Renderer            *r,
+               const char              *str,
+               const size_t             str_len,
+               const SDL_Color          fg,
+               const SDL_Color          bg);
 
 void
 CTK_CreateWidgetTexture(CTK_Instance       *inst,
@@ -272,6 +280,28 @@ CTK_MainloopInstance(CTK_Instance *inst);
 void
 CTK_InstanceDefaultQuit(CTK_Instance *inst,
                         void         *dummy);
+
+bool
+CTK_RenderText(SDL_Renderer            *r,
+               const char              *str,
+               const size_t             str_len,
+               const SDL_FRect          rect,
+               const CTK_TextAlignment  ta,
+               const SDL_Color          fg,
+               const SDL_Color          bg);
+
+bool
+CTK_RenderSelectedText(SDL_Renderer            *r,
+                       char                    *str,
+                       const size_t             str_len,
+                       const SDL_FRect          rect,
+                       const int                cursor,
+                       const int                selection,
+                       const CTK_TextAlignment  ta,
+                       const SDL_Color          fg,
+                       const SDL_Color          fg_selected,
+                       const SDL_Color          bg,
+                       const SDL_Color          bg_selected);
 
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
@@ -519,6 +549,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->border[ret] = false;
 	inst->cursor[ret] = 0;
 	inst->group[ret] = -1;
+	inst->selection[ret] = inst->cursor[ret];
 	inst->scroll[ret] = 0;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
 	inst->toggle[ret] = false;
@@ -615,17 +646,39 @@ CTK_CreateInstance(const char            *title,
 	return inst;
 }
 
+SDL_Texture*
+CTK_CreateText(SDL_Renderer            *r,
+               const char              *str,
+               const size_t             str_len,
+               const SDL_Color          fg,
+               const SDL_Color          bg)
+{
+	SDL_Surface *text_s = NULL;
+	SDL_Texture *text_t = NULL;
+
+	if (str_len == 0 ||
+	    strlen(str) == 0) {
+		SDL_SetError("Cannot create empty text");
+		return NULL;
+	}
+
+	text_s = TTF_RenderText_LCD(CTK_font, str, 0, fg, bg);
+	text_t = SDL_CreateTextureFromSurface(r, text_s);
+
+	SDL_DestroySurface(text_s);
+
+	return text_t;
+}
+
 void
 CTK_CreateWidgetTexture(CTK_Instance       *inst,
                         const CTK_WidgetId  widget)
 {
-	SDL_Color fg;
+	SDL_Color     fg;
 	SDL_Renderer *r = NULL;
-	SDL_FRect    rect;
-	SDL_Surface *text_s = NULL;
-	SDL_Texture *text_t = NULL;
-	const int    numv = 3;
-	SDL_Vertex   v[numv];
+	SDL_FRect     rect;
+	const int     numv = 3;
+	SDL_Vertex    v[numv];
 
 	r = SDL_GetRenderer(inst->win);
 
@@ -655,35 +708,36 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 	switch (inst->type[widget]) {
 	case CTK_WTYPE_UNKNOWN:
 	case CTK_WTYPE_BUTTON:
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = inst->rect[widget].w;
+		rect.h = inst->rect[widget].h;
+		CTK_RenderText(r,
+		               inst->text[widget],
+		               strlen(inst->text[widget]),
+		               rect,
+		               inst->text_alignment[widget],
+		               fg,
+		               *inst->bg[widget]);
+		break;
+
 	case CTK_WTYPE_ENTRY:
 	case CTK_WTYPE_LABEL:
-		if (strlen(inst->text[widget]) != 0) {
-			text_s = TTF_RenderText_LCD(CTK_font,
-					            inst->text[widget],
-					            0,
-					            fg,
-					            *inst->bg[widget]);
-			text_t = SDL_CreateTextureFromSurface(r, text_s);
-
-			switch (inst->text_alignment[widget]) {
-			case CTK_TEXT_ALIGNMENT_LEFT:
-				rect.x = 0;
-				break;
-
-			case CTK_TEXT_ALIGNMENT_CENTER:
-				rect.x = (inst->rect[widget].w - text_s->w) / 2.0;
-				break;
-
-			case CTK_TEXT_ALIGNMENT_RIGHT:
-				rect.x = inst->rect[widget].w - text_s->w;
-				break;
-			}
-			rect.y = (inst->rect[widget].h - text_s->h) / 2.0;
-			rect.w = text_s->w;
-			rect.h = text_s->h;
-
-			SDL_RenderTexture(r, text_t, NULL, &rect);
-		}
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = inst->rect[widget].w;
+		rect.h = inst->rect[widget].h;
+		CTK_RenderSelectedText(r,
+		                       inst->text[widget],
+		                       strlen(inst->text[widget]),
+		                       rect,
+		                       inst->cursor[widget],
+		                       inst->selection[widget],
+		                       inst->text_alignment[widget],
+		                       fg,
+		                       inst->style.fg_selected,
+		                       *inst->bg[widget],
+		                       inst->style.bg_selected);
 		break;
 
 	case CTK_WTYPE_CHECKBOX:
@@ -814,8 +868,6 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 cleanup:
 	inst->redraw = true;
 	SDL_SetRenderTarget(r, NULL);
-	SDL_DestroySurface(text_s);
-	SDL_DestroyTexture(text_t);
 }
 
 void
@@ -875,9 +927,9 @@ CTK_DrawInstance(CTK_Instance *inst)
 			w = 0;
 		} else {
 			TTF_GetStringSize(CTK_font,
-			          inst->text[fw],
-			          inst->cursor[fw],
-			          &w, NULL);
+			                  inst->text[fw],
+			                  inst->cursor[fw],
+			                  &w, NULL);
 	        }
 		SDL_SetRenderDrawColor(r,
 			               inst->style.fg.r,
@@ -952,6 +1004,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 		inst->text[fw][i - 1] = '\0';
 		inst->cursor[fw]--;
+		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
 		break;
 
@@ -965,6 +1018,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			}
 
 			inst->cursor[fw]--;
+			if (!(SDL_KMOD_SHIFT & e.mod)) {
+				inst->selection[fw] = inst->cursor[fw];
+			}
+
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
@@ -995,6 +1052,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			}
 
 			inst->cursor[fw]++;
+			if (!(SDL_KMOD_SHIFT & e.mod)) {
+				inst->selection[fw] = inst->cursor[fw];
+			}
+
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
@@ -1349,6 +1410,148 @@ CTK_InstanceDefaultQuit(CTK_Instance *inst,
 	inst->active = false;
 }
 
+bool
+CTK_RenderText(SDL_Renderer            *r,
+               const char              *str,
+               const size_t             str_len,
+               const SDL_FRect          rect,
+               const CTK_TextAlignment  ta,
+               const SDL_Color          fg,
+               const SDL_Color          bg)
+{
+	SDL_FRect    dest;
+	SDL_Texture *text = NULL;
+
+	text = CTK_CreateText(r, str, str_len, fg, bg);
+	if (NULL == text) {
+		return false;
+	}
+
+	switch (ta) {
+	case CTK_TEXT_ALIGNMENT_LEFT:
+		dest.x = 0;
+		break;
+
+	case CTK_TEXT_ALIGNMENT_CENTER:
+		dest.x = (rect.w - text->w) / 2.0;
+		break;
+
+	case CTK_TEXT_ALIGNMENT_RIGHT:
+		dest.x = rect.w - text->w;
+		break;
+	}
+
+	dest.y = (rect.h - text->h) / 2.0;
+	dest.w = text->w;
+	dest.h = text->h;
+
+	SDL_RenderTexture(r, text, NULL, &dest);
+
+	SDL_DestroyTexture(text);
+
+	return true;
+}
+
+bool
+CTK_RenderSelectedText(SDL_Renderer            *r,
+                       char                    *str,
+                       const size_t             str_len,
+                       const SDL_FRect          rect,
+                       const int                cursor,
+                       const int                selection,
+                       const CTK_TextAlignment  ta,
+                       const SDL_Color          fg,
+                       const SDL_Color          fg_selected,
+                       const SDL_Color          bg,
+                       const SDL_Color          bg_selected)
+{
+	int          a;
+	int          b;
+	int          i;
+	SDL_FRect    subrect;
+	char         temp;
+	int          texts = 0;
+	SDL_Texture *text[3];
+	int          text_w = 0;
+
+	if (str_len <= 0) {
+		SDL_SetError("String len is null");
+		return false;
+	}
+
+	if (cursor > selection) {
+		a = selection;
+		b = cursor;
+	} else {
+		a = cursor;
+		b = selection;
+	}
+
+	if (a < 0) {
+		a = 0;
+	}
+	if (b < 0) {
+		b = 0;
+	}
+	if (a == b) {
+		return CTK_RenderText(r, str, str_len, rect, ta, fg, bg);
+	}
+
+	temp = str[a];
+	str[a] = '\0';
+	text[0] = CTK_CreateText(r, str, a, fg, bg);
+	if (NULL == text[0]) {
+		return false;
+	}
+	str[a] = temp;
+	texts++;
+	text_w += text[0]->w;
+
+	temp = str[b];
+	str[b] = '\0';
+	text[1] = CTK_CreateText(r, &str[a], b - a, fg_selected, bg_selected);
+	if (NULL == text[1]) {
+		return false;
+	}
+	str[b] = temp;
+	texts++;
+	text_w += text[1]->w;
+
+	if ((size_t) b < str_len) {
+		text[2] = CTK_CreateText(r, &str[b], str_len - b, fg, bg);
+		if (NULL == text[2]) {
+			return false;
+		}
+		texts++;
+		text_w += text[2]->w;
+	}
+
+	switch (ta) {
+	case CTK_TEXT_ALIGNMENT_LEFT:
+		subrect.x = 0;
+		break;
+
+	case CTK_TEXT_ALIGNMENT_CENTER:
+		subrect.x = (rect.w - text_w) / 2;
+		break;
+
+	case CTK_TEXT_ALIGNMENT_RIGHT:
+		subrect.x = rect.w - text_w;
+		break;
+	}
+	subrect.y = (rect.h - text[0]->h) / 2.0;
+
+	for (i = 0; i < texts; i++) {
+		subrect.w = text[i]->w;
+		subrect.h = text[i]->h;
+		SDL_RenderTexture(r, text[i], NULL, &subrect);
+		subrect.x += text[i]->w;
+		SDL_DestroyTexture(text[i]);
+	}
+
+	return true;
+}
+
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
                      const CTK_WidgetId  widget)
@@ -1588,6 +1791,7 @@ CTK_TickInstance(CTK_Instance *inst)
 
 			inst->text[fw][inst->cursor[fw]] = e.text.text[0];
 			inst->cursor[fw]++;
+			inst->selection[fw] = inst->cursor[fw];
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 

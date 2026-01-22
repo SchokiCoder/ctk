@@ -1497,33 +1497,35 @@ CTK_RenderSelectedText(SDL_Renderer            *r,
 		return CTK_RenderText(r, str, str_len, rect, ta, fg, bg);
 	}
 
-	temp = str[a];
-	str[a] = '\0';
-	text[0] = CTK_CreateText(r, str, a, fg, bg);
-	if (NULL == text[0]) {
-		return false;
+	if (a > 0) {
+		temp = str[a];
+		str[a] = '\0';
+		text[texts] = CTK_CreateText(r, str, a, fg, bg);
+		if (NULL == text[texts]) {
+			return false;
+		}
+		str[a] = temp;
+		text_w += text[texts]->w;
+		texts++;
 	}
-	str[a] = temp;
-	texts++;
-	text_w += text[0]->w;
 
 	temp = str[b];
 	str[b] = '\0';
-	text[1] = CTK_CreateText(r, &str[a], b - a, fg_selected, bg_selected);
-	if (NULL == text[1]) {
+	text[texts] = CTK_CreateText(r, &str[a], b - a, fg_selected, bg_selected);
+	if (NULL == text[texts]) {
 		return false;
 	}
 	str[b] = temp;
+	text_w += text[texts]->w;
 	texts++;
-	text_w += text[1]->w;
 
 	if ((size_t) b < str_len) {
-		text[2] = CTK_CreateText(r, &str[b], str_len - b, fg, bg);
-		if (NULL == text[2]) {
+		text[texts] = CTK_CreateText(r, &str[b], str_len - b, fg, bg);
+		if (NULL == text[texts]) {
 			return false;
 		}
+		text_w += text[texts]->w;
 		texts++;
-		text_w += text[2]->w;
 	}
 
 	switch (ta) {

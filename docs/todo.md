@@ -230,7 +230,7 @@ This also touches the previous string termination fix.
 Fixed.
 
 - [x] add keyboard based selection to entry
-- [ ] fix selection going from or to left corner
+- [x] fix selection drawing when selection starts at text start
 
 - [ ] add entry text input case while selection
 - [ ] add entry backspace key case while selection

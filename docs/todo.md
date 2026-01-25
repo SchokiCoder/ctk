@@ -232,12 +232,19 @@ Fixed.
 - [x] add keyboard based selection to entry
 - [x] fix selection drawing when selection starts at text start
 
-- [ ] add entry text input case while selection
+- [x] add entry text input case while selection
 - [ ] add entry backspace key case while selection
 - [ ] add entry delete key support
 - [ ] add entry delete key case while selection
 - [ ] add entry text paste via ctrl + v
 - [ ] add entry text copy via ctrl + c
+
+- [ ] add entry navigation via home key
+- [ ] add entry navigation via end key
+- [ ] add entry navigation via pgup key
+- [ ] add entry navigation via pgdn key
+
+- [ ] move away from single header lib to classic lib design
 
 - [ ] fix entry cursor going past right border
 So we need to scroll text then

@@ -6,6 +6,7 @@
 #define _CTK_H
 
 #include "CTK_style.h"
+#include "STR.h"
 
 #include <math.h>
 #include <SDL3/SDL.h>
@@ -989,7 +990,6 @@ void
 CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
-	size_t i;
 	CTK_WidgetId fw;
 
 	switch (e.key) {
@@ -999,10 +999,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		if (CTK_WTYPE_ENTRY != inst->type[fw])
 			return;
 
-		for (i = inst->cursor[fw]; i < strlen(inst->text[fw]); i++) {
-			inst->text[fw][i - 1] = inst->text[fw][i];
-		}
-		inst->text[fw][i - 1] = '\0';
+		STR_Cut(inst->text[fw], inst->cursor[fw] - 1, 1);
 		inst->cursor[fw]--;
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
@@ -1748,7 +1745,6 @@ CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
 	CTK_WidgetId fw;
-	int i;
 
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
@@ -1783,17 +1779,30 @@ CTK_TickInstance(CTK_Instance *inst)
 		case SDL_EVENT_TEXT_INPUT:
 			fw = CTK_GetFocusedWidget(inst);
 
-			if (inst->cursor[fw] >= CTK_MAX_TEXTLEN ||
-			    strlen(inst->text[fw]) >= CTK_MAX_TEXTLEN)
-				break;
-
-			for (i = strlen(inst->text[fw]); i > inst->cursor[fw]; i--) {
-				inst->text[fw][i] = inst->text[fw][i - 1];
+			if (inst->cursor[fw] < inst->selection[fw]) {
+				STR_Cut(inst->text[fw],
+				        inst->cursor[fw],
+				        inst->selection[fw] -
+				        inst->cursor[fw]);
+			} else if (inst->cursor[fw] > inst->selection[fw]) {
+				STR_Cut(inst->text[fw],
+				        inst->selection[fw],
+				        inst->cursor[fw] -
+				        inst->selection[fw]);
+				inst->cursor[fw] -= inst->cursor[fw] -
+				                    inst->selection[fw];
 			}
 
-			inst->text[fw][inst->cursor[fw]] = e.text.text[0];
-			inst->cursor[fw]++;
-			inst->selection[fw] = inst->cursor[fw];
+			if (strlen(inst->text[fw]) + strlen(e.text.text) <
+			    CTK_MAX_TEXTLEN) {
+				STR_Insert(inst->text[fw],
+					   CTK_MAX_TEXTLEN,
+					   inst->cursor[fw],
+					   e.text.text);
+				inst->cursor[fw]++;
+				inst->selection[fw] = inst->cursor[fw];
+			}
+
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 

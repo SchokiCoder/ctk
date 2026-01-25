@@ -3,11 +3,14 @@
  */
 
 #define CTK_IMPL
+#define STR_IMPL
 #include "CTK.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#define SILENCE_CALLBACKS
 
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
@@ -21,7 +24,11 @@ btnCounterMousePress(CTK_Instance               *inst,
 	(void) e;
 	(void) data;
 
+#ifndef SILENCE_CALLBACKS
 	printf("%i is about to count\n", widget);
+#else
+	(void) widget;
+#endif
 }
 
 void
@@ -106,7 +113,9 @@ draw(CTK_Instance *inst,
 	(void) inst;
 	(void) data;
 
+#ifndef SILENCE_CALLBACKS
 	printf("draw\n");
+#endif
 }
 
 void
@@ -116,7 +125,9 @@ enter(CTK_Instance *inst,
 	(void) inst;
 	(void) data;
 
+#ifndef SILENCE_CALLBACKS
 	printf("enter\n");
+#endif
 }
 
 void
@@ -126,7 +137,9 @@ leave(CTK_Instance *inst,
 	(void) inst;
 	(void) data;
 
+#ifndef SILENCE_CALLBACKS
 	printf("leave\n");
+#endif
 }
 
 void
@@ -138,7 +151,12 @@ motion(CTK_Instance *inst,
 	(void) inst;
 	(void) data;
 
+#ifndef SILENCE_CALLBACKS
 	printf("mouse at %i %i\n", (int) x, (int) y);
+#else
+	(void) x;
+	(void) y;
+#endif
 }
 
 void
@@ -164,8 +182,10 @@ sclMouseWheel(CTK_Instance              *inst,
 	(void) widget;
 	(void) data;
 
+#ifndef SILENCE_CALLBACKS
 	printf("Uppies or downies!\n");
 	/* Too lazy to find out */
+#endif
 }
 
 int
@@ -265,6 +285,7 @@ main(int    argc,
 	inst->rect[lbl_counter].y = inst->rect[btn_counter].y;
 
 	txt = CTK_AddEntry(inst);
+	CTK_SetWidgetText(inst, txt, "12345");
 	inst->rect[txt].x = MARGIN;
 	inst->rect[txt].y = inst->rect[lbl_counter].y +
 	                    inst->rect[lbl_counter].h + MARGIN;

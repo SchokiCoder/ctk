@@ -236,7 +236,8 @@ Fixed.
 - [x] add entry backspace key case while selection
 - [x] add entry delete key support
 - [x] add entry delete key case while selection
-- [ ] add entry text paste via ctrl + v
+- [x] add entry text paste via ctrl + v
+- [ ] add entry text paste case while selection
 - [ ] add entry text copy via ctrl + c
 
 - [ ] move away from single header lib to classic lib design
@@ -245,6 +246,8 @@ Fixed.
 - [ ] add entry navigation via end key
 - [ ] add entry navigation via pgup key
 - [ ] add entry navigation via pgdn key
+
+- [ ] STR returning NULL pointers even though dest isn't NULL is silly
 
 - [ ] fix entry cursor going past right border
 So we need to scroll text then

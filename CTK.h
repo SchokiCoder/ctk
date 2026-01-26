@@ -1023,7 +1023,21 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	case SDLK_DELETE:
 		fw = CTK_GetFocusedWidget(inst);
 
-		STR_Cut(inst->text[fw], inst->cursor[fw], 1);
+		if (inst->cursor[fw] < inst->selection[fw]) {
+			STR_Cut(inst->text[fw],
+			        inst->cursor[fw],
+			        inst->selection[fw] -
+			        inst->cursor[fw]);
+		} else if (inst->cursor[fw] > inst->selection[fw]) {
+			STR_Cut(inst->text[fw],
+			        inst->selection[fw],
+			        inst->cursor[fw] -
+			        inst->selection[fw]);
+			inst->cursor[fw] -= inst->cursor[fw] -
+			                    inst->selection[fw];
+		} else {
+			STR_Cut(inst->text[fw], inst->cursor[fw], 1);
+		}
 
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);

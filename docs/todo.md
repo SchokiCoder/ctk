@@ -235,7 +235,7 @@ Fixed.
 - [x] add entry text input case while selection
 - [x] add entry backspace key case while selection
 - [x] add entry delete key support
-- [ ] add entry delete key case while selection
+- [x] add entry delete key case while selection
 - [ ] add entry text paste via ctrl + v
 - [ ] add entry text copy via ctrl + c
 

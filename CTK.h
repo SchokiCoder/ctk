@@ -990,8 +990,11 @@ void
 CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
+	char *buf;
+	size_t end;
 	CTK_WidgetId fw;
-	char *temp;
+	size_t start;
+	char temp;
 
 	switch (e.key) {
 	case SDLK_BACKSPACE:
@@ -1019,6 +1022,28 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
+		break;
+
+	case SDLK_C:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (CTK_WTYPE_ENTRY != inst->type[fw] ||
+		    !(SDL_KMOD_CTRL & e.mod) ||
+		    inst->cursor[fw] == inst->selection[fw])
+			break;
+
+		if (inst->cursor[fw] > inst->selection[fw]) {
+			start = inst->selection[fw];
+			end = inst->cursor[fw];
+		} else {
+			start = inst->cursor[fw];
+			end = inst->selection[fw];
+		}
+
+		temp = inst->text[fw][end];
+		inst->text[fw][end] = '\0';
+		SDL_SetClipboardText(&inst->text[fw][start]);
+		inst->text[fw][end] = temp;
 		break;
 
 	case SDLK_DELETE:
@@ -1176,7 +1201,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		    !SDL_HasClipboardText())
 			break;
 
-		temp = SDL_GetClipboardText();
+		buf = SDL_GetClipboardText();
 
 		if (inst->cursor[fw] < inst->selection[fw]) {
 			STR_Cut(inst->text[fw],
@@ -1195,12 +1220,12 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		STR_Insert(inst->text[fw],
 		           CTK_MAX_TEXTLEN,
 		           inst->cursor[fw],
-		           temp);
-		inst->cursor[fw] += strlen(temp);
+		           buf);
+		inst->cursor[fw] += strlen(buf);
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
 
-		SDL_free(temp);
+		SDL_free(buf);
 		break;
 	}
 }

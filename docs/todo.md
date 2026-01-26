@@ -23,6 +23,11 @@ if so, a theme change should change them.
 
 # 0.2.0
 
+- [ ] there are many possible but ignored error cases for calling SDL functions
+add verbose error printing, which gets triggered by env var or compile flag
+Log function that, depending on env var, returns early?
+Log function that, depending on compile flag, is empty or not?
+
 - [ ] add visual scrolling to entries
 
 - [ ] if sdl3-gfx is available yet, use it for radiobutton circles
@@ -240,7 +245,7 @@ Fixed.
 - [x] add entry delete key case while selection
 - [x] add entry text paste via ctrl + v
 - [x] add entry text paste case while selection
-- [ ] add entry text copy via ctrl + c
+- [x] add entry text copy via ctrl + c
 - [ ] add entry primary selection text setting
 
 - [ ] move away from single header lib to classic lib design

@@ -2,8 +2,6 @@
  * Copyright (C) 2025  Andy Frank Schoknecht
  */
 
-#define CTK_IMPL
-#define STR_IMPL
 #include "CTK.h"
 
 #include <stdio.h>

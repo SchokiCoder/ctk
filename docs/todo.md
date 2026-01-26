@@ -248,7 +248,10 @@ Fixed.
 - [x] add entry text copy via ctrl + c
 - [x] add entry primary selection text setting
 
-- [ ] move away from single header lib to classic lib design
+- [x] rework from single header to classic lib design
+- [ ] update copyright
+- [ ] we now need heap buffers for strings
+- [ ] we now need heap buffers for widgets in instance
 
 - [ ] add entry navigation via home key
 - [ ] add entry navigation via end key

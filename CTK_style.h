@@ -5,7 +5,7 @@
 #ifndef _CTK_STYLE_H
 #define _CTK_STYLE_H
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_pixels.h>
 
 typedef struct CTK_Style {
 	SDL_Color bg;
@@ -33,7 +33,7 @@ typedef struct CTK_Style {
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY 0xff
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_A    0xff
 
-const CTK_Style CTK_Theme_TclTk = {
+static const CTK_Style CTK_Theme_TclTk = {
 	.bg.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.bg.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.bg.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,

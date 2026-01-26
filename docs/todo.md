@@ -246,7 +246,7 @@ Fixed.
 - [x] add entry text paste via ctrl + v
 - [x] add entry text paste case while selection
 - [x] add entry text copy via ctrl + c
-- [ ] add entry primary selection text setting
+- [x] add entry primary selection text setting
 
 - [ ] move away from single header lib to classic lib design
 

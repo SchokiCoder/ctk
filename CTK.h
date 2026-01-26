@@ -1086,6 +1086,22 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 				inst->selection[fw] = inst->cursor[fw];
 			}
 
+			if (inst->cursor[fw] > inst->selection[fw]) {
+				start = inst->selection[fw];
+				end = inst->cursor[fw];
+				temp = inst->text[fw][end];
+				inst->text[fw][end] = '\0';
+				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
+				inst->text[fw][end] = temp;
+			} else if (inst->cursor[fw] < inst->selection[fw]) {
+				start = inst->cursor[fw];
+				end = inst->selection[fw];
+				temp = inst->text[fw][end];
+				inst->text[fw][end] = '\0';
+				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
+				inst->text[fw][end] = temp;
+			}
+
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
@@ -1118,6 +1134,22 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			inst->cursor[fw]++;
 			if (!(SDL_KMOD_SHIFT & e.mod)) {
 				inst->selection[fw] = inst->cursor[fw];
+			}
+
+			if (inst->cursor[fw] > inst->selection[fw]) {
+				start = inst->selection[fw];
+				end = inst->cursor[fw];
+				temp = inst->text[fw][end];
+				inst->text[fw][end] = '\0';
+				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
+				inst->text[fw][end] = temp;
+			} else if (inst->cursor[fw] < inst->selection[fw]) {
+				start = inst->cursor[fw];
+				end = inst->selection[fw];
+				temp = inst->text[fw][end];
+				inst->text[fw][end] = '\0';
+				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
+				inst->text[fw][end] = temp;
 			}
 
 			CTK_CreateWidgetTexture(inst, fw);

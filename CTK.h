@@ -999,8 +999,23 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		if (CTK_WTYPE_ENTRY != inst->type[fw])
 			return;
 
-		STR_Cut(inst->text[fw], inst->cursor[fw] - 1, 1);
-		inst->cursor[fw]--;
+		if (inst->cursor[fw] < inst->selection[fw]) {
+			STR_Cut(inst->text[fw],
+			        inst->cursor[fw],
+			        inst->selection[fw] -
+			        inst->cursor[fw]);
+		} else if (inst->cursor[fw] > inst->selection[fw]) {
+			STR_Cut(inst->text[fw],
+			        inst->selection[fw],
+			        inst->cursor[fw] -
+			        inst->selection[fw]);
+			inst->cursor[fw] -= inst->cursor[fw] -
+			                    inst->selection[fw];
+		} else {
+			STR_Cut(inst->text[fw], inst->cursor[fw] - 1, 1);
+			inst->cursor[fw]--;
+		}
+
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
 		break;

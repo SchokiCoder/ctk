@@ -1178,6 +1178,20 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		temp = SDL_GetClipboardText();
 
+		if (inst->cursor[fw] < inst->selection[fw]) {
+			STR_Cut(inst->text[fw],
+			        inst->cursor[fw],
+			        inst->selection[fw] -
+			        inst->cursor[fw]);
+		} else if (inst->cursor[fw] > inst->selection[fw]) {
+			STR_Cut(inst->text[fw],
+			        inst->selection[fw],
+			        inst->cursor[fw] -
+			        inst->selection[fw]);
+			inst->cursor[fw] -= inst->cursor[fw] -
+			                    inst->selection[fw];
+		}
+
 		STR_Insert(inst->text[fw],
 		           CTK_MAX_TEXTLEN,
 		           inst->cursor[fw],

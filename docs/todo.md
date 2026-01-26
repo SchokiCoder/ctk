@@ -23,6 +23,8 @@ if so, a theme change should change them.
 
 # 0.2.0
 
+- [ ] add visual scrolling to entries
+
 - [ ] if sdl3-gfx is available yet, use it for radiobutton circles
 if not, postpone this task
 
@@ -237,8 +239,9 @@ Fixed.
 - [x] add entry delete key support
 - [x] add entry delete key case while selection
 - [x] add entry text paste via ctrl + v
-- [ ] add entry text paste case while selection
+- [x] add entry text paste case while selection
 - [ ] add entry text copy via ctrl + c
+- [ ] add entry primary selection text setting
 
 - [ ] move away from single header lib to classic lib design
 
@@ -249,9 +252,12 @@ Fixed.
 
 - [ ] STR returning NULL pointers even though dest isn't NULL is silly
 
-- [ ] fix entry cursor going past right border
-So we need to scroll text then
-
+- [ ] add mouse based navigation to entry
 - [ ] add mouse based selection to entry
+- [ ] add entry primary selection text paste
+- [ ] add entry primary selection text paste while selection
+yes, this makes sense, you did not misread
+this is down here
+because it will depend on the mouse position and doesn't use the cursor at all
 
 - [ ] set version to 0.1.0

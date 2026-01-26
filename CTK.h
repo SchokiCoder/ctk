@@ -1020,6 +1020,15 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		CTK_CreateWidgetTexture(inst, fw);
 		break;
 
+	case SDLK_DELETE:
+		fw = CTK_GetFocusedWidget(inst);
+
+		STR_Cut(inst->text[fw], inst->cursor[fw], 1);
+
+		inst->selection[fw] = inst->cursor[fw];
+		CTK_CreateWidgetTexture(inst, fw);
+		break;
+
 	case SDLK_LEFT:
 		fw = CTK_GetFocusedWidget(inst);
 

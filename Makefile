@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-only
-# Copyright (C) 2025  Andy Frank Schoknecht
+# Copyright (C) 2025 - 2026  Andy Frank Schoknecht
 
 CC      :=cc
 CFLAGS  :=-std=c99 -pedantic -Wall -Wextra -fsanitize=address,undefined -g

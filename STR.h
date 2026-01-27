@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: LGPL-2.1-only
- * Copyright (C) 2026  Andy Frank Schoknecht
+ * Copyright (C) 2025 - 2026  Andy Frank Schoknecht
  */
 
 #ifndef _STR_H

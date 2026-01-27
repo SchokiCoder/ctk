@@ -249,14 +249,14 @@ Fixed.
 - [x] add entry primary selection text setting
 
 - [x] rework from single header to classic lib design
-- [ ] update copyright
+- [x] update copyright
 - [ ] we now need heap buffers for strings
 - [ ] we now need heap buffers for widgets in instance
 
-- [ ] add entry navigation via home key
-- [ ] add entry navigation via end key
-- [ ] add entry navigation via pgup key
-- [ ] add entry navigation via pgdn key
+- [ ] add entry navigation and selection via home key
+- [ ] add entry navigation and selection via end key
+- [ ] add entry navigation and selection via pgup key
+- [ ] add entry navigation and selection via pgdn key
 
 - [ ] STR returning NULL pointers even though dest isn't NULL is silly
 

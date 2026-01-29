@@ -23,9 +23,9 @@ STR_Cut(char *str,
 /* Inserts into a string, pushing old content back
  */
 char*
-STR_Insert(char *restrict dest,
-           const size_t dest_size,
-           const size_t pos,
-           const char *restrict src);
+STR_Insert(char         **restrict dest,
+           size_t        *dest_size,
+           const size_t   pos,
+           const char    *restrict src);
 
 #endif /* _STR_H */

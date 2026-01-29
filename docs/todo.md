@@ -251,7 +251,7 @@ Fixed.
 - [x] rework from single header to classic lib design
 - [x] update copyright
 - [x] change fixed size string arrays to heap arrays
-- [ ] make STR_Insert grow strings as needed
+- [x] add string growth to STR_Insert, if needed
 - [ ] we now need heap buffers for widgets in instance
 
 - [ ] add entry navigation and selection via home key

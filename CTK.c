@@ -900,8 +900,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			                    inst->selection[fw];
 		}
 
-		STR_Insert(inst->text[fw],
-		           inst->textsize[fw],
+		STR_Insert(&inst->text[fw],
+		           &inst->textsize[fw],
 		           inst->cursor[fw],
 		           buf);
 		inst->cursor[fw] += strlen(buf);
@@ -1580,8 +1580,8 @@ CTK_TickInstance(CTK_Instance *inst)
 
 			if (strlen(inst->text[fw]) + strlen(e.text.text) <
 			    inst->textsize[fw]) {
-				STR_Insert(inst->text[fw],
-					   inst->textsize[fw],
+				STR_Insert(&inst->text[fw],
+					   &inst->textsize[fw],
 					   inst->cursor[fw],
 					   e.text.text);
 				inst->cursor[fw]++;

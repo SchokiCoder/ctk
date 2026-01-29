@@ -2,6 +2,7 @@
  * Copyright (C) 2025 - 2026  Andy Frank Schoknecht
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "STR.h"
@@ -29,25 +30,35 @@ STR_Cut(char *str,
 }
 
 char*
-STR_Insert(char *restrict dest,
-           const size_t dest_size,
-           const size_t pos,
-           const char *restrict src)
+STR_Insert(char         **restrict dest,
+           size_t        *dest_size,
+           const size_t   pos,
+           const char    *restrict src)
 {
+	size_t i;
 	size_t new_len;
 	size_t old_len;
 	size_t src_len;
 
-	old_len = strlen(dest);
+	old_len = strlen(*dest);
 	src_len = strlen(src);
-
-	memmove(&dest[pos + src_len], &dest[pos], dest_size - pos - src_len - 1);
-	memmove(&dest[pos], src, src_len);
-
 	new_len = old_len + src_len;
-	if (new_len >= dest_size)
-		new_len = dest_size - 1;
-	dest[new_len] = '\0';
 
-	return dest;
+	if (new_len + 1 >= *dest_size) {
+		*dest_size = (((new_len + 1) /
+		               STR_TEXT_BLOCK_SIZE) +
+		              1) *
+		             STR_TEXT_BLOCK_SIZE;
+		*dest = realloc(*dest, *dest_size);
+	}
+
+	for (i = new_len - 1; i >= pos + src_len; i--)
+		(*dest)[i] = (*dest)[i - src_len];
+
+	for (i = pos; i < pos + src_len; i++)
+		(*dest)[i] = src[i - pos];
+
+	(*dest)[new_len + 1] = '\0';
+
+	return *dest;
 }

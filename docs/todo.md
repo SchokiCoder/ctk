@@ -250,7 +250,8 @@ Fixed.
 
 - [x] rework from single header to classic lib design
 - [x] update copyright
-- [ ] we now need heap buffers for strings
+- [x] change fixed size string arrays to heap arrays
+- [ ] make STR_Insert grow strings as needed
 - [ ] we now need heap buffers for widgets in instance
 
 - [ ] add entry navigation and selection via home key

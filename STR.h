@@ -9,6 +9,8 @@
 
 #include "CTK_version.h"
 
+#define STR_TEXT_BLOCK_SIZE 32
+
 #define STR_VERSION LIB_VERSION
 
 /* Cuts from a string, reducing its size, by setting a null byte

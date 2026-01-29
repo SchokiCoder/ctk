@@ -35,7 +35,6 @@
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
 #define CTK_DEFAULT_MAX_FRAMERATE    60
 
-#define CTK_MAX_TEXTLEN 64
 #define CTK_MAX_WIDGETS 64
 
 #define CTK_SCALE_SLIDER_SIZE_FRACTION 0.3
@@ -99,7 +98,8 @@ typedef struct CTK_Instance {
 	int                group[CTK_MAX_WIDGETS];
 	int                selection[CTK_MAX_WIDGETS];
 	int                scroll[CTK_MAX_WIDGETS];
-	char               text[CTK_MAX_TEXTLEN][CTK_MAX_WIDGETS];
+	char              *text[CTK_MAX_WIDGETS];
+	size_t             textsize[CTK_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
 	bool               toggle[CTK_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_MAX_WIDGETS];

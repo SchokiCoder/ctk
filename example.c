@@ -36,13 +36,14 @@ btnCounterTrigger(CTK_Instance               *inst,
 {
 	long i;
 	CTK_WidgetId lbl_counter = *((CTK_WidgetId*) (data));
-	char str[CTK_MAX_TEXTLEN];
+	const size_t str_size = 32;
+	char str[str_size];
 
 	(void) widget;
 
 	i = strtol(inst->text[lbl_counter], NULL, 10);
 	i++;
-	snprintf(str, CTK_MAX_TEXTLEN, "%li", i);
+	snprintf(str, str_size, "%li", i);
 	CTK_SetWidgetText(inst, lbl_counter, str);
 }
 

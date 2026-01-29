@@ -202,6 +202,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->group[ret] = -1;
 	inst->selection[ret] = inst->cursor[ret];
 	inst->scroll[ret] = 0;
+	inst->textsize[ret] = STR_TEXT_BLOCK_SIZE;
+	inst->text[ret] = calloc(inst->textsize[ret], sizeof(char));
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
 	inst->toggle[ret] = false;
 	inst->type[ret] = CTK_WTYPE_UNKNOWN;
@@ -221,8 +223,6 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->mouse_wheel_data[ret] = NULL;
 	inst->trigger[ret] = NULL;
 	inst->trigger_data[ret] = NULL;
-
-	memset(inst->text[ret], '\0', CTK_MAX_TEXTLEN);
 
 	return ret;
 }
@@ -527,6 +527,7 @@ CTK_DestroyInstance(CTK_Instance *inst)
 	int i;
 
 	for (i = 0; i < inst->count; i++) {
+		free(inst->text[i]);
 		SDL_DestroyTexture(inst->texture[i]);
 	}
 	SDL_DestroyWindow(inst->win);
@@ -900,7 +901,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 
 		STR_Insert(inst->text[fw],
-		           CTK_MAX_TEXTLEN,
+		           inst->textsize[fw],
 		           inst->cursor[fw],
 		           buf);
 		inst->cursor[fw] += strlen(buf);
@@ -1427,7 +1428,7 @@ CTK_SetWidgetText(CTK_Instance       *inst,
 {
 	int w, h;
 
-	strncpy(inst->text[widget], text, CTK_MAX_TEXTLEN - 1);
+	strncpy(inst->text[widget], text, inst->textsize[widget] - 1);
 	TTF_GetStringSize(CTK_font,
 	                  inst->text[widget],
 	                  strlen(inst->text[widget]),
@@ -1459,7 +1460,7 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
 {
 	int w, h;
 
-	strncpy(inst->text[widget], text, CTK_MAX_TEXTLEN - 1);
+	strncpy(inst->text[widget], text, inst->textsize[widget] - 1);
 	TTF_GetStringSize(CTK_font,
 	                  inst->text[widget],
 	                  strlen(inst->text[widget]),
@@ -1578,9 +1579,9 @@ CTK_TickInstance(CTK_Instance *inst)
 			}
 
 			if (strlen(inst->text[fw]) + strlen(e.text.text) <
-			    CTK_MAX_TEXTLEN) {
+			    inst->textsize[fw]) {
 				STR_Insert(inst->text[fw],
-					   CTK_MAX_TEXTLEN,
+					   inst->textsize[fw],
 					   inst->cursor[fw],
 					   e.text.text);
 				inst->cursor[fw]++;

@@ -23,6 +23,8 @@ if so, a theme change should change them.
 
 # 0.2.0
 
+- [ ] is it fine to leak memory when exiting the application ?
+
 - [ ] there are many possible but ignored error cases for calling SDL functions
 add verbose error printing, which gets triggered by env var or compile flag
 Log function that, depending on env var, returns early?
@@ -252,7 +254,7 @@ Fixed.
 - [x] update copyright
 - [x] change fixed size string arrays to heap arrays
 - [x] add string growth to STR_Insert, if needed
-- [ ] we now need heap buffers for widgets in instance
+- [x] add instance growth to CTK_AddWidget, if needed
 
 - [ ] add entry navigation and selection via home key
 - [ ] add entry navigation and selection via end key

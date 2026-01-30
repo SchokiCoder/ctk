@@ -195,6 +195,68 @@ CTK_AddWidget(CTK_Instance *inst)
 	CTK_WidgetId ret = inst->count;
 
 	inst->count++;
+	if (inst->count > inst->size) {
+		inst->size += CTK_WIDGET_BLOCK_SIZE;
+
+		inst->enabled_w = realloc(inst->enabled_w,
+		                          sizeof(CTK_WidgetId*) * inst->size);
+		inst->focusable_w = realloc(inst->focusable_w,
+		                            sizeof(CTK_WidgetId*) * inst->size);
+		inst->visible_w = realloc(inst->visible_w,
+		                          sizeof(CTK_WidgetId*) * inst->size);
+
+		inst->bg = realloc(inst->bg,
+		                   sizeof(SDL_Color*) * inst->size);
+		inst->border = realloc(inst->border,
+		                       sizeof(bool) * inst->size);
+		inst->cursor = realloc(inst->cursor,
+		                       sizeof(int) * inst->size);
+		inst->group = realloc(inst->group,
+		                      sizeof(int) * inst->size);
+		inst->selection = realloc(inst->selection,
+		                          sizeof(int) * inst->size);
+		inst->scroll = realloc(inst->scroll,
+		                       sizeof(int) * inst->size);
+		inst->text = realloc(inst->text,
+		                     sizeof(char*) * inst->size);
+		inst->textsize = realloc(inst->textsize,
+		                         sizeof(size_t) * inst->size);
+		inst->text_alignment = realloc(inst->text_alignment,
+		                               sizeof(CTK_TextAlignment) * inst->size);
+		inst->toggle = realloc(inst->toggle,
+		                       sizeof(bool) * inst->size);
+		inst->type = realloc(inst->type,
+		                     sizeof(CTK_WidgetType) * inst->size);
+		inst->value = realloc(inst->value,
+		                      sizeof(unsigned int) * inst->size);
+		inst->value_max = realloc(inst->value_max,
+		                          sizeof(unsigned int) * inst->size);
+		inst->rect = realloc(inst->rect,
+		                     sizeof(SDL_FRect) * inst->size);
+		inst->texture = realloc(inst->texture,
+		                        sizeof(SDL_Texture) * inst->size);
+
+		inst->edit = realloc(inst->edit,
+		                     sizeof(void*) * inst->size);
+		inst->edit_data = realloc(inst->edit_data,
+		                          sizeof(void*) * inst->size);
+		inst->mouse_press = realloc(inst->mouse_press,
+		                            sizeof(void*) * inst->size);
+		inst->mouse_press_data = realloc(inst->mouse_press_data,
+		                                 sizeof(void*) * inst->size);
+		inst->mouse_release = realloc(inst->mouse_release,
+		                              sizeof(void*) * inst->size);
+		inst->mouse_release_data = realloc(inst->mouse_release_data,
+		                                   sizeof(void*) * inst->size);
+		inst->mouse_wheel = realloc(inst->mouse_wheel,
+		                            sizeof(void*) * inst->size);
+		inst->mouse_wheel_data = realloc(inst->mouse_wheel_data,
+		                                 sizeof(void*) * inst->size);
+		inst->trigger = realloc(inst->trigger,
+		                        sizeof(void*) * inst->size);
+		inst->trigger_data = realloc(inst->trigger_data,
+		                             sizeof(void*) * inst->size);
+	}
 
 	inst->bg[ret] = &inst->style.bg_widget;
 	inst->border[ret] = false;
@@ -274,11 +336,43 @@ CTK_CreateInstance(const char            *title,
 	inst->quit = CTK_InstanceDefaultQuit;
 	inst->quit_data = NULL;
 
+	inst->size = CTK_WIDGET_BLOCK_SIZE;
+	inst->count = 0;
+
 	inst->enabled_ws = 0;
 	inst->focusable_ws = 0;
 	inst->visible_ws = 0;
 
-	inst->count = 0;
+	inst->enabled_w = malloc(sizeof(CTK_WidgetId*) * inst->size);
+	inst->focusable_w = malloc(sizeof(CTK_WidgetId*) * inst->size);
+	inst->visible_w = malloc(sizeof(CTK_WidgetId*) * inst->size);
+
+	inst->bg = malloc(sizeof(SDL_Color*) * inst->size);
+	inst->border = malloc(sizeof(bool) * inst->size);
+	inst->cursor = malloc(sizeof(int) * inst->size);
+	inst->group = malloc(sizeof(int) * inst->size);
+	inst->selection = malloc(sizeof(int) * inst->size);
+	inst->scroll = malloc(sizeof(int) * inst->size);
+	inst->text = malloc(sizeof(char*) * inst->size);
+	inst->textsize = malloc(sizeof(size_t) * inst->size);
+	inst->text_alignment = malloc(sizeof(CTK_TextAlignment) * inst->size);
+	inst->toggle = malloc(sizeof(bool) * inst->size);
+	inst->type = malloc(sizeof(CTK_WidgetType) * inst->size);
+	inst->value = malloc(sizeof(unsigned int) * inst->size);
+	inst->value_max = malloc(sizeof(unsigned int) * inst->size);
+	inst->rect = malloc(sizeof(SDL_FRect) * inst->size);
+	inst->texture = malloc(sizeof(SDL_Texture*) * inst->size);
+
+	inst->edit = malloc(sizeof(void*) * inst->size);
+	inst->edit_data = malloc(sizeof(void*) * inst->size);
+	inst->mouse_press = malloc(sizeof(void*) * inst->size);
+	inst->mouse_press_data = malloc(sizeof(void*) * inst->size);
+	inst->mouse_release = malloc(sizeof(void*) * inst->size);
+	inst->mouse_release_data = malloc(sizeof(void*) * inst->size);
+	inst->mouse_wheel = malloc(sizeof(void*) * inst->size);
+	inst->mouse_wheel_data = malloc(sizeof(void*) * inst->size);
+	inst->trigger = malloc(sizeof(void*) * inst->size);
+	inst->trigger_data = malloc(sizeof(void*) * inst->size);
 
 	if (0 == flags)
 		f = CTK_DEFAULT_WINDOW_FLAGS;
@@ -524,12 +618,44 @@ cleanup:
 void
 CTK_DestroyInstance(CTK_Instance *inst)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < inst->count; i++) {
 		free(inst->text[i]);
 		SDL_DestroyTexture(inst->texture[i]);
 	}
+
+	free(inst->enabled_w);
+	free(inst->focusable_w);
+	free(inst->visible_w);
+
+	free(inst->bg);
+	free(inst->border);
+	free(inst->cursor);
+	free(inst->group);
+	free(inst->selection);
+	free(inst->scroll);
+	free(inst->text);
+	free(inst->textsize);
+	free(inst->text_alignment);
+	free(inst->toggle);
+	free(inst->type);
+	free(inst->value);
+	free(inst->value_max);
+	free(inst->rect);
+	free(inst->texture);
+
+	free(inst->edit);
+	free(inst->edit_data);
+	free(inst->mouse_press);
+	free(inst->mouse_press_data);
+	free(inst->mouse_release);
+	free(inst->mouse_release_data);
+	free(inst->mouse_wheel);
+	free(inst->mouse_wheel_data);
+	free(inst->trigger);
+	free(inst->trigger_data);
+
 	SDL_DestroyWindow(inst->win);
 	free(inst);
 }
@@ -537,7 +663,7 @@ CTK_DestroyInstance(CTK_Instance *inst)
 void
 CTK_DrawInstance(CTK_Instance *inst)
 {
-	int i;
+	size_t i;
 	CTK_WidgetId fw;
 	SDL_Renderer *r;
 	int          w;
@@ -861,8 +987,9 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 	case SDLK_TAB:
 		if (SDL_KMOD_SHIFT & e.mod) {
-			inst->focused_w--;
-			if (inst->focused_w < 0) {
+			if (inst->focused_w > 0) {
+				inst->focused_w--;
+			} else {
 				inst->focused_w = inst->focusable_ws - 1;
 			}
 		} else {
@@ -917,7 +1044,7 @@ void
 CTK_HandleMouseButtonDown(CTK_Instance               *inst,
                           const SDL_MouseButtonEvent  e)
 {
-	int i;
+	size_t i;
 	SDL_FPoint p;
 	CTK_WidgetId w;
 
@@ -949,7 +1076,7 @@ void
 CTK_HandleMouseButtonUp(CTK_Instance               *inst,
                         const SDL_MouseButtonEvent  e)
 {
-	int i;
+	size_t i;
 	SDL_FPoint p;
 	CTK_WidgetId w;
 
@@ -1007,7 +1134,7 @@ void
 CTK_HandleMouseWheel(CTK_Instance              *inst,
                      const SDL_MouseWheelEvent  e)
 {
-	int i;
+	size_t i;
 	SDL_FPoint p;
 	CTK_WidgetId w;
 
@@ -1062,7 +1189,7 @@ CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
                        int                *cacheId)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		if (widget == inst->enabled_w[i]) {
@@ -1079,7 +1206,7 @@ CTK_GetWidgetFocusableId(const CTK_Instance *inst,
                          const CTK_WidgetId  widget,
                          int                *cacheId)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < inst->focusable_ws; i++) {
 		if (widget == inst->focusable_w[i]) {
@@ -1096,7 +1223,7 @@ CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
                        int                *cacheId)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < inst->visible_ws; i++) {
 		if (widget == inst->visible_w[i]) {
@@ -1340,7 +1467,7 @@ void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
                      const CTK_WidgetId  widget)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < inst->focusable_ws; i++) {
 		if (widget == inst->focusable_w[i] &&
@@ -1363,7 +1490,7 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
                      const CTK_WidgetId  widget,
                      const bool          enabled)
 {
-	int i;
+	size_t i;
 	bool is_enabled;
 	int enabledId;
 
@@ -1395,7 +1522,7 @@ CTK_SetWidgetFocusable(CTK_Instance       *inst,
                        const CTK_WidgetId  widget,
                        const bool          focusable)
 {
-	int i;
+	size_t i;
 	bool is_focusable;
 	int focusableId;
 
@@ -1501,7 +1628,7 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
                      const CTK_WidgetId  widget,
                      const bool          visible)
 {
-	int i;
+	size_t i;
 	bool is_visible;
 	int visibleId;
 
@@ -1641,7 +1768,7 @@ void
 CTK_ToggleRadiobutton(CTK_Instance *inst,
                       CTK_WidgetId  widget)
 {
-	int i;
+	size_t i;
 
 	if (inst->toggle[widget])
 		return;

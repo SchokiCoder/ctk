@@ -35,7 +35,7 @@
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
 #define CTK_DEFAULT_MAX_FRAMERATE    60
 
-#define CTK_MAX_WIDGETS 64
+#define CTK_WIDGET_BLOCK_SIZE 16
 
 #define CTK_SCALE_SLIDER_SIZE_FRACTION 0.3
 
@@ -61,7 +61,7 @@ typedef enum CTK_TextAlignment {
 typedef struct CTK_Instance {
 	bool        active;
 	bool        drag;
-	int         focused_w;
+	size_t      focused_w;
 	Uint64      max_framerate;
 	bool        redraw;
 	CTK_Style   style;
@@ -83,55 +83,56 @@ typedef struct CTK_Instance {
 	void *quit_data;
 
 	/* widget cache */
-	int                enabled_ws;
-	CTK_WidgetId       enabled_w[CTK_MAX_WIDGETS];
-	int                focusable_ws;
-	CTK_WidgetId       focusable_w[CTK_MAX_WIDGETS];
-	int                visible_ws;
-	CTK_WidgetId       visible_w[CTK_MAX_WIDGETS];
+	size_t              enabled_ws;
+	CTK_WidgetId       *enabled_w;
+	size_t              focusable_ws;
+	CTK_WidgetId       *focusable_w;
+	size_t              visible_ws;
+	CTK_WidgetId       *visible_w;
 
 	/* widget data */
-	int                count;
-	SDL_Color         *bg[CTK_MAX_WIDGETS];
-	bool               border[CTK_MAX_WIDGETS];
-	int                cursor[CTK_MAX_WIDGETS];
-	int                group[CTK_MAX_WIDGETS];
-	int                selection[CTK_MAX_WIDGETS];
-	int                scroll[CTK_MAX_WIDGETS];
-	char              *text[CTK_MAX_WIDGETS];
-	size_t             textsize[CTK_MAX_WIDGETS];
-	CTK_TextAlignment  text_alignment[CTK_MAX_WIDGETS];
-	bool               toggle[CTK_MAX_WIDGETS];
-	CTK_WidgetType     type[CTK_MAX_WIDGETS];
-	unsigned int       value[CTK_MAX_WIDGETS];
-	unsigned int       value_max[CTK_MAX_WIDGETS];
-	SDL_FRect          rect[CTK_MAX_WIDGETS];
-	SDL_Texture       *texture[CTK_MAX_WIDGETS];
+	size_t              size;
+	size_t              count;
+	SDL_Color         **bg;
+	bool               *border;
+	int                *cursor;
+	int                *group;
+	int                *selection;
+	int                *scroll;
+	char              **text;
+	size_t             *textsize;
+	CTK_TextAlignment  *text_alignment;
+	bool               *toggle;
+	CTK_WidgetType     *type;
+	unsigned int       *value;
+	unsigned int       *value_max;
+	SDL_FRect          *rect;
+	SDL_Texture       **texture;
 
 	/* widget events */
-	void (*edit[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                              const CTK_WidgetId,
-	                              void*);
-	void *edit_data[CTK_MAX_WIDGETS];
-	void (*mouse_press[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                     const SDL_MouseButtonEvent,
-	                                     const CTK_WidgetId,
-	                                     void*);
-	void *mouse_press_data[CTK_MAX_WIDGETS];
-	void (*mouse_release[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                       const SDL_MouseButtonEvent,
-	                                       const CTK_WidgetId,
-	                                       void*);
-	void *mouse_release_data[CTK_MAX_WIDGETS];
-	void (*mouse_wheel[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                     const SDL_MouseWheelEvent,
-	                                     const CTK_WidgetId,
-	                                     void*);
-	void *mouse_wheel_data[CTK_MAX_WIDGETS];
-	void (*trigger[CTK_MAX_WIDGETS])(struct CTK_Instance*,
-	                                 const CTK_WidgetId,
-	                                 void*);
-	void *trigger_data[CTK_MAX_WIDGETS];
+	void (**edit)(struct CTK_Instance*,
+	              const CTK_WidgetId,
+	              void*);
+	void **edit_data;
+	void (**mouse_press)(struct CTK_Instance*,
+	                     const SDL_MouseButtonEvent,
+	                     const CTK_WidgetId,
+	                     void*);
+	void **mouse_press_data;
+	void (**mouse_release)(struct CTK_Instance*,
+	                       const SDL_MouseButtonEvent,
+	                       const CTK_WidgetId,
+	                       void*);
+	void **mouse_release_data;
+	void (**mouse_wheel)(struct CTK_Instance*,
+	                     const SDL_MouseWheelEvent,
+	                     const CTK_WidgetId,
+	                     void*);
+	void **mouse_wheel_data;
+	void (**trigger)(struct CTK_Instance*,
+	                 const CTK_WidgetId,
+	                 void*);
+	void **trigger_data;
 } CTK_Instance;
 
 CTK_WidgetId

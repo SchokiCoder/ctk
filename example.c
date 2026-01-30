@@ -52,7 +52,7 @@ ckbEnabledTrigger(CTK_Instance               *inst,
                   const CTK_WidgetId          widget,
                   void                       *data)
 {
-	int i;
+	size_t i;
 
 	(void) data;
 
@@ -72,7 +72,7 @@ ckbFocusableTrigger(CTK_Instance               *inst,
                     const CTK_WidgetId          widget,
                     void                       *data)
 {
-	int i;
+	size_t i;
 
 	(void) data;
 
@@ -91,7 +91,7 @@ ckbVisibleTrigger(CTK_Instance               *inst,
                   const CTK_WidgetId          widget,
                   void                       *data)
 {
-	int i;
+	size_t i;
 
 	(void) data;
 

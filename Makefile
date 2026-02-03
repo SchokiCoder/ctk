@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: LGPL-2.1-only
+# SPDX-License-Identifier: MPL-2.0
 # Copyright (C) 2025 - 2026  Andy Frank Schoknecht
 
 CC      :=cc

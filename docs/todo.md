@@ -263,8 +263,9 @@ This is necessary for the next step.
 We can't and don't want to compete with big bloated toolkits like GTK and Qt.
 Array growth adds questionable value, while adding definite brittleness.
 Let apps set their own limits, while having beefy enough defaults.
-- [ ] change license to BSD-3-Clause
-This is necessary, because the LGPL very likely adds some legal gray area-ness,
+- [x] change license to MPL-2.0
+This is necessary, since it's all headers now,
+because the LGPL very likely brings library users into some legal gray areas,
 just for using the library as intended.
 
 - [ ] fix string insert func: copy paste causes negative size param; when too much?

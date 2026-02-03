@@ -259,13 +259,15 @@ Fixed.
 
 - [x] change back to header only library
 This is necessary for the next step.
-- [ ] change back to `#define` based config DONT FORGET ABOUT STR CHANGE!  
+- [x] change back to `#define` based config and fixed size arrays
 We can't and don't want to compete with big bloated toolkits like GTK and Qt.
 Array growth adds questionable value, while adding definite brittleness.
 Let apps set their own limits, while having beefy enough defaults.
 - [ ] change license to BSD-3-Clause
 This is necessary, because the LGPL very likely adds some legal gray area-ness,
 just for using the library as intended.
+
+- [ ] fix string insert func: copy paste causes negative size param; when too much?
 
 - [ ] add entry navigation and selection via home key
 - [ ] add entry navigation and selection via end key

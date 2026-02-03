@@ -38,11 +38,17 @@
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
 #define CTK_DEFAULT_MAX_FRAMERATE    60
 
-#define CTK_WIDGET_BLOCK_SIZE 16
-
 #define CTK_SCALE_SLIDER_SIZE_FRACTION 0.3
 
 #define CTK_VERSION "0.0.0"
+
+#ifndef CTK_INSTANCE_MAX_WIDGETS
+#define CTK_INSTANCE_MAX_WIDGETS 64
+#endif
+
+#ifndef CTK_TEXT_SIZE
+#define CTK_TEXT_SIZE 128
+#endif
 
 typedef int CTK_WidgetId;
 
@@ -88,56 +94,54 @@ typedef struct CTK_Instance {
 	void *quit_data;
 
 	/* widget cache */
-	size_t              enabled_ws;
-	CTK_WidgetId       *enabled_w;
-	size_t              focusable_ws;
-	CTK_WidgetId       *focusable_w;
-	size_t              visible_ws;
-	CTK_WidgetId       *visible_w;
+	size_t             enabled_ws;
+	CTK_WidgetId       enabled_w[CTK_INSTANCE_MAX_WIDGETS];
+	size_t             focusable_ws;
+	CTK_WidgetId       focusable_w[CTK_INSTANCE_MAX_WIDGETS];
+	size_t             visible_ws;
+	CTK_WidgetId       visible_w[CTK_INSTANCE_MAX_WIDGETS];
 
 	/* widget data */
-	size_t              size;
-	size_t              count;
-	SDL_Color         **bg;
-	bool               *border;
-	int                *cursor;
-	int                *group;
-	int                *selection;
-	int                *scroll;
-	char              **text;
-	size_t             *textsize;
-	CTK_TextAlignment  *text_alignment;
-	bool               *toggle;
-	CTK_WidgetType     *type;
-	unsigned int       *value;
-	unsigned int       *value_max;
-	SDL_FRect          *rect;
-	SDL_Texture       **texture;
+	size_t             count;
+	SDL_Color         *bg[CTK_INSTANCE_MAX_WIDGETS];
+	bool               border[CTK_INSTANCE_MAX_WIDGETS];
+	int                cursor[CTK_INSTANCE_MAX_WIDGETS];
+	int                group[CTK_INSTANCE_MAX_WIDGETS];
+	int                selection[CTK_INSTANCE_MAX_WIDGETS];
+	int                scroll[CTK_INSTANCE_MAX_WIDGETS];
+	char               text[CTK_TEXT_SIZE][CTK_INSTANCE_MAX_WIDGETS];
+	CTK_TextAlignment  text_alignment[CTK_INSTANCE_MAX_WIDGETS];
+	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
+	CTK_WidgetType     type[CTK_INSTANCE_MAX_WIDGETS];
+	unsigned int       value[CTK_INSTANCE_MAX_WIDGETS];
+	unsigned int       value_max[CTK_INSTANCE_MAX_WIDGETS];
+	SDL_FRect          rect[CTK_INSTANCE_MAX_WIDGETS];
+	SDL_Texture       *texture[CTK_INSTANCE_MAX_WIDGETS];
 
 	/* widget events */
-	void (**edit)(struct CTK_Instance*,
-	              const CTK_WidgetId,
-	              void*);
-	void **edit_data;
-	void (**mouse_press)(struct CTK_Instance*,
-	                     const SDL_MouseButtonEvent,
-	                     const CTK_WidgetId,
-	                     void*);
-	void **mouse_press_data;
-	void (**mouse_release)(struct CTK_Instance*,
-	                       const SDL_MouseButtonEvent,
-	                       const CTK_WidgetId,
-	                       void*);
-	void **mouse_release_data;
-	void (**mouse_wheel)(struct CTK_Instance*,
-	                     const SDL_MouseWheelEvent,
-	                     const CTK_WidgetId,
-	                     void*);
-	void **mouse_wheel_data;
-	void (**trigger)(struct CTK_Instance*,
-	                 const CTK_WidgetId,
-	                 void*);
-	void **trigger_data;
+	void (*edit[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                       const CTK_WidgetId,
+	                                       void*);
+	void *edit_data[CTK_INSTANCE_MAX_WIDGETS];
+	void (*mouse_press[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                              const SDL_MouseButtonEvent,
+	                                              const CTK_WidgetId,
+	                                              void*);
+	void *mouse_press_data[CTK_INSTANCE_MAX_WIDGETS];
+	void (*mouse_release[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                                const SDL_MouseButtonEvent,
+	                                                const CTK_WidgetId,
+	                                                void*);
+	void *mouse_release_data[CTK_INSTANCE_MAX_WIDGETS];
+	void (*mouse_wheel[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                              const SDL_MouseWheelEvent,
+	                                              const CTK_WidgetId,
+	                                              void*);
+	void *mouse_wheel_data[CTK_INSTANCE_MAX_WIDGETS];
+	void (*trigger[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                          const CTK_WidgetId,
+	                                          void*);
+	void *trigger_data[CTK_INSTANCE_MAX_WIDGETS];
 } CTK_Instance;
 
 #if defined(__linux__)
@@ -539,67 +543,9 @@ CTK_AddWidget(CTK_Instance *inst)
 	CTK_WidgetId ret = inst->count;
 
 	inst->count++;
-	if (inst->count > inst->size) {
-		inst->size += CTK_WIDGET_BLOCK_SIZE;
-
-		inst->enabled_w = realloc(inst->enabled_w,
-		                          sizeof(CTK_WidgetId*) * inst->size);
-		inst->focusable_w = realloc(inst->focusable_w,
-		                            sizeof(CTK_WidgetId*) * inst->size);
-		inst->visible_w = realloc(inst->visible_w,
-		                          sizeof(CTK_WidgetId*) * inst->size);
-
-		inst->bg = realloc(inst->bg,
-		                   sizeof(SDL_Color*) * inst->size);
-		inst->border = realloc(inst->border,
-		                       sizeof(bool) * inst->size);
-		inst->cursor = realloc(inst->cursor,
-		                       sizeof(int) * inst->size);
-		inst->group = realloc(inst->group,
-		                      sizeof(int) * inst->size);
-		inst->selection = realloc(inst->selection,
-		                          sizeof(int) * inst->size);
-		inst->scroll = realloc(inst->scroll,
-		                       sizeof(int) * inst->size);
-		inst->text = realloc(inst->text,
-		                     sizeof(char*) * inst->size);
-		inst->textsize = realloc(inst->textsize,
-		                         sizeof(size_t) * inst->size);
-		inst->text_alignment = realloc(inst->text_alignment,
-		                               sizeof(CTK_TextAlignment) * inst->size);
-		inst->toggle = realloc(inst->toggle,
-		                       sizeof(bool) * inst->size);
-		inst->type = realloc(inst->type,
-		                     sizeof(CTK_WidgetType) * inst->size);
-		inst->value = realloc(inst->value,
-		                      sizeof(unsigned int) * inst->size);
-		inst->value_max = realloc(inst->value_max,
-		                          sizeof(unsigned int) * inst->size);
-		inst->rect = realloc(inst->rect,
-		                     sizeof(SDL_FRect) * inst->size);
-		inst->texture = realloc(inst->texture,
-		                        sizeof(SDL_Texture) * inst->size);
-
-		inst->edit = realloc(inst->edit,
-		                     sizeof(void*) * inst->size);
-		inst->edit_data = realloc(inst->edit_data,
-		                          sizeof(void*) * inst->size);
-		inst->mouse_press = realloc(inst->mouse_press,
-		                            sizeof(void*) * inst->size);
-		inst->mouse_press_data = realloc(inst->mouse_press_data,
-		                                 sizeof(void*) * inst->size);
-		inst->mouse_release = realloc(inst->mouse_release,
-		                              sizeof(void*) * inst->size);
-		inst->mouse_release_data = realloc(inst->mouse_release_data,
-		                                   sizeof(void*) * inst->size);
-		inst->mouse_wheel = realloc(inst->mouse_wheel,
-		                            sizeof(void*) * inst->size);
-		inst->mouse_wheel_data = realloc(inst->mouse_wheel_data,
-		                                 sizeof(void*) * inst->size);
-		inst->trigger = realloc(inst->trigger,
-		                        sizeof(void*) * inst->size);
-		inst->trigger_data = realloc(inst->trigger_data,
-		                             sizeof(void*) * inst->size);
+	if (inst->count > CTK_INSTANCE_MAX_WIDGETS) {
+		SDL_SetError("Instance can not hold more widgets");
+		return -1;
 	}
 
 	inst->bg[ret] = &inst->style.bg_widget;
@@ -608,8 +554,6 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->group[ret] = -1;
 	inst->selection[ret] = inst->cursor[ret];
 	inst->scroll[ret] = 0;
-	inst->textsize[ret] = CTK_STRING_BLOCK_SIZE;
-	inst->text[ret] = calloc(inst->textsize[ret], sizeof(char));
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
 	inst->toggle[ret] = false;
 	inst->type[ret] = CTK_WTYPE_UNKNOWN;
@@ -629,6 +573,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->mouse_wheel_data[ret] = NULL;
 	inst->trigger[ret] = NULL;
 	inst->trigger_data[ret] = NULL;
+
+	memset(inst->text[ret], '\0', CTK_TEXT_SIZE);
 
 	return ret;
 }
@@ -680,43 +626,11 @@ CTK_CreateInstance(const char            *title,
 	inst->quit = CTK_InstanceDefaultQuit;
 	inst->quit_data = NULL;
 
-	inst->size = CTK_WIDGET_BLOCK_SIZE;
 	inst->count = 0;
 
 	inst->enabled_ws = 0;
 	inst->focusable_ws = 0;
 	inst->visible_ws = 0;
-
-	inst->enabled_w = malloc(sizeof(CTK_WidgetId*) * inst->size);
-	inst->focusable_w = malloc(sizeof(CTK_WidgetId*) * inst->size);
-	inst->visible_w = malloc(sizeof(CTK_WidgetId*) * inst->size);
-
-	inst->bg = malloc(sizeof(SDL_Color*) * inst->size);
-	inst->border = malloc(sizeof(bool) * inst->size);
-	inst->cursor = malloc(sizeof(int) * inst->size);
-	inst->group = malloc(sizeof(int) * inst->size);
-	inst->selection = malloc(sizeof(int) * inst->size);
-	inst->scroll = malloc(sizeof(int) * inst->size);
-	inst->text = malloc(sizeof(char*) * inst->size);
-	inst->textsize = malloc(sizeof(size_t) * inst->size);
-	inst->text_alignment = malloc(sizeof(CTK_TextAlignment) * inst->size);
-	inst->toggle = malloc(sizeof(bool) * inst->size);
-	inst->type = malloc(sizeof(CTK_WidgetType) * inst->size);
-	inst->value = malloc(sizeof(unsigned int) * inst->size);
-	inst->value_max = malloc(sizeof(unsigned int) * inst->size);
-	inst->rect = malloc(sizeof(SDL_FRect) * inst->size);
-	inst->texture = malloc(sizeof(SDL_Texture*) * inst->size);
-
-	inst->edit = malloc(sizeof(void*) * inst->size);
-	inst->edit_data = malloc(sizeof(void*) * inst->size);
-	inst->mouse_press = malloc(sizeof(void*) * inst->size);
-	inst->mouse_press_data = malloc(sizeof(void*) * inst->size);
-	inst->mouse_release = malloc(sizeof(void*) * inst->size);
-	inst->mouse_release_data = malloc(sizeof(void*) * inst->size);
-	inst->mouse_wheel = malloc(sizeof(void*) * inst->size);
-	inst->mouse_wheel_data = malloc(sizeof(void*) * inst->size);
-	inst->trigger = malloc(sizeof(void*) * inst->size);
-	inst->trigger_data = malloc(sizeof(void*) * inst->size);
 
 	if (0 == flags)
 		f = CTK_DEFAULT_WINDOW_FLAGS;
@@ -968,37 +882,6 @@ CTK_DestroyInstance(CTK_Instance *inst)
 		free(inst->text[i]);
 		SDL_DestroyTexture(inst->texture[i]);
 	}
-
-	free(inst->enabled_w);
-	free(inst->focusable_w);
-	free(inst->visible_w);
-
-	free(inst->bg);
-	free(inst->border);
-	free(inst->cursor);
-	free(inst->group);
-	free(inst->selection);
-	free(inst->scroll);
-	free(inst->text);
-	free(inst->textsize);
-	free(inst->text_alignment);
-	free(inst->toggle);
-	free(inst->type);
-	free(inst->value);
-	free(inst->value_max);
-	free(inst->rect);
-	free(inst->texture);
-
-	free(inst->edit);
-	free(inst->edit_data);
-	free(inst->mouse_press);
-	free(inst->mouse_press_data);
-	free(inst->mouse_release);
-	free(inst->mouse_release_data);
-	free(inst->mouse_wheel);
-	free(inst->mouse_wheel_data);
-	free(inst->trigger);
-	free(inst->trigger_data);
 
 	SDL_DestroyWindow(inst->win);
 	free(inst);
@@ -1371,8 +1254,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			                    inst->selection[fw];
 		}
 
-		CTK_StrInsert(&inst->text[fw],
-		              &inst->textsize[fw],
+		CTK_StrInsert(inst->text[fw],
+		              CTK_TEXT_SIZE,
 		              inst->cursor[fw],
 		              buf);
 		inst->cursor[fw] += strlen(buf);
@@ -1899,7 +1782,7 @@ CTK_SetWidgetText(CTK_Instance       *inst,
 {
 	int w, h;
 
-	strncpy(inst->text[widget], text, inst->textsize[widget] - 1);
+	strncpy(inst->text[widget], text, CTK_TEXT_SIZE - 1);
 	TTF_GetStringSize(CTK_font,
 	                  inst->text[widget],
 	                  strlen(inst->text[widget]),
@@ -1931,7 +1814,7 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
 {
 	int w, h;
 
-	strncpy(inst->text[widget], text, inst->textsize[widget] - 1);
+	strncpy(inst->text[widget], text, CTK_TEXT_SIZE - 1);
 	TTF_GetStringSize(CTK_font,
 	                  inst->text[widget],
 	                  strlen(inst->text[widget]),
@@ -2050,9 +1933,9 @@ CTK_TickInstance(CTK_Instance *inst)
 			}
 
 			if (strlen(inst->text[fw]) + strlen(e.text.text) <
-			    inst->textsize[fw]) {
-				CTK_StrInsert(&inst->text[fw],
-					      &inst->textsize[fw],
+			    CTK_TEXT_SIZE) {
+				CTK_StrInsert(inst->text[fw],
+					      CTK_TEXT_SIZE,
 					      inst->cursor[fw],
 					      e.text.text);
 				inst->cursor[fw]++;

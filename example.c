@@ -2,6 +2,7 @@
  * Copyright (C) 2025 - 2026  Andy Frank Schoknecht
  */
 
+#define CTK_IMPLEMENTATION
 #include "CTK.h"
 
 #include <stdio.h>

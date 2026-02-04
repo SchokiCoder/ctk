@@ -382,6 +382,10 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
                       CTK_WidgetId  widget);
 
 void
+CTK_UpdatePrimarySelection(CTK_Instance *inst,
+                           CTK_WidgetId  w);
+
+void
 CTK_Quit();
 
 #ifdef CTK_IMPLEMENTATION
@@ -1084,6 +1088,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		inst->cursor[fw] = strlen(inst->text[fw]);
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = inst->cursor[fw];
+		else
+			CTK_UpdatePrimarySelection(inst, fw);
 
 		CTK_CreateWidgetTexture(inst, fw);
 		break;
@@ -1097,6 +1103,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		inst->cursor[fw] = 0;
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = 0;
+		else
+			CTK_UpdatePrimarySelection(inst, fw);
 
 		CTK_CreateWidgetTexture(inst, fw);
 		break;
@@ -1115,22 +1123,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 				inst->selection[fw] = inst->cursor[fw];
 			}
 
-			if (inst->cursor[fw] > inst->selection[fw]) {
-				start = inst->selection[fw];
-				end = inst->cursor[fw];
-				temp = inst->text[fw][end];
-				inst->text[fw][end] = '\0';
-				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
-				inst->text[fw][end] = temp;
-			} else if (inst->cursor[fw] < inst->selection[fw]) {
-				start = inst->cursor[fw];
-				end = inst->selection[fw];
-				temp = inst->text[fw][end];
-				inst->text[fw][end] = '\0';
-				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
-				inst->text[fw][end] = temp;
-			}
-
+			CTK_UpdatePrimarySelection(inst, fw);
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
@@ -1160,6 +1153,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		inst->cursor[fw] = strlen(inst->text[fw]);
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = inst->cursor[fw];
+		else
+			CTK_UpdatePrimarySelection(inst, fw);
 
 		CTK_CreateWidgetTexture(inst, fw);
 		break;
@@ -1173,6 +1168,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		inst->cursor[fw] = 0;
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = inst->cursor[fw];
+		else
+			CTK_UpdatePrimarySelection(inst, fw);
 
 		CTK_CreateWidgetTexture(inst, fw);
 		break;
@@ -1191,22 +1188,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 				inst->selection[fw] = inst->cursor[fw];
 			}
 
-			if (inst->cursor[fw] > inst->selection[fw]) {
-				start = inst->selection[fw];
-				end = inst->cursor[fw];
-				temp = inst->text[fw][end];
-				inst->text[fw][end] = '\0';
-				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
-				inst->text[fw][end] = temp;
-			} else if (inst->cursor[fw] < inst->selection[fw]) {
-				start = inst->cursor[fw];
-				end = inst->selection[fw];
-				temp = inst->text[fw][end];
-				inst->text[fw][end] = '\0';
-				SDL_SetPrimarySelectionText(&inst->text[fw][start]);
-				inst->text[fw][end] = temp;
-			}
-
+			CTK_UpdatePrimarySelection(inst, fw);
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
 
@@ -2060,6 +2042,31 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 
 	if (NULL != inst->edit[widget]) {
 		inst->edit[widget](inst, widget, inst->edit_data[widget]);
+	}
+}
+
+void
+CTK_UpdatePrimarySelection(CTK_Instance *inst,
+                           CTK_WidgetId  w)
+{
+	size_t end;
+	size_t start;
+	char   temp;
+
+	if (inst->cursor[w] > inst->selection[w]) {
+		start = inst->selection[w];
+		end = inst->cursor[w];
+		temp = inst->text[w][end];
+		inst->text[w][end] = '\0';
+		SDL_SetPrimarySelectionText(&inst->text[w][start]);
+		inst->text[w][end] = temp;
+	} else if (inst->cursor[w] < inst->selection[w]) {
+		start = inst->cursor[w];
+		end = inst->selection[w];
+		temp = inst->text[w][end];
+		inst->text[w][end] = '\0';
+		SDL_SetPrimarySelectionText(&inst->text[w][start]);
+		inst->text[w][end] = temp;
 	}
 }
 

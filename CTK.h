@@ -1114,11 +1114,9 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		switch (inst->type[fw]) {
 		case CTK_WTYPE_ENTRY:
-			if (inst->cursor[fw] <= 0) {
-				break;
+			if (inst->cursor[fw] > 0) {
+				inst->cursor[fw]--;
 			}
-
-			inst->cursor[fw]--;
 			if (!(SDL_KMOD_SHIFT & e.mod)) {
 				inst->selection[fw] = inst->cursor[fw];
 			}
@@ -1179,11 +1177,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		switch (inst->type[fw]) {
 		case CTK_WTYPE_ENTRY:
-			if ((size_t) inst->cursor[fw] >= strlen(inst->text[fw])) {
-				break;
+			if ((size_t) inst->cursor[fw] < strlen(inst->text[fw])) {
+				inst->cursor[fw]++;
 			}
 
-			inst->cursor[fw]++;
 			if (!(SDL_KMOD_SHIFT & e.mod)) {
 				inst->selection[fw] = inst->cursor[fw];
 			}

@@ -278,7 +278,7 @@ just for using the library as intended.
 - [x] add entry navigation and selection via pgup key
 - [x] add entry navigation and selection via pgdn key
 - [x] add primary selection support to home, end, pgup, pgdn keys
-- [ ] fix selection not dropping when using arrows on the start and end of entry
+- [x] fix entry selection not dropping when using arrows on the start or end
 
 - [ ] STR returning NULL pointers even though dest isn't NULL is silly
 

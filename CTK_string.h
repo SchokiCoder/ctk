@@ -16,8 +16,9 @@ CTK_StrCut(char *str,
            const size_t len);
 
 /* Inserts into a string, pushing old content back
+ * Returns how many characters have been inserted.
  */
-char*
+size_t
 CTK_StrInsert(char *restrict dest,
               const size_t dest_size,
               const size_t pos,
@@ -47,7 +48,7 @@ CTK_StrCut(char *str,
 	return str;
 }
 
-char*
+size_t
 CTK_StrInsert(char *restrict dest,
               const size_t dest_size,
               const size_t pos,
@@ -76,7 +77,7 @@ CTK_StrInsert(char *restrict dest,
 	memmove(&dest[pos], src, paste_len);
 	dest[new_len] = '\0';
 
-	return dest;
+	return paste_len;
 }
 
 #endif /* CTK_IMPLEMENTATION */

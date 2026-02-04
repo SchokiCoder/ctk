@@ -270,8 +270,8 @@ just for using the library as intended.
 
 - [x] fix string insert failing with large sources
 - [x] remove invalid text free from `CTK_DestroyInstance`
-- [ ] make `CTK_StrInsert` return new str len and use that for cursor
-cuz entries are bugged with big pastes
+- [x] fix entry cursor moving incorrectly upon text paste
+- [ ] wtf is going on with just typing into an entry now!?s
 
 - [ ] add entry navigation and selection via home key
 - [ ] add entry navigation and selection via end key

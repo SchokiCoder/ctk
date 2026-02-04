@@ -1253,11 +1253,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			                    inst->selection[fw];
 		}
 
-		CTK_StrInsert(inst->text[fw],
-		              CTK_TEXT_SIZE,
-		              inst->cursor[fw],
-		              buf);
-		inst->cursor[fw] += strlen(buf);
+		inst->cursor[fw] += CTK_StrInsert(inst->text[fw],
+		                                  CTK_TEXT_SIZE,
+		                                  inst->cursor[fw],
+		                                  buf);
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
 
@@ -1933,11 +1932,10 @@ CTK_TickInstance(CTK_Instance *inst)
 
 			if (strlen(inst->text[fw]) + strlen(e.text.text) <
 			    CTK_TEXT_SIZE) {
-				CTK_StrInsert(inst->text[fw],
-					      CTK_TEXT_SIZE,
-					      inst->cursor[fw],
-					      e.text.text);
-				inst->cursor[fw]++;
+				inst->cursor[fw] += CTK_StrInsert(inst->text[fw],
+					                          CTK_TEXT_SIZE,
+					                          inst->cursor[fw],
+					                          e.text.text);
 				inst->selection[fw] = inst->cursor[fw];
 			}
 

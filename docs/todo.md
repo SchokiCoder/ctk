@@ -273,7 +273,7 @@ just for using the library as intended.
 - [x] fix entry cursor moving incorrectly upon text paste
 - [x] fix backspace on entry deleting infinitely out of left bound
 
-- [ ] add entry navigation and selection via home key
+- [x] add entry navigation and selection via home key
 - [ ] add entry navigation and selection via end key
 - [ ] add entry navigation and selection via pgup key
 - [ ] add entry navigation and selection via pgdn key

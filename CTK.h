@@ -1018,7 +1018,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			           inst->selection[fw]);
 			inst->cursor[fw] -= inst->cursor[fw] -
 			                    inst->selection[fw];
-		} else {
+		} else if (inst->cursor[fw] > 0) {
 			CTK_StrCut(inst->text[fw], inst->cursor[fw] - 1, 1);
 			inst->cursor[fw]--;
 		}

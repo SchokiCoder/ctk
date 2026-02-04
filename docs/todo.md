@@ -271,7 +271,7 @@ just for using the library as intended.
 - [x] fix string insert failing with large sources
 - [x] remove invalid text free from `CTK_DestroyInstance`
 - [x] fix entry cursor moving incorrectly upon text paste
-- [ ] wtf is going on with just typing into an entry now!?s
+- [x] fix backspace on entry deleting infinitely out of left bound
 
 - [ ] add entry navigation and selection via home key
 - [ ] add entry navigation and selection via end key

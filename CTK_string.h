@@ -55,17 +55,25 @@ CTK_StrInsert(char *restrict dest,
 {
 	size_t new_len;
 	size_t old_len;
+	size_t paste_len;
+	long   push_back;
 	size_t src_len;
 
 	old_len = strlen(dest);
 	src_len = strlen(src);
-
-	memmove(&dest[pos + src_len], &dest[pos], dest_size - pos - src_len - 1);
-	memmove(&dest[pos], src, src_len);
-
 	new_len = old_len + src_len;
 	if (new_len >= dest_size)
 		new_len = dest_size - 1;
+
+	push_back = dest_size - pos - src_len - 1;
+	paste_len = src_len;
+	if (paste_len >= dest_size - pos)
+		paste_len = dest_size - pos - 1;
+
+	if (push_back > 0)
+		memmove(&dest[pos + src_len], &dest[pos], push_back);
+
+	memmove(&dest[pos], src, paste_len);
 	dest[new_len] = '\0';
 
 	return dest;

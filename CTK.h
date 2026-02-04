@@ -1151,6 +1151,19 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 		break;
 
+	case SDLK_PAGEUP:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (CTK_WTYPE_ENTRY != inst->type[fw])
+			break;
+
+		inst->cursor[fw] = 0;
+		if (!(SDL_KMOD_SHIFT & e.mod))
+			inst->selection[fw] = inst->cursor[fw];
+
+		CTK_CreateWidgetTexture(inst, fw);
+		break;
+
 	case SDLK_RIGHT:
 		fw = CTK_GetFocusedWidget(inst);
 

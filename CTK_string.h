@@ -9,8 +9,9 @@
 #include <string.h>
 
 /* Cuts from a string, reducing its size, by setting a null byte
+ * Returns if cut could be done or not.
  */
-char*
+bool
 CTK_StrCut(char *str,
            const size_t pos,
            const size_t len);
@@ -26,7 +27,7 @@ CTK_StrInsert(char *restrict dest,
 
 #ifdef CTK_IMPLEMENTATION
 
-char*
+bool
 CTK_StrCut(char *str,
            const size_t pos,
            const size_t len)
@@ -37,7 +38,7 @@ CTK_StrCut(char *str,
 	str_len = strlen(str);
 
 	if (pos + len > str_len) {
-		return NULL;
+		return false;
 	}
 
 	for (i = pos + len; i < str_len; i++) {
@@ -45,7 +46,7 @@ CTK_StrCut(char *str,
 	}
 	str[str_len - len] = '\0';
 
-	return str;
+	return true;
 }
 
 size_t

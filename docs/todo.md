@@ -280,7 +280,7 @@ just for using the library as intended.
 - [x] add primary selection support to home, end, pgup, pgdn keys
 - [x] fix entry selection not dropping when using arrows on the start or end
 
-- [ ] STR returning NULL pointers even though dest isn't NULL is silly
+- [x] replace useless return type from `CTK_StrCut` with success bool
 
 - [ ] add mouse based navigation to entry
 - [ ] add mouse based selection to entry

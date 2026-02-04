@@ -276,7 +276,7 @@ just for using the library as intended.
 - [x] add entry navigation and selection via home key
 - [x] add entry navigation and selection via end key
 - [x] add entry navigation and selection via pgup key
-- [ ] add entry navigation and selection via pgdn key
+- [x] add entry navigation and selection via pgdn key
 - [ ] add primary selection support to home, end, pgup, pgdn keys
 
 - [ ] STR returning NULL pointers even though dest isn't NULL is silly

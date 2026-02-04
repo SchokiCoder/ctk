@@ -274,9 +274,10 @@ just for using the library as intended.
 - [x] fix backspace on entry deleting infinitely out of left bound
 
 - [x] add entry navigation and selection via home key
-- [ ] add entry navigation and selection via end key
+- [x] add entry navigation and selection via end key
 - [ ] add entry navigation and selection via pgup key
 - [ ] add entry navigation and selection via pgdn key
+- [ ] add primary selection support to home, end, pgup, pgdn keys
 
 - [ ] STR returning NULL pointers even though dest isn't NULL is silly
 

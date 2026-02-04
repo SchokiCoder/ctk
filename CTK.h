@@ -879,7 +879,6 @@ CTK_DestroyInstance(CTK_Instance *inst)
 	size_t i;
 
 	for (i = 0; i < inst->count; i++) {
-		free(inst->text[i]);
 		SDL_DestroyTexture(inst->texture[i]);
 	}
 

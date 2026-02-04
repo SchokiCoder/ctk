@@ -269,7 +269,7 @@ because the LGPL very likely brings library users into some legal gray areas,
 just for using the library as intended.
 
 - [x] fix string insert failing with large sources
-- [ ] remove text free from `CTK_DestroyInstance`
+- [x] remove invalid text free from `CTK_DestroyInstance`
 - [ ] make `CTK_StrInsert` return new str len and use that for cursor
 cuz entries are bugged with big pastes
 

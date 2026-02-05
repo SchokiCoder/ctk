@@ -9,14 +9,19 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "CTK_string.h"
 #include "CTK_style.h"
 
+/* Macros
+ */
+
 #ifndef ARRLEN
 #define ARRLEN(arr) (sizeof(arr) / sizeof(arr[0]))
 #endif
+
+/* Constant defines
+ */
 
 #define CTK_DEFAULT_BUTTON_W         80
 #define CTK_DEFAULT_BUTTON_H         27
@@ -42,6 +47,9 @@
 
 #define CTK_VERSION "0.1.0"
 
+/* Configuration defines
+ */
+
 #ifndef CTK_INSTANCE_MAX_WIDGETS
 #define CTK_INSTANCE_MAX_WIDGETS 64
 #endif
@@ -49,6 +57,25 @@
 #ifndef CTK_TEXT_SIZE
 #define CTK_TEXT_SIZE 128
 #endif
+
+#ifndef calloc
+#define calloc SDL_calloc
+#endif
+
+#ifndef free
+#define free SDL_free
+#endif
+
+#ifndef malloc
+#define malloc SDL_malloc
+#endif
+
+#ifndef realloc
+#define realloc SDL_realloc
+#endif
+
+/* Types
+ */
 
 typedef int CTK_WidgetId;
 
@@ -144,6 +171,9 @@ typedef struct CTK_Instance {
 	void *trigger_data[CTK_INSTANCE_MAX_WIDGETS];
 } CTK_Instance;
 
+/* Constants
+ */
+
 #if defined(__linux__)
 #define FONTPATH "/usr/share/fonts/truetype/"
 static const char *FONTNAMES[] = {
@@ -169,7 +199,13 @@ static const char *FONTNAMES[] = {
 };
 #endif
 
+/* Global variables
+ */
+
 static TTF_Font *CTK_font = NULL;
+
+/* Function declarations
+ */
 
 CTK_WidgetId
 CTK_AddButton(CTK_Instance *inst);
@@ -389,6 +425,9 @@ void
 CTK_Quit();
 
 #ifdef CTK_IMPLEMENTATION
+
+/* Function definitions
+ */
 
 CTK_WidgetId
 CTK_AddButton(CTK_Instance *inst)

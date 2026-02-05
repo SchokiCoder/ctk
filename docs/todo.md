@@ -90,7 +90,7 @@ because it will depend on the mouse position and doesn't use the cursor at all
 
 # 0.2.0
 
-- [ ] add a define for malloc function (may allow me to make stdlib.h optional)
+- [x] add defines for the malloc functions
 
 - [ ] add widget on hover callbacks
 - [ ] add background colors for widgets that are hovered on
@@ -101,6 +101,8 @@ because it will depend on the mouse position and doesn't use the cursor at all
 - [ ] add visual scrolling to entries
 
 - [ ] update version number
+
+-----
 
 # 0.1.0
 

@@ -5,7 +5,6 @@
 #ifndef _CTK_STRING_H
 #define _CTK_STRING_H
 
-#include <stdlib.h>
 #include <string.h>
 
 /* Cuts from a string, reducing its size, by setting a null byte

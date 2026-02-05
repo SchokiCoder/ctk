@@ -1,18 +1,85 @@
-- compatibility tests
+# 1.0.0
+
+- [ ] update version number
+
+# 0.10.0
+
+- **thorough** compatibility tests
 (freebsd, abuse my relatives to test on their windows and apple machines)
 
-- add proper click?
+- [ ] add proper click?
 Right now a click is just button release event on a widget, which might confuse.
+- [ ] add right click
 
-# 0.3.0
+- [ ] update version number
+
+# 0.9.0
+
+- [ ] is it fine to leak memory when exiting the application ?
+
+- [ ] there are many possible but ignored error cases for calling SDL functions
+add verbose error printing, which gets triggered by env var or compile flag
+Log function that, depending on env var, returns early?
+Log function that, depending on compile flag, is empty or not?
+
+- [ ] if sdl3-gfx is available yet, use it for radiobutton circles
+if not, postpone this task
+
+- [ ] update version number
+
+# 0.8.0
 
 - [ ] add more themes, especially a dark one
 - [ ] use `SDL_GetSystemTheme`
-- do themes contain default widget sizes?
+- [ ] do themes contain default widget sizes?
 if so, move the default size values to the tcl-tk theme.
 adding a widget should set the rect once and then leave them alone.
 (do not restrict or interfere with later size changes.)
 if so, a theme change should change them.
+
+- [ ] update version number
+
+# 0.7.0
+
+- [ ] add proper borders
+- [ ] make sure scale sliders are symmetric
+- [ ] add button click border change
+
+- [ ] a widget turning (un)focusable might change focused widget?
+
+- [ ] update version number
+
+# 0.6.0
+
+- [ ] make all the data needed for drawing available in a "style" property
+Thus drawing will be fully declarative.
+- [ ] add text drawing to checkbox and radiobutton
+This also works as a hitbox of course.
+Many expect the text next to a checkbox or radiobutton to register clicks too.
+`text_alignment` will tell which side the text is on.
+
+- [ ] update version number
+
+# 0.5.0
+
+- [ ] add a way to grid widgets
+- [ ] add a content fitting window resize (just initially? (upon mainloop))
+
+- [ ] update version number
+
+# 0.4.0
+
+- [ ] add mouse based navigation to entry
+- [ ] add mouse based selection to entry
+- [ ] add entry primary selection text paste
+- [ ] add entry primary selection text paste while selection
+yes, this makes sense, you did not misread
+this is down here
+because it will depend on the mouse position and doesn't use the cursor at all
+
+- [ ] update version number
+
+# 0.3.0
 
 - [ ] add menubar
 - [ ] add menubar accelerators
@@ -23,37 +90,15 @@ if so, a theme change should change them.
 
 # 0.2.0
 
-- [ ] is it fine to leak memory when exiting the application ?
-
-- [ ] there are many possible but ignored error cases for calling SDL functions
-add verbose error printing, which gets triggered by env var or compile flag
-Log function that, depending on env var, returns early?
-Log function that, depending on compile flag, is empty or not?
-
-- [ ] add visual scrolling to entries
-
-- [ ] if sdl3-gfx is available yet, use it for radiobutton circles
-if not, postpone this task
-
-- [ ] make all the data needed for drawing available in a "style" property
-Thus drawing will be fully declarative.
-- [ ] add text drawing to checkbox and radiobutton
-This also works as a hitbox of course.
-Many expect the text next to a checkbox or radiobutton to register clicks too.
-`text_alignment` will tell which side the text is on.
-
-- [ ] add a way to grid widgets
-- [ ] add a content fitting window resize (just initially? (upon mainloop))
-
-- [ ] add proper borders
-- [ ] make sure scale sliders are symmetric
-- [ ] add button click border change
-
-- [ ] a widget turning (un)focusable might change focused widget?
+- [ ] add a define for malloc function (may allow me to make stdlib.h optional)
 
 - [ ] add widget on hover callbacks
 - [ ] add background colors for widgets that are hovered on
 (tcl-tk = rgb(ededed))
+
+- [ ] entry text drawing is sometimes blurry
+
+- [ ] add visual scrolling to entries
 
 - [ ] update version number
 
@@ -282,12 +327,5 @@ just for using the library as intended.
 
 - [x] replace useless return type from `CTK_StrCut` with success bool
 
-- [ ] add mouse based navigation to entry
-- [ ] add mouse based selection to entry
-- [ ] add entry primary selection text paste
-- [ ] add entry primary selection text paste while selection
-yes, this makes sense, you did not misread
-this is down here
-because it will depend on the mouse position and doesn't use the cursor at all
-
-- [ ] set version to 0.1.0
+- [x] update version number
+Also update README with some quick facts and dependencies.

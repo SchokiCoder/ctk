@@ -11,9 +11,27 @@ It is based on the SDL, and made so that SDL is the background player,
 but can also be directly used, when special needs arise.
 <https://libsdl.org/>
 
+# Quick facts
+
+- written in C, specifically C99
+- architectured as header-only-library
+- utilizing the header only aspect, we avoid allocations as much as possible
+- SDL alike ergonomics, since it's the main dependency
+- with Linux code format but camel case naming for functions
+- max. 20000 SLOC for the lib itself
+- max. 500 SLOC for build system
+- compatibility with Linux, FreeBSD, OpenBSD, and MS Windows
+- Apple's macOS will be a best effort, since they don't give me an ISO for a VM
+  _almost as if they don't care about developing for their platform_ :)
+
 # Have a look at it
 
-Just run:
+Install dependencies:
+```
+sudo apt install libsdl3-{dev,ttf-dev}
+```
+
+Run my example:
 ```
 git clone https://github.com/schokicoder/ctk.git
 cd ctk

@@ -92,11 +92,15 @@ because it will depend on the mouse position and doesn't use the cursor at all
 
 - [x] add defines for the malloc functions
 
-- [ ] add widget on hover callbacks
+- [x] replace instance motion callback with a widget motion callback
 - [ ] add background colors for widgets that are hovered on
 (tcl-tk = rgb(ededed))
 
+- [ ] rename inst->motion to inst->mouse_motion for parity
+- [ ] replace inst->mouse_motion's x and y with the event for parity
+
 - [ ] entry text drawing is sometimes blurry
+It's probably these god damn floats again! Purge = instawin?
 
 - [ ] add visual scrolling to entries
 

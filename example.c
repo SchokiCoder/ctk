@@ -10,9 +10,24 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SILENCE_CALLBACKS
-
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
+
+void
+btnCounterMouseMotion(CTK_Instance         *inst,
+                      SDL_MouseMotionEvent  e,
+                      const CTK_WidgetId    widget,
+                      void                 *data)
+{
+	(void) inst;
+	(void) e;
+	(void) data;
+
+#ifndef SILENCE_CALLBACKS
+	printf("%i might count\n", widget);
+#else
+	(void) widget;
+#endif
+}
 
 void
 btnCounterMousePress(CTK_Instance               *inst,
@@ -144,23 +159,6 @@ leave(CTK_Instance *inst,
 }
 
 void
-motion(CTK_Instance *inst,
-       const float   x,
-       const float   y,
-       void         *data)
-{
-	(void) inst;
-	(void) data;
-
-#ifndef SILENCE_CALLBACKS
-	printf("mouse at %i %i\n", (int) x, (int) y);
-#else
-	(void) x;
-	(void) y;
-#endif
-}
-
-void
 sclEdit(CTK_Instance               *inst,
         const CTK_WidgetId          widget,
         void                       *data)
@@ -229,7 +227,6 @@ main(int    argc,
 	inst->draw = draw;
 	inst->enter = enter;
 	inst->leave = leave;
-	inst->motion = motion;
 
 	ckb_focusable = CTK_AddCheckbox(inst);
 	inst->rect[ckb_focusable].x = MARGIN;
@@ -275,6 +272,7 @@ main(int    argc,
 	inst->rect[btn_counter].x = MARGIN;
 	inst->rect[btn_counter].y = inst->rect[lbl_visible].y +
 	                            inst->rect[lbl_visible].h + (MARGIN * 4);
+	inst->mouse_motion[btn_counter] = btnCounterMouseMotion;
 	inst->mouse_press[btn_counter] = btnCounterMousePress;
 	inst->trigger[btn_counter] = btnCounterTrigger;
 	inst->trigger_data[btn_counter] = &lbl_counter;

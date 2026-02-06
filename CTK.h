@@ -112,11 +112,6 @@ typedef struct CTK_Instance {
 	void *enter_data;
 	void (*leave)(struct CTK_Instance*, void*);
 	void *leave_data;
-	void (*motion)(struct CTK_Instance*,
-	               const float x,
-	               const float y,
-	               void*);
-	void *motion_data;
 	void (*quit)(struct CTK_Instance*, void*);
 	void *quit_data;
 
@@ -150,6 +145,11 @@ typedef struct CTK_Instance {
 	                                       const CTK_WidgetId,
 	                                       void*);
 	void *edit_data[CTK_INSTANCE_MAX_WIDGETS];
+	void (*mouse_motion[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                               const SDL_MouseMotionEvent,
+	                                               const CTK_WidgetId,
+	                                               void*);
+	void *mouse_motion_data[CTK_INSTANCE_MAX_WIDGETS];
 	void (*mouse_press[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
 	                                              const SDL_MouseButtonEvent,
 	                                              const CTK_WidgetId,
@@ -280,6 +280,10 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 void
 CTK_HandleMouseButtonUp(CTK_Instance               *inst,
                         const SDL_MouseButtonEvent  e);
+
+void
+CTK_HandleMouseMotion(CTK_Instance               *inst,
+                      const SDL_MouseMotionEvent  e);
 
 void
 CTK_HandleMouseWheel(CTK_Instance              *inst,
@@ -608,6 +612,8 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->value_max[ret] = 0;
 	inst->edit[ret] = NULL;
 	inst->edit_data[ret] = NULL;
+	inst->mouse_motion[ret] = NULL;
+	inst->mouse_motion_data[ret] = NULL;
 	inst->mouse_press[ret] = NULL;
 	inst->mouse_press_data[ret] = NULL;
 	inst->mouse_release[ret] = NULL;
@@ -664,8 +670,6 @@ CTK_CreateInstance(const char            *title,
 	inst->enter_data = NULL;
 	inst->leave = NULL;
 	inst->leave_data = NULL;
-	inst->motion = NULL;
-	inst->motion_data = NULL;
 	inst->quit = CTK_InstanceDefaultQuit;
 	inst->quit_data = NULL;
 
@@ -1426,6 +1430,31 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 }
 
 void
+CTK_HandleMouseMotion(CTK_Instance               *inst,
+                      const SDL_MouseMotionEvent  e)
+{
+	size_t i;
+	SDL_FPoint p;
+	CTK_WidgetId w;
+
+	for (i = 0; i < inst->enabled_ws; i++) {
+		w = inst->enabled_w[i];
+		p.x = e.x;
+		p.y = e.y;
+
+		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
+			continue;
+
+		if (inst->mouse_motion[w]) {
+			inst->mouse_motion[w](inst,
+			                      e,
+			                      w,
+			                      inst->mouse_motion_data);
+		}
+	}
+}
+
+void
 CTK_HandleMouseWheel(CTK_Instance              *inst,
                      const SDL_MouseWheelEvent  e)
 {
@@ -1967,12 +1996,7 @@ CTK_TickInstance(CTK_Instance *inst)
 			if (inst->drag)
 				CTK_HandleDrag(inst, e.motion.x);
 
-			if (inst->motion) {
-				inst->motion(inst,
-				             e.motion.x,
-				             e.motion.y,
-				             inst->motion_data);
-			}
+			CTK_HandleMouseMotion(inst, e.motion);
 			break;
 
 		case SDL_EVENT_MOUSE_WHEEL:

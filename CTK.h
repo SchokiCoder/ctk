@@ -97,13 +97,14 @@ typedef enum CTK_TextAlignment {
 } CTK_TextAlignment;
 
 typedef struct CTK_Instance {
-	bool        active;
-	bool        drag;
-	size_t      focused_w;
-	Uint64      max_framerate;
-	bool        redraw;
-	CTK_Style   style;
-	SDL_Window *win;
+	bool         active;
+	bool         drag;
+	size_t       focused_w;
+	CTK_WidgetId hovered_w;
+	Uint64       max_framerate;
+	bool         redraw;
+	CTK_Style    style;
+	SDL_Window  *win;
 
 	/* instance events */
 	void (*draw)(struct CTK_Instance*, void*);
@@ -131,6 +132,7 @@ typedef struct CTK_Instance {
 	int                group[CTK_INSTANCE_MAX_WIDGETS];
 	int                selection[CTK_INSTANCE_MAX_WIDGETS];
 	int                scroll[CTK_INSTANCE_MAX_WIDGETS];
+	SDL_Color         *slider[CTK_INSTANCE_MAX_WIDGETS];
 	char               text[CTK_TEXT_SIZE][CTK_INSTANCE_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_INSTANCE_MAX_WIDGETS];
 	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
@@ -601,6 +603,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->group[ret] = -1;
 	inst->selection[ret] = inst->cursor[ret];
 	inst->scroll[ret] = 0;
+	inst->slider[ret] = &inst->style.scale_slider;
 	inst->text_alignment[ret] = CTK_TEXT_ALIGNMENT_LEFT;
 	inst->toggle[ret] = false;
 	inst->type[ret] = CTK_WTYPE_UNKNOWN;
@@ -660,6 +663,7 @@ CTK_CreateInstance(const char            *title,
 	inst->active = true;
 	inst->drag = false;
 	inst->focused_w = 0;
+	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
@@ -882,10 +886,10 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		rect.y = 0;
 
 		SDL_SetRenderDrawColor(r,
-				       inst->style.scale_slider.r,
-				       inst->style.scale_slider.g,
-				       inst->style.scale_slider.b,
-				       inst->style.scale_slider.a);
+				       inst->slider[widget]->r,
+				       inst->slider[widget]->g,
+				       inst->slider[widget]->b,
+				       inst->slider[widget]->a);
 		SDL_RenderFillRect(r, &rect);
 
 		rect.x += rect.w / 2.0;
@@ -1434,8 +1438,12 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
 	size_t i;
+	CTK_WidgetId old_hov_w;
 	SDL_FPoint p;
 	CTK_WidgetId w;
+
+	old_hov_w = inst->hovered_w;
+	inst->hovered_w = -1;
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
@@ -1445,12 +1453,94 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
 
+		inst->hovered_w = w;
+
 		if (inst->mouse_motion[w]) {
 			inst->mouse_motion[w](inst,
 			                      e,
 			                      w,
 			                      inst->mouse_motion_data);
 		}
+		break;
+	}
+
+	if (old_hov_w == inst->hovered_w)
+		return;
+
+	if (-1 != inst->hovered_w) {
+		switch (inst->type[inst->hovered_w]) {
+		case CTK_WTYPE_UNKNOWN:
+			inst->bg[inst->hovered_w] = &inst->style.bg_widget_hovered;
+			break;
+
+		case CTK_WTYPE_BUTTON:
+			inst->bg[inst->hovered_w] = &inst->style.bg_button_hovered;
+			break;
+
+		case CTK_WTYPE_CHECKBOX:
+			inst->bg[inst->hovered_w] = &inst->style.bg_checkbox_hovered;
+			break;
+
+		case CTK_WTYPE_ENTRY:
+			inst->bg[inst->hovered_w] = &inst->style.bg_entry_hovered;
+			break;
+
+		case CTK_WTYPE_LABEL:
+			inst->bg[inst->hovered_w] = &inst->style.bg_label_hovered;
+			break;
+
+		case CTK_WTYPE_PROGRESSBAR:
+			inst->bg[inst->hovered_w] = &inst->style.bg_progressbar_hovered;
+			break;
+
+		case CTK_WTYPE_RADIOBUTTON:
+			inst->bg[inst->hovered_w] = &inst->style.bg_radiobutton_hovered;
+			break;
+
+		case CTK_WTYPE_SCALE:
+			inst->bg[inst->hovered_w] = &inst->style.bg_scale_hovered;
+			break;
+		}
+		inst->slider[inst->hovered_w] = &inst->style.scale_slider_hovered;
+		CTK_CreateWidgetTexture(inst, inst->hovered_w);
+	}
+
+	if (-1 != old_hov_w) {
+		switch (inst->type[old_hov_w]) {
+		case CTK_WTYPE_UNKNOWN:
+			inst->bg[old_hov_w] = &inst->style.bg_widget;
+			break;
+
+		case CTK_WTYPE_BUTTON:
+			inst->bg[old_hov_w] = &inst->style.bg_button;
+			break;
+
+		case CTK_WTYPE_CHECKBOX:
+			inst->bg[old_hov_w] = &inst->style.bg_checkbox;
+			break;
+
+		case CTK_WTYPE_ENTRY:
+			inst->bg[old_hov_w] = &inst->style.bg_entry;
+			break;
+
+		case CTK_WTYPE_LABEL:
+			inst->bg[old_hov_w] = &inst->style.bg_label;
+			break;
+
+		case CTK_WTYPE_PROGRESSBAR:
+			inst->bg[old_hov_w] = &inst->style.bg_progressbar;
+			break;
+
+		case CTK_WTYPE_RADIOBUTTON:
+			inst->bg[old_hov_w] = &inst->style.bg_radiobutton;
+			break;
+
+		case CTK_WTYPE_SCALE:
+			inst->bg[old_hov_w] = &inst->style.bg_scale;
+			break;
+		}
+		inst->slider[old_hov_w] = &inst->style.scale_slider;
+		CTK_CreateWidgetTexture(inst, old_hov_w);
 	}
 }
 

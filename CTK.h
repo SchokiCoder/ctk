@@ -10,7 +10,6 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
 
-#include "CTK_string.h"
 #include "CTK_style.h"
 
 /* Macros
@@ -54,10 +53,6 @@
 #define CTK_INSTANCE_MAX_WIDGETS 64
 #endif
 
-#ifndef CTK_TEXT_SIZE
-#define CTK_TEXT_SIZE 128
-#endif
-
 #ifndef calloc
 #define calloc SDL_calloc
 #endif
@@ -97,14 +92,15 @@ typedef enum CTK_TextAlignment {
 } CTK_TextAlignment;
 
 typedef struct CTK_Instance {
-	bool         active;
-	bool         drag;
-	size_t       focused_w;
-	CTK_WidgetId hovered_w;
-	Uint64       max_framerate;
-	bool         redraw;
-	CTK_Style    style;
-	SDL_Window  *win;
+	bool            active;
+	bool            drag;
+	size_t          focused_w;
+	CTK_WidgetId    hovered_w;
+	Uint64          max_framerate;
+	bool            redraw;
+	CTK_Style       style;
+	TTF_TextEngine *tengine;
+	SDL_Window     *win;
 
 	/* instance events */
 	void (*draw)(struct CTK_Instance*, void*);
@@ -133,7 +129,7 @@ typedef struct CTK_Instance {
 	int                selection[CTK_INSTANCE_MAX_WIDGETS];
 	int                scroll[CTK_INSTANCE_MAX_WIDGETS];
 	SDL_Color         *slider[CTK_INSTANCE_MAX_WIDGETS];
-	char               text[CTK_TEXT_SIZE][CTK_INSTANCE_MAX_WIDGETS];
+	TTF_Text          *text[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_INSTANCE_MAX_WIDGETS];
 	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_INSTANCE_MAX_WIDGETS];
@@ -250,13 +246,6 @@ CTK_CreateInstance(const char            *title,
                    const int              winh,
                    const SDL_WindowFlags  flags);
 
-SDL_Texture*
-CTK_CreateText(SDL_Renderer            *r,
-               const char              *str,
-               const size_t             str_len,
-               const SDL_Color          fg,
-               const SDL_Color          bg);
-
 void
 CTK_CreateWidgetTexture(CTK_Instance       *inst,
                         const CTK_WidgetId  widget);
@@ -347,26 +336,9 @@ CTK_InstanceDefaultQuit(CTK_Instance *inst,
                         void         *dummy);
 
 bool
-CTK_RenderText(SDL_Renderer            *r,
-               const char              *str,
-               const size_t             str_len,
+CTK_RenderText(TTF_Text                *text,
                const SDL_FRect          rect,
-               const CTK_TextAlignment  ta,
-               const SDL_Color          fg,
-               const SDL_Color          bg);
-
-bool
-CTK_RenderSelectedText(SDL_Renderer            *r,
-                       char                    *str,
-                       const size_t             str_len,
-                       const SDL_FRect          rect,
-                       const int                cursor,
-                       const int                selection,
-                       const CTK_TextAlignment  ta,
-                       const SDL_Color          fg,
-                       const SDL_Color          fg_selected,
-                       const SDL_Color          bg,
-                       const SDL_Color          bg_selected);
+               const CTK_TextAlignment  ta);
 
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
@@ -626,7 +598,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->trigger[ret] = NULL;
 	inst->trigger_data[ret] = NULL;
 
-	memset(inst->text[ret], '\0', CTK_TEXT_SIZE);
+	inst->text[ret] = TTF_CreateText(inst->tengine, CTK_font, "", 0);
 
 	return ret;
 }
@@ -692,6 +664,11 @@ CTK_CreateInstance(const char            *title,
 		return NULL;
 	}
 
+	inst->tengine = TTF_CreateRendererTextEngine(r);
+	if (NULL == inst->tengine) {
+		return NULL;
+	}
+
 	if (!SDL_SetRenderLogicalPresentation(r, winw, winh,
 	                                      SDL_LOGICAL_PRESENTATION_DISABLED)) {
 		return NULL;
@@ -700,38 +677,17 @@ CTK_CreateInstance(const char            *title,
 	return inst;
 }
 
-SDL_Texture*
-CTK_CreateText(SDL_Renderer            *r,
-               const char              *str,
-               const size_t             str_len,
-               const SDL_Color          fg,
-               const SDL_Color          bg)
-{
-	SDL_Surface *text_s = NULL;
-	SDL_Texture *text_t = NULL;
-
-	if (str_len == 0 ||
-	    strlen(str) == 0) {
-		SDL_SetError("Cannot create empty text");
-		return NULL;
-	}
-
-	text_s = TTF_RenderText_LCD(CTK_font, str, 0, fg, bg);
-	text_t = SDL_CreateTextureFromSurface(r, text_s);
-
-	SDL_DestroySurface(text_s);
-
-	return text_t;
-}
-
 void
 CTK_CreateWidgetTexture(CTK_Instance       *inst,
                         const CTK_WidgetId  widget)
 {
+	size_t        a, b;
 	SDL_Color     fg;
+	size_t        i;
 	SDL_Renderer *r = NULL;
 	SDL_FRect     rect;
 	const int     numv = 3;
+	TTF_SubString first, cur;
 	SDL_Vertex    v[numv];
 
 	r = SDL_GetRenderer(inst->win);
@@ -766,32 +722,59 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 		rect.y = 0;
 		rect.w = inst->rect[widget].w;
 		rect.h = inst->rect[widget].h;
-		CTK_RenderText(r,
-		               inst->text[widget],
-		               strlen(inst->text[widget]),
+		TTF_SetTextColor(inst->text[widget], fg.r, fg.g, fg.b, fg.a);
+		CTK_RenderText(inst->text[widget],
 		               rect,
-		               inst->text_alignment[widget],
-		               fg,
-		               *inst->bg[widget]);
+		               inst->text_alignment[widget]);
 		break;
 
 	case CTK_WTYPE_ENTRY:
 	case CTK_WTYPE_LABEL:
+		if (inst->cursor[widget] != inst->selection[widget]) {
+			if (inst->cursor[widget] > inst->selection[widget]) {
+				a = inst->selection[widget];
+				b = inst->cursor[widget];
+			} else {
+				a = inst->cursor[widget];
+				b = inst->selection[widget];
+			}
+
+			TTF_GetTextSubString(inst->text[widget],
+			                     0,
+			                     &first);
+			rect.x = 0;
+			for (i = 0; i < a; i++) {
+				TTF_GetNextTextSubString(inst->text[widget],
+				                         &cur,
+				                         &cur);
+				rect.x += cur.rect.w;
+			}
+			rect.w = 0;
+			for (i = a; i < b; i++) {
+				TTF_GetNextTextSubString(inst->text[widget],
+				                         &cur,
+				                         &cur);
+				rect.w += cur.rect.w;
+			}
+
+			rect.h = first.rect.h;
+			rect.y = (inst->rect[widget].h - rect.h) / 2.0;
+			SDL_SetRenderDrawColor(r,
+					       inst->style.bg_selected.r,
+					       inst->style.bg_selected.g,
+					       inst->style.bg_selected.b,
+					       inst->style.bg_selected.a);
+			SDL_RenderFillRect(r, &rect);
+		}
+
 		rect.x = 0;
 		rect.y = 0;
 		rect.w = inst->rect[widget].w;
 		rect.h = inst->rect[widget].h;
-		CTK_RenderSelectedText(r,
-		                       inst->text[widget],
-		                       strlen(inst->text[widget]),
-		                       rect,
-		                       inst->cursor[widget],
-		                       inst->selection[widget],
-		                       inst->text_alignment[widget],
-		                       fg,
-		                       inst->style.fg_selected,
-		                       *inst->bg[widget],
-		                       inst->style.bg_selected);
+		TTF_SetTextColor(inst->text[widget], fg.r, fg.g, fg.b, fg.a);
+		CTK_RenderText(inst->text[widget],
+		               rect,
+		               inst->text_alignment[widget]);
 		break;
 
 	case CTK_WTYPE_CHECKBOX:
@@ -931,8 +914,10 @@ CTK_DestroyInstance(CTK_Instance *inst)
 
 	for (i = 0; i < inst->count; i++) {
 		SDL_DestroyTexture(inst->texture[i]);
+		TTF_DestroyText(inst->text[i]);
 	}
 
+	TTF_DestroyRendererTextEngine(inst->tengine);
 	SDL_DestroyWindow(inst->win);
 	free(inst);
 }
@@ -981,9 +966,10 @@ CTK_DrawInstance(CTK_Instance *inst)
 		if (inst->cursor[fw] <= 0) {
 			w = 0;
 		} else {
-			TTF_GetStringSize(CTK_font,
-			                  inst->text[fw],
+			TTF_MeasureString(CTK_font,
+			                  inst->text[fw]->text,
 			                  inst->cursor[fw],
+			                  0,
 			                  &w, NULL);
 	        }
 		SDL_SetRenderDrawColor(r,
@@ -1058,19 +1044,21 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			return;
 
 		if (inst->cursor[fw] < inst->selection[fw]) {
-			CTK_StrCut(inst->text[fw],
-			           inst->cursor[fw],
-			           inst->selection[fw] -
-			           inst->cursor[fw]);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->cursor[fw],
+			                     inst->selection[fw] -
+			                     inst->cursor[fw]);
 		} else if (inst->cursor[fw] > inst->selection[fw]) {
-			CTK_StrCut(inst->text[fw],
-			           inst->selection[fw],
-			           inst->cursor[fw] -
-			           inst->selection[fw]);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->selection[fw],
+			                     inst->cursor[fw] -
+			                     inst->selection[fw]);
 			inst->cursor[fw] -= inst->cursor[fw] -
 			                    inst->selection[fw];
 		} else if (inst->cursor[fw] > 0) {
-			CTK_StrCut(inst->text[fw], inst->cursor[fw] - 1, 1);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->cursor[fw] - 1,
+			                     1);
 			inst->cursor[fw]--;
 		}
 
@@ -1094,10 +1082,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			end = inst->selection[fw];
 		}
 
-		temp = inst->text[fw][end];
-		inst->text[fw][end] = '\0';
-		SDL_SetClipboardText(&inst->text[fw][start]);
-		inst->text[fw][end] = temp;
+		temp = inst->text[fw]->text[end];
+		inst->text[fw]->text[end] = '\0';
+		SDL_SetClipboardText(&inst->text[fw]->text[start]);
+		inst->text[fw]->text[end] = temp;
 		break;
 
 	case SDLK_DELETE:
@@ -1107,19 +1095,19 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			return;
 
 		if (inst->cursor[fw] < inst->selection[fw]) {
-			CTK_StrCut(inst->text[fw],
-			           inst->cursor[fw],
-			           inst->selection[fw] -
-			           inst->cursor[fw]);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->cursor[fw],
+			                     inst->selection[fw] -
+			                     inst->cursor[fw]);
 		} else if (inst->cursor[fw] > inst->selection[fw]) {
-			CTK_StrCut(inst->text[fw],
-			           inst->selection[fw],
-			           inst->cursor[fw] -
-			           inst->selection[fw]);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->selection[fw],
+			                     inst->cursor[fw] -
+			                     inst->selection[fw]);
 			inst->cursor[fw] -= inst->cursor[fw] -
 			                    inst->selection[fw];
 		} else {
-			CTK_StrCut(inst->text[fw], inst->cursor[fw], 1);
+			TTF_DeleteTextString(inst->text[fw], inst->cursor[fw], 1);
 		}
 
 		inst->selection[fw] = inst->cursor[fw];
@@ -1132,7 +1120,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		if (CTK_WTYPE_ENTRY != inst->type[fw])
 			break;
 
-		inst->cursor[fw] = strlen(inst->text[fw]);
+		inst->cursor[fw] = strlen(inst->text[fw]->text);
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = inst->cursor[fw];
 		else
@@ -1195,7 +1183,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		if (CTK_WTYPE_ENTRY != inst->type[fw])
 			break;
 
-		inst->cursor[fw] = strlen(inst->text[fw]);
+		inst->cursor[fw] = strlen(inst->text[fw]->text);
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = inst->cursor[fw];
 		else
@@ -1224,7 +1212,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		switch (inst->type[fw]) {
 		case CTK_WTYPE_ENTRY:
-			if ((size_t) inst->cursor[fw] < strlen(inst->text[fw])) {
+			if ((size_t) inst->cursor[fw] <
+			    strlen(inst->text[fw]->text)) {
 				inst->cursor[fw]++;
 			}
 
@@ -1318,23 +1307,21 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		buf = SDL_GetClipboardText();
 
 		if (inst->cursor[fw] < inst->selection[fw]) {
-			CTK_StrCut(inst->text[fw],
-			           inst->cursor[fw],
-			           inst->selection[fw] -
-			           inst->cursor[fw]);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->cursor[fw],
+			                     inst->selection[fw] -
+			                     inst->cursor[fw]);
 		} else if (inst->cursor[fw] > inst->selection[fw]) {
-			CTK_StrCut(inst->text[fw],
-			           inst->selection[fw],
-			           inst->cursor[fw] -
-			           inst->selection[fw]);
+			TTF_DeleteTextString(inst->text[fw],
+			                     inst->selection[fw],
+			                     inst->cursor[fw] -
+			                     inst->selection[fw]);
 			inst->cursor[fw] -= inst->cursor[fw] -
 			                    inst->selection[fw];
 		}
 
-		inst->cursor[fw] += CTK_StrInsert(inst->text[fw],
-		                                  CTK_TEXT_SIZE,
-		                                  inst->cursor[fw],
-		                                  buf);
+		TTF_InsertTextString(inst->text[fw], inst->cursor[fw], buf, 0);
+		inst->cursor[fw] += strlen(buf);
 		inst->selection[fw] = inst->cursor[fw];
 		CTK_CreateWidgetTexture(inst, fw);
 
@@ -1676,6 +1663,9 @@ CTK_Init(const char *appname,
 	if (NULL == CTK_font)
 		return false;
 
+	TTF_SetFontDirection(CTK_font, TTF_DIRECTION_LTR);
+	TTF_SetFontLanguage(CTK_font, "en");
+
 	return true;
 }
 
@@ -1734,145 +1724,35 @@ CTK_InstanceDefaultQuit(CTK_Instance *inst,
 }
 
 bool
-CTK_RenderText(SDL_Renderer            *r,
-               const char              *str,
-               const size_t             str_len,
+CTK_RenderText(TTF_Text                *text,
                const SDL_FRect          rect,
-               const CTK_TextAlignment  ta,
-               const SDL_Color          fg,
-               const SDL_Color          bg)
+               const CTK_TextAlignment  ta)
 {
-	SDL_FRect    dest;
-	SDL_Texture *text = NULL;
+	int text_w;
+	int text_h;
+	float x, y;
 
-	text = CTK_CreateText(r, str, str_len, fg, bg);
-	if (NULL == text) {
+	if (!TTF_GetTextSize(text, &text_w, &text_h))
 		return false;
-	}
 
 	switch (ta) {
 	case CTK_TEXT_ALIGNMENT_LEFT:
-		dest.x = 0;
+		x = 0;
 		break;
 
 	case CTK_TEXT_ALIGNMENT_CENTER:
-		dest.x = (rect.w - text->w) / 2.0;
+		x = (rect.w - text_w) / 2.0;
 		break;
 
 	case CTK_TEXT_ALIGNMENT_RIGHT:
-		dest.x = rect.w - text->w;
+		x = rect.w - text_w;
 		break;
 	}
 
-	dest.y = (rect.h - text->h) / 2.0;
-	dest.w = text->w;
-	dest.h = text->h;
+	y = (rect.h - text_h) / 2.0;
 
-	SDL_RenderTexture(r, text, NULL, &dest);
-
-	SDL_DestroyTexture(text);
-
-	return true;
-}
-
-bool
-CTK_RenderSelectedText(SDL_Renderer            *r,
-                       char                    *str,
-                       const size_t             str_len,
-                       const SDL_FRect          rect,
-                       const int                cursor,
-                       const int                selection,
-                       const CTK_TextAlignment  ta,
-                       const SDL_Color          fg,
-                       const SDL_Color          fg_selected,
-                       const SDL_Color          bg,
-                       const SDL_Color          bg_selected)
-{
-	int          a;
-	int          b;
-	int          i;
-	SDL_FRect    subrect;
-	char         temp;
-	int          texts = 0;
-	SDL_Texture *text[3];
-	int          text_w = 0;
-
-	if (str_len <= 0) {
-		SDL_SetError("String len is null");
+	if (!TTF_DrawRendererText(text, x, y))
 		return false;
-	}
-
-	if (cursor > selection) {
-		a = selection;
-		b = cursor;
-	} else {
-		a = cursor;
-		b = selection;
-	}
-
-	if (a < 0) {
-		a = 0;
-	}
-	if (b < 0) {
-		b = 0;
-	}
-	if (a == b) {
-		return CTK_RenderText(r, str, str_len, rect, ta, fg, bg);
-	}
-
-	if (a > 0) {
-		temp = str[a];
-		str[a] = '\0';
-		text[texts] = CTK_CreateText(r, str, a, fg, bg);
-		if (NULL == text[texts]) {
-			return false;
-		}
-		str[a] = temp;
-		text_w += text[texts]->w;
-		texts++;
-	}
-
-	temp = str[b];
-	str[b] = '\0';
-	text[texts] = CTK_CreateText(r, &str[a], b - a, fg_selected, bg_selected);
-	if (NULL == text[texts]) {
-		return false;
-	}
-	str[b] = temp;
-	text_w += text[texts]->w;
-	texts++;
-
-	if ((size_t) b < str_len) {
-		text[texts] = CTK_CreateText(r, &str[b], str_len - b, fg, bg);
-		if (NULL == text[texts]) {
-			return false;
-		}
-		text_w += text[texts]->w;
-		texts++;
-	}
-
-	switch (ta) {
-	case CTK_TEXT_ALIGNMENT_LEFT:
-		subrect.x = 0;
-		break;
-
-	case CTK_TEXT_ALIGNMENT_CENTER:
-		subrect.x = (rect.w - text_w) / 2;
-		break;
-
-	case CTK_TEXT_ALIGNMENT_RIGHT:
-		subrect.x = rect.w - text_w;
-		break;
-	}
-	subrect.y = (rect.h - text[0]->h) / 2.0;
-
-	for (i = 0; i < texts; i++) {
-		subrect.w = text[i]->w;
-		subrect.h = text[i]->h;
-		SDL_RenderTexture(r, text[i], NULL, &subrect);
-		subrect.x += text[i]->w;
-		SDL_DestroyTexture(text[i]);
-	}
 
 	return true;
 }
@@ -1969,11 +1849,8 @@ CTK_SetWidgetText(CTK_Instance       *inst,
 {
 	int w, h;
 
-	strncpy(inst->text[widget], text, CTK_TEXT_SIZE - 1);
-	TTF_GetStringSize(CTK_font,
-	                  inst->text[widget],
-	                  strlen(inst->text[widget]),
-	                  &w, &h);
+	TTF_SetTextString(inst->text[widget], text, 0);
+	TTF_GetTextSize(inst->text[widget], &w, &h);
 	if (inst->border[widget]) {
 		w++;
 		h++;
@@ -1982,6 +1859,7 @@ CTK_SetWidgetText(CTK_Instance       *inst,
 		inst->rect[widget].w = w;
 	if (h > inst->rect[widget].h)
 		inst->rect[widget].h = h;
+
 	CTK_CreateWidgetTexture(inst, widget);
 }
 
@@ -2001,11 +1879,8 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
 {
 	int w, h;
 
-	strncpy(inst->text[widget], text, CTK_TEXT_SIZE - 1);
-	TTF_GetStringSize(CTK_font,
-	                  inst->text[widget],
-	                  strlen(inst->text[widget]),
-	                  &w, &h);
+	TTF_SetTextString(inst->text[widget], text, 0);
+	TTF_GetTextSize(inst->text[widget], &w, &h);
 	if (inst->border[widget]) {
 		w++;
 		h++;
@@ -2101,27 +1976,24 @@ CTK_TickInstance(CTK_Instance *inst)
 			fw = CTK_GetFocusedWidget(inst);
 
 			if (inst->cursor[fw] < inst->selection[fw]) {
-				CTK_StrCut(inst->text[fw],
-				           inst->cursor[fw],
-				           inst->selection[fw] -
-				           inst->cursor[fw]);
+				TTF_DeleteTextString(inst->text[fw],
+				                     inst->cursor[fw],
+				                     inst->selection[fw] -
+				                     inst->cursor[fw]);
 			} else if (inst->cursor[fw] > inst->selection[fw]) {
-				CTK_StrCut(inst->text[fw],
-				           inst->selection[fw],
-				           inst->cursor[fw] -
-				           inst->selection[fw]);
+				TTF_DeleteTextString(inst->text[fw],
+				                     inst->selection[fw],
+				                     inst->cursor[fw] -
+				                     inst->selection[fw]);
 				inst->cursor[fw] -= inst->cursor[fw] -
 				                    inst->selection[fw];
 			}
 
-			if (strlen(inst->text[fw]) + strlen(e.text.text) <
-			    CTK_TEXT_SIZE) {
-				inst->cursor[fw] += CTK_StrInsert(inst->text[fw],
-					                          CTK_TEXT_SIZE,
-					                          inst->cursor[fw],
-					                          e.text.text);
-				inst->selection[fw] = inst->cursor[fw];
-			}
+			TTF_InsertTextString(inst->text[fw],
+			                     inst->cursor[fw],
+			                     e.text.text, 0);
+			inst->cursor[fw] += strlen(e.text.text);
+			inst->selection[fw] = inst->cursor[fw];
 
 			CTK_CreateWidgetTexture(inst, fw);
 			break;
@@ -2206,17 +2078,17 @@ CTK_UpdatePrimarySelection(CTK_Instance *inst,
 	if (inst->cursor[w] > inst->selection[w]) {
 		start = inst->selection[w];
 		end = inst->cursor[w];
-		temp = inst->text[w][end];
-		inst->text[w][end] = '\0';
-		SDL_SetPrimarySelectionText(&inst->text[w][start]);
-		inst->text[w][end] = temp;
+		temp = inst->text[w]->text[end];
+		inst->text[w]->text[end] = '\0';
+		SDL_SetPrimarySelectionText(&inst->text[w]->text[start]);
+		inst->text[w]->text[end] = temp;
 	} else if (inst->cursor[w] < inst->selection[w]) {
 		start = inst->cursor[w];
 		end = inst->selection[w];
-		temp = inst->text[w][end];
-		inst->text[w][end] = '\0';
-		SDL_SetPrimarySelectionText(&inst->text[w][start]);
-		inst->text[w][end] = temp;
+		temp = inst->text[w]->text[end];
+		inst->text[w]->text[end] = '\0';
+		SDL_SetPrimarySelectionText(&inst->text[w]->text[start]);
+		inst->text[w]->text[end] = temp;
 	}
 }
 

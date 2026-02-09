@@ -70,7 +70,9 @@ Many expect the text next to a checkbox or radiobutton to register clicks too.
 # 0.4.0
 
 - [ ] add mouse based navigation to entry
+see `TTF_GetTextSubStringForPoint`
 - [ ] add mouse based selection to entry
+see `TTF_GetTextSubStringForLine`
 - [ ] add entry primary selection text paste
 - [ ] add entry primary selection text paste while selection
 yes, this makes sense, you did not misread
@@ -95,11 +97,15 @@ because it will depend on the mouse position and doesn't use the cursor at all
 - [x] replace instance motion callback with a widget motion callback
 - [x] add alternate colors for widgets that are hovered on
 
-- [ ] rename inst->motion to inst->mouse_motion for parity
-- [ ] replace inst->mouse_motion's x and y with the event for parity
+- [x] rework widget text to rely on `TTF_Text`
+This allows infinite text length, replaces "CTK_string.h",
+and will very likely improve UTF-8 and localization support later on.
+It probably also improves performance, and makes me a sandvich.
 
-- [ ] entry text drawing is sometimes blurry
-It's probably these god damn floats again! Purge = instawin?
+- [ ] fix text selection bg struggling with the str end
+- [ ] fix text selection bg and cursor not ending at the same point
+- [ ] port fg_selected into the new system
+Attention, this is where text got blurry, especially around hyphens!
 
 - [ ] add visual scrolling to entries
 

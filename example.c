@@ -58,7 +58,7 @@ btnCounterTrigger(CTK_Instance               *inst,
 
 	(void) widget;
 
-	i = strtol(inst->text[lbl_counter], NULL, 10);
+	i = strtol(inst->text[lbl_counter]->text, NULL, 10);
 	i++;
 	snprintf(str, str_size, "%li", i);
 	CTK_SetWidgetText(inst, lbl_counter, str);

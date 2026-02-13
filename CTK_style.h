@@ -29,7 +29,6 @@ typedef struct CTK_Style {
 	SDL_Color border;
 	SDL_Color fg;
 	SDL_Color fg_disabled;
-	SDL_Color fg_selected;
 	SDL_Color focus;
 	SDL_Color radiobutton;
 	SDL_Color scale_slider;
@@ -121,9 +120,9 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg_scale_hovered.b = 0xc3,
 	.bg_scale_hovered.a = 0xff,
 
-	.bg_selected.r = 0x48,
-	.bg_selected.g = 0x68,
-	.bg_selected.b = 0x87,
+	.bg_selected.r = 0x7c,
+	.bg_selected.g = 0xb0,
+	.bg_selected.b = 0xe2,
 	.bg_selected.a = 0xff,
 
 	.bg_widget.r = 0x00,
@@ -150,11 +149,6 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.fg_disabled.g = 0xa4,
 	.fg_disabled.b = 0xa4,
 	.fg_disabled.a = 0xff,
-
-	.fg_selected.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.fg_selected.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.fg_selected.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.fg_selected.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
 
 	.focus.r = 0x48,
 	.focus.g = 0x68,

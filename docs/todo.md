@@ -116,10 +116,10 @@ It's way too finicky.
 
 - [x] fix alphabetical ordering of `CTK_InstanceDefaultQuit`
 
-- [ ] remove `fg_selected` from style and adjust `bg_selected`
+- [x] remove `fg_selected` from style and adjust `bg_selected`
 Due to `fg_selected` being removed,
 `bg_selected` needs to be adjusted for contrast.
-*Sigh*, another diversion from Tcl/Tk.
+*Sigh*, another diversion from Tcl/Tk, but I just inverted the black value.
 
 - [ ] add visual scrolling to entries
 

@@ -112,7 +112,9 @@ I would need to create three `TTF_Text`s to split by color.
 I am afraid this will create unforessen bugs with direction, language, etc.
 It's way too finicky.
 
-- [ ] text: cursor pos and selection size use different measuring methods, unify
+- [x] unify text measurement for cursor pos and selection
+
+- [ ] Mainloop and MeasureText are incorrectly sorted in the source file (alphabetical order violated)
 
 - [ ] remove `fg_selected` from style and adjust `bg_selected`
 Due to `fg_selected` being removed,

@@ -331,6 +331,17 @@ CTK_IsWidgetVisible(const CTK_Instance *inst,
 void
 CTK_MainloopInstance(CTK_Instance *inst);
 
+/* @text: TTF_Text
+ * @start: position at which to start measuring the text
+ * @len: amount chars that should be measured
+ *
+ * Returns size in pixels of a TTF_Text portion.
+ */
+SDL_Rect
+CTK_MeasureTTFText(TTF_Text *text,
+                   size_t start,
+                   size_t len);
+
 void
 CTK_InstanceDefaultQuit(CTK_Instance *inst,
                         void         *dummy);
@@ -684,11 +695,10 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 {
 	size_t        a, b;
 	SDL_Color     fg;
-	size_t        i;
+	SDL_Rect      irect;
 	SDL_Renderer *r = NULL;
 	SDL_FRect     rect;
 	const int     numv = 3;
-	TTF_SubString first, cur;
 	SDL_Vertex    v[numv];
 
 	r = SDL_GetRenderer(inst->win);
@@ -740,27 +750,12 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 				b = inst->selection[widget];
 			}
 
-			TTF_GetTextSubString(inst->text[widget],
-			                     0,
-			                     &first);
-			rect.x = 0;
-			for (i = 0; i < a; i++) {
-				TTF_GetNextTextSubString(inst->text[widget],
-				                         &cur,
-				                         &cur);
-			}
-			rect.x = cur.rect.x;
+			irect = CTK_MeasureTTFText(inst->text[widget], a, b - a);
+			rect.x = irect.x;
+			rect.y = (inst->rect[widget].h - irect.h) / 2.0;
+			rect.w = irect.w;
+			rect.h = irect.h;
 
-			rect.w = 0;
-			for (i = a; i < b; i++) {
-				TTF_GetNextTextSubString(inst->text[widget],
-				                         &cur,
-				                         &cur);
-			}
-			rect.w = cur.rect.x - rect.x;
-
-			rect.h = first.rect.h;
-			rect.y = (inst->rect[widget].h - rect.h) / 2.0;
 			SDL_SetRenderDrawColor(r,
 					       inst->style.bg_selected.r,
 					       inst->style.bg_selected.g,
@@ -927,10 +922,10 @@ CTK_DestroyInstance(CTK_Instance *inst)
 void
 CTK_DrawInstance(CTK_Instance *inst)
 {
-	size_t i;
-	CTK_WidgetId fw;
+	size_t        i;
+	CTK_WidgetId  fw;
 	SDL_Renderer *r;
-	int          w;
+	SDL_Rect      rect;
 
 	fw = CTK_GetFocusedWidget(inst);
 
@@ -965,24 +960,17 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	/* cursor */
 	if (CTK_WTYPE_ENTRY == inst->type[fw]) {
-		if (inst->cursor[fw] <= 0) {
-			w = 0;
-		} else {
-			TTF_MeasureString(CTK_font,
-			                  inst->text[fw]->text,
-			                  inst->cursor[fw],
-			                  0,
-			                  &w, NULL);
-	        }
+		rect = CTK_MeasureTTFText(inst->text[fw], inst->cursor[fw], 0);
+
 		SDL_SetRenderDrawColor(r,
 			               inst->style.fg.r,
 			               inst->style.fg.g,
 			               inst->style.fg.b,
 			               inst->style.fg.a);
 		SDL_RenderLine(r,
-		               inst->rect[fw].x + w,
+		               inst->rect[fw].x + rect.x,
 		               inst->rect[fw].y + 2,
-		               inst->rect[fw].x + w,
+		               inst->rect[fw].x + rect.x,
 		               inst->rect[fw].y + inst->rect[fw].h - 3);
 	}
 
@@ -1714,6 +1702,39 @@ CTK_MainloopInstance(CTK_Instance *inst)
 			CTK_DrawInstance(inst);
 		}
 	}
+}
+
+/* @text: TTF_Text
+ * @start: position at which to start measuring the text
+ * @len: amount chars that should be measured
+ *
+ * Returns size in pixels of a TTF_Text portion.
+ */
+SDL_Rect
+CTK_MeasureTTFText(TTF_Text *text,
+                   size_t start,
+                   size_t len)
+{
+	TTF_SubString cur;
+	TTF_SubString first;
+	size_t        i;
+	SDL_Rect      ret;
+
+	TTF_GetTextSubString(text, 0, &first);
+	ret.x = 0;
+	for (i = 0; i < start; i++)
+		TTF_GetNextTextSubString(text, &cur, &cur);
+
+	ret.x = cur.rect.x;
+	ret.y = cur.rect.y;
+
+	for (i = start; i < (start + len); i++)
+		TTF_GetNextTextSubString(text, &cur, &cur);
+
+	ret.w = cur.rect.x - ret.x;
+	ret.h = first.rect.h;
+
+	return ret;
 }
 
 void

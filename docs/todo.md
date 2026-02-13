@@ -114,7 +114,7 @@ It's way too finicky.
 
 - [x] unify text measurement for cursor pos and selection
 
-- [ ] Mainloop and MeasureText are incorrectly sorted in the source file (alphabetical order violated)
+- [x] fix alphabetical ordering of `CTK_InstanceDefaultQuit`
 
 - [ ] remove `fg_selected` from style and adjust `bg_selected`
 Due to `fg_selected` being removed,

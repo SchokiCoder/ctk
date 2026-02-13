@@ -313,6 +313,10 @@ CTK_Init(const char *appname,
          const char *appversion,
          const char *appidentifier);
 
+void
+CTK_InstanceDefaultQuit(CTK_Instance *inst,
+                        void         *dummy);
+
 bool
 CTK_IsWidgetEnabled(const CTK_Instance *inst,
                     const CTK_WidgetId  widget);
@@ -341,10 +345,6 @@ SDL_Rect
 CTK_MeasureTTFText(TTF_Text *text,
                    size_t start,
                    size_t len);
-
-void
-CTK_InstanceDefaultQuit(CTK_Instance *inst,
-                        void         *dummy);
 
 bool
 CTK_RenderText(TTF_Text                *text,
@@ -1659,6 +1659,15 @@ CTK_Init(const char *appname,
 	return true;
 }
 
+void
+CTK_InstanceDefaultQuit(CTK_Instance *inst,
+                        void         *dummy)
+{
+	(void) dummy;
+
+	inst->active = false;
+}
+
 bool
 CTK_IsWidgetEnabled(const CTK_Instance *inst,
                     const CTK_WidgetId  widget)
@@ -1735,15 +1744,6 @@ CTK_MeasureTTFText(TTF_Text *text,
 	ret.h = first.rect.h;
 
 	return ret;
-}
-
-void
-CTK_InstanceDefaultQuit(CTK_Instance *inst,
-                        void         *dummy)
-{
-	(void) dummy;
-
-	inst->active = false;
 }
 
 bool

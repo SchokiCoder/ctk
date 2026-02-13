@@ -29,6 +29,7 @@ if not, postpone this task
 
 # 0.8.0
 
+- [ ] add tooltips
 - [ ] add more themes, especially a dark one
 - [ ] use `SDL_GetSystemTheme`
 - [ ] do themes contain default widget sizes?
@@ -102,10 +103,21 @@ This allows infinite text length, replaces "CTK_string.h",
 and will very likely improve UTF-8 and localization support later on.
 It probably also improves performance, and makes me a sandvich.
 
-- [ ] fix text selection bg struggling with the str end
-- [ ] fix text selection bg and cursor not ending at the same point
-- [ ] port fg_selected into the new system
+- [x] fix text selection bg being incorrectly measured
+This also sets whitespace visibility, because they have no size by default.
+
+- [x] ~~port fg_selected into the new system~~
 Attention, this is where text got blurry, especially around hyphens!
+I would need to create three `TTF_Text`s to split by color.
+I am afraid this will create unforessen bugs with direction, language, etc.
+It's way too finicky.
+
+- [ ] text: cursor pos and selection size use different measuring methods, unify
+
+- [ ] remove `fg_selected` from style and adjust `bg_selected`
+Due to `fg_selected` being removed,
+`bg_selected` needs to be adjusted for contrast.
+*Sigh*, another diversion from Tcl/Tk.
 
 - [ ] add visual scrolling to entries
 

@@ -599,6 +599,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->trigger_data[ret] = NULL;
 
 	inst->text[ret] = TTF_CreateText(inst->tengine, CTK_font, "", 0);
+	TTF_SetTextWrapWhitespaceVisible(inst->text[ret], true);
 
 	return ret;
 }
@@ -747,15 +748,16 @@ CTK_CreateWidgetTexture(CTK_Instance       *inst,
 				TTF_GetNextTextSubString(inst->text[widget],
 				                         &cur,
 				                         &cur);
-				rect.x += cur.rect.w;
 			}
+			rect.x = cur.rect.x;
+
 			rect.w = 0;
 			for (i = a; i < b; i++) {
 				TTF_GetNextTextSubString(inst->text[widget],
 				                         &cur,
 				                         &cur);
-				rect.w += cur.rect.w;
 			}
+			rect.w = cur.rect.x - rect.x;
 
 			rect.h = first.rect.h;
 			rect.y = (inst->rect[widget].h - rect.h) / 2.0;

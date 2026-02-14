@@ -125,22 +125,22 @@ typedef struct CTK_Instance {
 	CTK_WidgetId       visible_w[CTK_INSTANCE_MAX_WIDGETS];
 
 	/* widget data */
-	size_t             count;
+	size_t             widgets;
 	SDL_Color         *bg[CTK_INSTANCE_MAX_WIDGETS];
 	bool               border[CTK_INSTANCE_MAX_WIDGETS];
 	int                cursor[CTK_INSTANCE_MAX_WIDGETS];
 	int                group[CTK_INSTANCE_MAX_WIDGETS];
+	SDL_FRect          rect[CTK_INSTANCE_MAX_WIDGETS];
 	int                selection[CTK_INSTANCE_MAX_WIDGETS];
 	int                scroll[CTK_INSTANCE_MAX_WIDGETS];
 	SDL_Color         *slider[CTK_INSTANCE_MAX_WIDGETS];
 	TTF_Text          *text[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_TextAlignment  text_alignment[CTK_INSTANCE_MAX_WIDGETS];
+	SDL_Texture       *texture[CTK_INSTANCE_MAX_WIDGETS];
 	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_INSTANCE_MAX_WIDGETS];
 	unsigned int       value[CTK_INSTANCE_MAX_WIDGETS];
 	unsigned int       value_max[CTK_INSTANCE_MAX_WIDGETS];
-	SDL_FRect          rect[CTK_INSTANCE_MAX_WIDGETS];
-	SDL_Texture       *texture[CTK_INSTANCE_MAX_WIDGETS];
 
 	/* widget events */
 	void (*edit[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
@@ -604,10 +604,10 @@ CTK_AddScale(CTK_Instance *inst)
 CTK_WidgetId
 CTK_AddWidget(CTK_Instance *inst)
 {
-	CTK_WidgetId ret = inst->count;
+	CTK_WidgetId ret = inst->widgets;
 
-	inst->count++;
-	if (inst->count > CTK_INSTANCE_MAX_WIDGETS) {
+	inst->widgets++;
+	if (inst->widgets > CTK_INSTANCE_MAX_WIDGETS) {
 		SDL_SetError("Instance can not hold more widgets");
 		return -1;
 	}
@@ -878,7 +878,7 @@ CTK_CreateInstance(const char            *title,
 	inst->quit = CTK_InstanceDefaultQuit;
 	inst->quit_data = NULL;
 
-	inst->count = 0;
+	inst->widgets = 0;
 
 	inst->enabled_ws = 0;
 	inst->focusable_ws = 0;
@@ -1146,7 +1146,7 @@ CTK_DestroyInstance(CTK_Instance *inst)
 {
 	size_t i;
 
-	for (i = 0; i < inst->count; i++) {
+	for (i = 0; i < inst->widgets; i++) {
 		SDL_DestroyTexture(inst->texture[i]);
 		TTF_DestroyText(inst->text[i]);
 	}
@@ -2313,7 +2313,7 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 	if (inst->toggle[widget])
 		return;
 
-	for (i = 0; i < inst->count; i++) {
+	for (i = 0; i < inst->widgets; i++) {
 		if (inst->group[i] == inst->group[widget]) {
 			inst->toggle[i] = false;
 			CTK_CreateWidgetTexture(inst, i);

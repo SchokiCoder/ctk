@@ -72,7 +72,7 @@ ckbEnabledTrigger(CTK_Instance               *inst,
 
 	(void) data;
 
-	for (i = 6; i < inst->count; i++) {
+	for (i = 6; i < inst->widgets; i++) {
 		CTK_SetWidgetEnabled(inst, i, inst->toggle[widget]);
 	}
 
@@ -92,7 +92,7 @@ ckbFocusableTrigger(CTK_Instance               *inst,
 
 	(void) data;
 
-	for (i = 6; i < inst->count; i++) {
+	for (i = 6; i < inst->widgets; i++) {
 		CTK_SetWidgetFocusable(inst, i, inst->toggle[widget]);
 	}
 
@@ -111,7 +111,7 @@ ckbVisibleTrigger(CTK_Instance               *inst,
 
 	(void) data;
 
-	for (i = 6; i < inst->count; i++) {
+	for (i = 6; i < inst->widgets; i++) {
 		CTK_SetWidgetVisible(inst, i, inst->toggle[widget]);
 	}
 

@@ -142,7 +142,7 @@ unwieldy, large, and ugly. This is why we:
 This giant ass switch sure allows to DRY,
 but man this will get nastier and nastier by the day.
 
-- [ ] clean up `CTK_Instance` a bit
+- [x] clean up `CTK_Instance` a bit
 Fix some alphabetical order violations on instance's widget data,
 and rename "count" to "widgets" for consistency and clarity.
 

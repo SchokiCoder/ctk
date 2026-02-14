@@ -1,3 +1,9 @@
+- [ ] do we need to destroy and create texture each time we update the texture?
+The size of the texture may have not changed,
+which is the only reason to recreate the texture at this level.  
+Decoupling that introduces another thing to keep track of.
+Not sure if it's worth it.
+
 # 1.0.0
 
 - [ ] update version number
@@ -43,6 +49,8 @@ if so, a theme change should change them.
 # 0.7.0
 
 - [ ] add proper borders
+also move it to the widget style
+
 - [ ] make sure scale sliders are symmetric
 - [ ] add button click border change
 
@@ -146,16 +154,16 @@ but man this will get nastier and nastier by the day.
 Fix some alphabetical order violations on instance's widget data,
 and rename "count" to "widgets" for consistency and clarity.
 
-- [ ] do we need to destroy and create texture each time we update the texture?
-The size of the texture may have not changed ,which is the only reason to recreate the texture at this level.
+- [x] add style data for each widget
+Fg colors, bg colors, border, offsets, etc. will be used from here for its draw.
+The instance's style just brings the data down when a theme is applied.
+After that each widget's look is on its own.
+
+- [ ] find a term that unifies style's radiobutton and scale_slider
+- [ ] change style's `bg_selected` to `txt_selected`?
 
 - [ ] do we need to `TTF_SetTextColor` each time we update the texture?
 The color may have not changed at all.
-
-- [ ] add style data for each widget
-Fg colors, bg colors, border, offsets, etc. will be used from there for its looks.
-The instance's style just brings the data down when a theme is applied.
-After that each widget's look is on its own.
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant

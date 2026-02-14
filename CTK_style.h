@@ -7,33 +7,55 @@
 
 #include <SDL3/SDL_pixels.h>
 
+typedef enum CTK_TextAlignment {
+	CTK_TEXT_ALIGNMENT_LEFT,
+	CTK_TEXT_ALIGNMENT_CENTER,
+	CTK_TEXT_ALIGNMENT_RIGHT,
+} CTK_TextAlignment;
+
 typedef struct CTK_Style {
-	SDL_Color bg;
-	SDL_Color bg_button;
-	SDL_Color bg_button_hovered;
-	SDL_Color bg_checkbox;
-	SDL_Color bg_checkbox_hovered;
-	SDL_Color bg_entry;
-	SDL_Color bg_entry_hovered;
-	SDL_Color bg_label;
-	SDL_Color bg_label_hovered;
-	SDL_Color bg_progressbar;
-	SDL_Color bg_progressbar_hovered;
-	SDL_Color bg_radiobutton;
-	SDL_Color bg_radiobutton_hovered;
-	SDL_Color bg_scale;
-	SDL_Color bg_scale_hovered;
-	SDL_Color bg_selected;
-	SDL_Color bg_widget;
-	SDL_Color bg_widget_hovered;
-	SDL_Color border;
-	SDL_Color fg;
-	SDL_Color fg_disabled;
-	SDL_Color focus;
-	SDL_Color radiobutton;
-	SDL_Color scale_slider;
-	SDL_Color scale_slider_hovered;
+	SDL_Color         bg;
+	SDL_Color         bg_button;
+	SDL_Color         bg_button_hovered;
+	SDL_Color         bg_checkbox;
+	SDL_Color         bg_checkbox_hovered;
+	SDL_Color         bg_entry;
+	SDL_Color         bg_entry_hovered;
+	SDL_Color         bg_label;
+	SDL_Color         bg_label_hovered;
+	SDL_Color         bg_progressbar;
+	SDL_Color         bg_progressbar_hovered;
+	SDL_Color         bg_radiobutton;
+	SDL_Color         bg_radiobutton_hovered;
+	SDL_Color         bg_scale;
+	SDL_Color         bg_scale_hovered;
+	SDL_Color         bg_selected;
+	SDL_Color         bg_widget;
+	SDL_Color         bg_widget_hovered;
+	SDL_Color         border;
+	SDL_Color         fg;
+	SDL_Color         fg_disabled;
+	SDL_Color         focus;
+	SDL_Color         radiobutton;
+	SDL_Color         scale_slider;
+	SDL_Color         scale_slider_hovered;
+	CTK_TextAlignment txt_align_button;
+	CTK_TextAlignment txt_align_entry;
+	CTK_TextAlignment txt_align_label;
 } CTK_Style;
+
+typedef struct CTK_WidgetStyle {
+	SDL_Color         bg;
+	SDL_Color         bg_hovered;
+	SDL_Color         bg_selected;
+	SDL_Color         border;
+	SDL_Color         fg;
+	SDL_Color         fg_disabled;
+	SDL_Color         radiobutton;
+	SDL_Color         scale_slider;
+	SDL_Color         scale_slider_hovered;
+	CTK_TextAlignment txt_align;
+} CTK_WidgetStyle;
 
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY 0xff
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_A    0xff
@@ -169,6 +191,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.scale_slider_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
 	.scale_slider_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
 	.scale_slider_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+
+	.txt_align_button = CTK_TEXT_ALIGNMENT_CENTER,
+	.txt_align_entry = CTK_TEXT_ALIGNMENT_LEFT,
+	.txt_align_label = CTK_TEXT_ALIGNMENT_LEFT,
 };
 
 #endif /* _CTK_STYLE_H */

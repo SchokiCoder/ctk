@@ -3,7 +3,6 @@
  */
 
 #define CTK_IMPLEMENTATION
-#define CTK_TEXT_SIZE 20
 #include "CTK.h"
 
 #include <stdio.h>

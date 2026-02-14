@@ -52,23 +52,12 @@ if so, a theme change should change them.
 
 # 0.6.0
 
-- [ ] make all the data needed for drawing available in a "style" property
-Thus drawing will be fully declarative.
-- [ ] add text drawing to checkbox and radiobutton
-This also works as a hitbox of course.
-Many expect the text next to a checkbox or radiobutton to register clicks too.
-`text_alignment` will tell which side the text is on.
-
-- [ ] update version number
-
-# 0.5.0
-
 - [ ] add a way to grid widgets
 - [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] update version number
 
-# 0.4.0
+# 0.5.0
 
 - [ ] add mouse based navigation to entry
 see `TTF_GetTextSubStringForPoint`
@@ -82,12 +71,23 @@ because it will depend on the mouse position and doesn't use the cursor at all
 
 - [ ] update version number
 
-# 0.3.0
+# 0.4.0
 
 - [ ] add menubar
 - [ ] add menubar accelerators
 
 - [ ] add mnemonics
+
+- [ ] update version number
+
+# 0.3.0
+
+- [ ] add visual scrolling to entries
+
+- [ ] add text drawing to checkbox and radiobutton
+This also works as a hitbox of course.
+Many expect the text next to a checkbox or radiobutton to register clicks too.
+`text_alignment` will tell which side the text is on.
 
 - [ ] update version number
 
@@ -121,7 +121,49 @@ Due to `fg_selected` being removed,
 `bg_selected` needs to be adjusted for contrast.
 *Sigh*, another diversion from Tcl/Tk, but I just inverted the black value.
 
-- [ ] add visual scrolling to entries
+- [x] ~~make all the data needed for drawing available in properties~~
+~~Thus drawing will be fully declarative.
+Generate a "content" texture.
+This will be drawn on the bg rect.
+It may be offset by padding and scroll values.
+On that, with the outer pixels, will be the border.~~  
+I tried to do it fully declarative, but man is this complex.
+I tried to add an array of visuals, which is an enum/struct type,
+differentiating between texts, rects, filled rects, circles, etc.  
+So this would really just add a step to the create texture process,
+where based on the widget, we create or update visuals,
+and then create or update the texture.
+We would take data, to create data, to create a texture,
+whereas now we take data, to create a texture.  
+I think this effort stems from the feeling that `CTK_CreateWidgetTexture` got
+unwieldy, large, and ugly. This is why we:  
+
+- [x] tidy drawing by having a createTexture function for each widget type
+This giant ass switch sure allows to DRY,
+but man this will get nastier and nastier by the day.
+
+- [ ] clean up `CTK_Instance` a bit
+Fix some alphabetical order violations on instance's widget data,
+and rename "count" to "widgets" for consistency and clarity.
+
+- [ ] do we need to destroy and create texture each time we update the texture?
+The size of the texture may have not changed ,which is the only reason to recreate the texture at this level.
+
+- [ ] do we need to `TTF_SetTextColor` each time we update the texture?
+The color may have not changed at all.
+
+- [ ] add style data for each widget
+Fg colors, bg colors, border, offsets, etc. will be used from there for its looks.
+The instance's style just brings the data down when a theme is applied.
+After that each widget's look is on its own.
+
+- [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
+making them similar to the Tcl/Tk variant
+
+- [ ] actually, we can have fg_selected for entries. why?
+we need multiple `TTF_Text`s anyway, because combobox will need it for sure
+It will just be slightly less efficient data wise because we need to copy
+the real data text into three ttf texts
 
 - [ ] update version number
 

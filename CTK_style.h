@@ -29,33 +29,48 @@ typedef struct CTK_Style {
 	SDL_Color         bg_radiobutton_hovered;
 	SDL_Color         bg_scale;
 	SDL_Color         bg_scale_hovered;
-	SDL_Color         bg_selected;
 	SDL_Color         bg_widget;
 	SDL_Color         bg_widget_hovered;
+	SDL_Color         body_radiobutton;
+	SDL_Color         body_radiobutton_hovered;
+	SDL_Color         body_scale;
+	SDL_Color         body_scale_hovered;
 	SDL_Color         border;
-	SDL_Color         fg;
-	SDL_Color         fg_disabled;
+	SDL_Color         fg_checkbox;
+	SDL_Color         fg_progressbar;
+	SDL_Color         fg_radiobutton;
+	SDL_Color         fg_scale;
 	SDL_Color         focus;
-	SDL_Color         radiobutton;
-	SDL_Color         scale_slider;
-	SDL_Color         scale_slider_hovered;
-	CTK_TextAlignment txt_align_button;
-	CTK_TextAlignment txt_align_entry;
-	CTK_TextAlignment txt_align_label;
+	CTK_TextAlignment text_align_button;
+	CTK_TextAlignment text_align_entry;
+	CTK_TextAlignment text_align_label;
+	SDL_Color         text_bg_selected;
+	SDL_Color         text_button;
+	SDL_Color         text_button_disabled;
+	SDL_Color         text_entry;
+	SDL_Color         text_entry_disabled;
+	SDL_Color         text_label;
+	SDL_Color         text_label_disabled;
 } CTK_Style;
 
 typedef struct CTK_WidgetStyle {
 	SDL_Color         bg;
 	SDL_Color         bg_hovered;
-	SDL_Color         bg_selected;
+	SDL_Color         body;
+	SDL_Color         body_hovered;
 	SDL_Color         border;
 	SDL_Color         fg;
-	SDL_Color         fg_disabled;
-	SDL_Color         radiobutton;
-	SDL_Color         scale_slider;
-	SDL_Color         scale_slider_hovered;
-	CTK_TextAlignment txt_align;
+	CTK_TextAlignment text_align;
+	SDL_Color         text;
+	SDL_Color         text_bg_selected;
+	SDL_Color         text_disabled;
 } CTK_WidgetStyle;
+
+#define CTK_THEME_TCLTK_TEXT_GRAY 0x00
+#define CTK_THEME_TCLTK_TEXT_A    0xff
+
+#define CTK_THEME_TCLTK_TEXT_DISABLED_GRAY 0xa4
+#define CTK_THEME_TCLTK_TEXT_DISABLED_A    0xff
 
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY 0xff
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_A    0xff
@@ -142,11 +157,6 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg_scale_hovered.b = 0xc3,
 	.bg_scale_hovered.a = 0xff,
 
-	.bg_selected.r = 0x7c,
-	.bg_selected.g = 0xb0,
-	.bg_selected.b = 0xe2,
-	.bg_selected.a = 0xff,
-
 	.bg_widget.r = 0x00,
 	.bg_widget.g = 0x00,
 	.bg_widget.b = 0x00,
@@ -157,44 +167,94 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg_widget_hovered.b = 0x00,
 	.bg_widget_hovered.a = 0x00,
 
+	.body_radiobutton.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_radiobutton.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_radiobutton.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_radiobutton.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+	.body_radiobutton_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_radiobutton_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_radiobutton_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_radiobutton_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+	.body_scale.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.body_scale.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.body_scale.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.body_scale.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+	.body_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.body_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.body_scale_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.body_scale_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+
 	.border.r = 0x83,
 	.border.g = 0x83,
 	.border.b = 0x83,
 	.border.a = 0xff,
 
-	.fg.r = 0x00,
-	.fg.g = 0x00,
-	.fg.b = 0x00,
-	.fg.a = 0xff,
+	.fg_checkbox.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_checkbox.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_checkbox.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_checkbox.a = CTK_THEME_TCLTK_TEXT_A,
 
-	.fg_disabled.r = 0xa4,
-	.fg_disabled.g = 0xa4,
-	.fg_disabled.b = 0xa4,
-	.fg_disabled.a = 0xff,
+	.fg_progressbar.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_progressbar.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_progressbar.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_progressbar.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.fg_radiobutton.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_radiobutton.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_radiobutton.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_radiobutton.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.fg_scale.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_scale.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_scale.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.fg_scale.a = CTK_THEME_TCLTK_TEXT_A,
 
 	.focus.r = 0x48,
 	.focus.g = 0x68,
 	.focus.b = 0x87,
 	.focus.a = 0xff,
 
-	.radiobutton.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.radiobutton.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.radiobutton.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.radiobutton.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+	.text_align_button = CTK_TEXT_ALIGNMENT_CENTER,
+	.text_align_entry = CTK_TEXT_ALIGNMENT_LEFT,
+	.text_align_label = CTK_TEXT_ALIGNMENT_LEFT,
 
-	.scale_slider.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.scale_slider.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.scale_slider.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.scale_slider.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+	.text_bg_selected.r = 0x7c,
+	.text_bg_selected.g = 0xb0,
+	.text_bg_selected.b = 0xe2,
+	.text_bg_selected.a = 0xff,
 
-	.scale_slider_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.scale_slider_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.scale_slider_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.scale_slider_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+	.text_button.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_button.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_button.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_button.a = CTK_THEME_TCLTK_TEXT_A,
 
-	.txt_align_button = CTK_TEXT_ALIGNMENT_CENTER,
-	.txt_align_entry = CTK_TEXT_ALIGNMENT_LEFT,
-	.txt_align_label = CTK_TEXT_ALIGNMENT_LEFT,
+	.text_button_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_button_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_button_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_button_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+
+	.text_entry.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_entry.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_entry.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_entry.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.text_entry_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_entry_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_entry_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_entry_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+
+	.text_label.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_label.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_label.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.text_label.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.text_label_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_label_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_label_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.text_label_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
 };
 
 #endif /* _CTK_STYLE_H */

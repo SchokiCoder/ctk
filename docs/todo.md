@@ -159,14 +159,22 @@ Fg colors, bg colors, border, offsets, etc. will be used from here for its draw.
 The instance's style just brings the data down when a theme is applied.
 After that each widget's look is on its own.
 
-- [ ] find a term that unifies style's radiobutton and scale_slider
-- [ ] change style's `bg_selected` to `txt_selected`?
+- [x] rename some style properties and add text color variants
+Buttons, entries, labels, have their own text color in `CTK_Style` now.
+`fg` has been mostly for text. It is now explicity `text`,
+but the other cases keep `fg`.
+`bg_selected` was misleading since it didn't chane the entire bg area.
+It is now `text_bg_selected`.
+`radiobutton` and `scale_slider` are now `body_`.
+
+- [ ] are all widgets correctly colored when disabled?
 
 - [ ] do we need to `TTF_SetTextColor` each time we update the texture?
 The color may have not changed at all.
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant
+checkbox will need a "body" color variant in style struct.
 
 - [ ] actually, we can have fg_selected for entries. why?
 we need multiple `TTF_Text`s anyway, because combobox will need it for sure

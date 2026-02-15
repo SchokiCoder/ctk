@@ -189,7 +189,9 @@ which in default theme functionally replace each bg.
 Entries body (was bg), checkbox body, and radiobutton body were too bright.
 Also radiobutton now actually cares about its body color.
 
-- [ ] change some fg coloring for parity with Tcl/Tk (dark blue, not black)
+- [x] change some Tcl/Tk theme fg coloring for parity
+Use dark blue, not black.
+Also remove unused fg from scale
 
 - [ ] add disabled style to scale
 This is also a good opportunity to ensure a parallel look of the slider,

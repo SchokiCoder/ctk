@@ -707,7 +707,6 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body = theme.body_scale;
 		inst->wstyle[w].body_disabled = theme.body_scale_disabled;
 		inst->wstyle[w].body_hovered = theme.body_scale_hovered;
-		inst->wstyle[w].fg = theme.fg_scale;
 		break;
 	}
 

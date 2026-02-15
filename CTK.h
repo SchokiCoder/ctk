@@ -22,22 +22,7 @@
 /* Constant defines
  */
 
-#define CTK_DEFAULT_BUTTON_W         80
-#define CTK_DEFAULT_BUTTON_H         27
-#define CTK_DEFAULT_CHECKBOX_W       CTK_DEFAULT_BUTTON_H - 4
-#define CTK_DEFAULT_CHECKBOX_H       CTK_DEFAULT_BUTTON_H - 4
-#define CTK_DEFAULT_CHECKBOX_FILL    0.7
-#define CTK_DEFAULT_ENTRY_W          165
-#define CTK_DEFAULT_ENTRY_H          CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_FONTSIZE         11
-#define CTK_DEFAULT_LABEL_H          CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_PROGRESSBAR_W    CTK_DEFAULT_BUTTON_W
-#define CTK_DEFAULT_PROGRESSBAR_H    CTK_DEFAULT_BUTTON_H
-#define CTK_DEFAULT_RADIOBUTTON_W    CTK_DEFAULT_CHECKBOX_W
-#define CTK_DEFAULT_RADIOBUTTON_H    CTK_DEFAULT_CHECKBOX_H
-#define CTK_DEFAULT_RADIOBUTTON_FILL CTK_DEFAULT_CHECKBOX_FILL
-#define CTK_DEFAULT_SCALE_W          CTK_DEFAULT_BUTTON_W
-#define CTK_DEFAULT_SCALE_H          CTK_DEFAULT_BUTTON_H
 #define CTK_DEFAULT_THEME            CTK_Theme_TclTk
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
 #define CTK_DEFAULT_MAX_FRAMERATE    60
@@ -464,8 +449,6 @@ CTK_AddButton(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_BUTTON;
-	inst->rect[ret].w = CTK_DEFAULT_BUTTON_W;
-	inst->rect[ret].h = CTK_DEFAULT_BUTTON_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -485,8 +468,6 @@ CTK_AddCheckbox(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_CHECKBOX;
-	inst->rect[ret].w = CTK_DEFAULT_CHECKBOX_W;
-	inst->rect[ret].h = CTK_DEFAULT_CHECKBOX_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -506,8 +487,6 @@ CTK_AddEntry(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_ENTRY;
-	inst->rect[ret].w = CTK_DEFAULT_ENTRY_W;
-	inst->rect[ret].h = CTK_DEFAULT_ENTRY_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -524,7 +503,6 @@ CTK_AddLabel(CTK_Instance *inst)
 	inst->enabled_ws++;
 
 	inst->type[ret] = CTK_WTYPE_LABEL;
-	inst->rect[ret].h = CTK_DEFAULT_LABEL_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -543,8 +521,6 @@ CTK_AddProgressbar(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
 	inst->value_max[ret] = 100;
-	inst->rect[ret].w = CTK_DEFAULT_PROGRESSBAR_W;
-	inst->rect[ret].h = CTK_DEFAULT_PROGRESSBAR_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -565,8 +541,6 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->group[ret] = 0;
 	inst->type[ret] = CTK_WTYPE_RADIOBUTTON;
-	inst->rect[ret].w = CTK_DEFAULT_RADIOBUTTON_W;
-	inst->rect[ret].h = CTK_DEFAULT_RADIOBUTTON_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -587,8 +561,6 @@ CTK_AddScale(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
 	inst->value_max[ret] = 100;
-	inst->rect[ret].w = CTK_DEFAULT_SCALE_W;
-	inst->rect[ret].h = CTK_DEFAULT_SCALE_H;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -663,6 +635,8 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_BUTTON:
+		inst->rect[w].h = theme.size_h_button;
+		inst->rect[w].w = theme.size_w_button;
 		inst->wstyle[w].bg = theme.bg_button;
 		inst->wstyle[w].bg_hovered = theme.bg_button_hovered;
 		inst->wstyle[w].text_align = theme.text_align_button;
@@ -671,12 +645,17 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_CHECKBOX:
+		inst->rect[w].h = theme.size_h_checkbox;
+		inst->rect[w].w = theme.size_w_checkbox;
 		inst->wstyle[w].bg = theme.bg_checkbox;
 		inst->wstyle[w].bg_hovered = theme.bg_checkbox_hovered;
 		inst->wstyle[w].fg = theme.fg_checkbox;
+		inst->wstyle[w].size_fillratio = theme.size_fillratio_checkbox;
 		break;
 
 	case CTK_WTYPE_ENTRY:
+		inst->rect[w].h = theme.size_h_entry;
+		inst->rect[w].w = theme.size_w_entry;
 		inst->wstyle[w].bg = theme.bg_entry;
 		inst->wstyle[w].bg_hovered = theme.bg_entry_hovered;
 		inst->wstyle[w].text_align = theme.text_align_entry;
@@ -685,6 +664,8 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_LABEL:
+		inst->rect[w].h = theme.size_h_label;
+		inst->rect[w].w = theme.size_w_label;
 		inst->wstyle[w].bg = theme.bg_label;
 		inst->wstyle[w].bg_hovered = theme.bg_label_hovered;
 		inst->wstyle[w].text_align = theme.text_align_label;
@@ -693,20 +674,27 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		break;
 
 	case CTK_WTYPE_PROGRESSBAR:
+		inst->rect[w].h = theme.size_h_progressbar;
+		inst->rect[w].w = theme.size_w_progressbar;
 		inst->wstyle[w].bg = theme.bg_progressbar;
 		inst->wstyle[w].bg_hovered = theme.bg_progressbar_hovered;
 		inst->wstyle[w].fg = theme.fg_progressbar;
 		break;
 
 	case CTK_WTYPE_RADIOBUTTON:
+		inst->rect[w].h = theme.size_h_radiobutton;
+		inst->rect[w].w = theme.size_w_radiobutton;
 		inst->wstyle[w].bg = theme.bg_radiobutton;
 		inst->wstyle[w].bg_hovered = theme.bg_radiobutton_hovered;
 		inst->wstyle[w].body = theme.body_radiobutton;
 		inst->wstyle[w].body_hovered = theme.body_radiobutton_hovered;
 		inst->wstyle[w].fg = theme.fg_radiobutton;
+		inst->wstyle[w].size_fillratio = theme.size_fillratio_radiobutton;
 		break;
 
 	case CTK_WTYPE_SCALE:
+		inst->rect[w].h = theme.size_h_scale;
+		inst->rect[w].w = theme.size_w_scale;
 		inst->wstyle[w].bg = theme.bg_scale;
 		inst->wstyle[w].bg_hovered = theme.bg_scale_hovered;
 		inst->wstyle[w].body = theme.body_scale;
@@ -822,12 +810,12 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 	if (inst->toggle[ckb]) {
 		rect.x = (inst->rect[ckb].w -
 		          inst->rect[ckb].w *
-		          CTK_DEFAULT_CHECKBOX_FILL) / 2.0;
+		          inst->wstyle[ckb].size_fillratio) / 2.0;
 		rect.y = (inst->rect[ckb].h -
 		          inst->rect[ckb].h *
-		          CTK_DEFAULT_CHECKBOX_FILL) / 2.0;
-		rect.w = inst->rect[ckb].w * CTK_DEFAULT_CHECKBOX_FILL;
-		rect.h = inst->rect[ckb].h * CTK_DEFAULT_CHECKBOX_FILL;
+		          inst->wstyle[ckb].size_fillratio) / 2.0;
+		rect.w = inst->rect[ckb].w * inst->wstyle[ckb].size_fillratio;
+		rect.h = inst->rect[ckb].h * inst->wstyle[ckb].size_fillratio;
 		SDL_SetRenderDrawColor(r,
 				       inst->wstyle[ckb].fg.r,
 				       inst->wstyle[ckb].fg.g,
@@ -1125,18 +1113,18 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	if (inst->toggle[rbn]) {
 		v[0].position.x = (inst->rect[rbn].w -
 		                  inst->rect[rbn].w *
-		                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
+		                  inst->wstyle[rbn].size_fillratio) / 2.0;
 		v[0].position.y = (inst->rect[rbn].h -
 		                  inst->rect[rbn].h *
-		                  CTK_DEFAULT_RADIOBUTTON_FILL) / 2.0;
+		                  inst->wstyle[rbn].size_fillratio) / 2.0;
 		v[0].color = CTK_ColorIntToFColor(inst->wstyle[rbn].fg);
 		v[1].position.x = v[0].position.x +
 		                  (inst->rect[rbn].w *
-		                  CTK_DEFAULT_RADIOBUTTON_FILL);
+		                  inst->wstyle[rbn].size_fillratio);
 		v[1].position.y = v[0].position.y;
 		v[1].color = CTK_ColorIntToFColor(inst->wstyle[rbn].fg);
 		v[2].position.y = inst->rect[rbn].h *
-		                  CTK_DEFAULT_RADIOBUTTON_FILL;
+		                  inst->wstyle[rbn].size_fillratio;
 		v[2].color = CTK_ColorIntToFColor(inst->wstyle[rbn].fg);
 		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 	}

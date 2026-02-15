@@ -41,6 +41,22 @@ typedef struct CTK_Style {
 	SDL_Color         fg_radiobutton;
 	SDL_Color         fg_scale;
 	SDL_Color         focus;
+	float             size_fillratio_checkbox;
+	float             size_fillratio_radiobutton;
+	size_t            size_h_button;
+	size_t            size_h_checkbox;
+	size_t            size_h_entry;
+	size_t            size_h_label;
+	size_t            size_h_progressbar;
+	size_t            size_h_radiobutton;
+	size_t            size_h_scale;
+	size_t            size_w_button;
+	size_t            size_w_checkbox;
+	size_t            size_w_entry;
+	size_t            size_w_label;
+	size_t            size_w_progressbar;
+	size_t            size_w_radiobutton;
+	size_t            size_w_scale;
 	CTK_TextAlignment text_align_button;
 	CTK_TextAlignment text_align_entry;
 	CTK_TextAlignment text_align_label;
@@ -60,6 +76,7 @@ typedef struct CTK_WidgetStyle {
 	SDL_Color         body_hovered;
 	SDL_Color         border;
 	SDL_Color         fg;
+	float             size_fillratio;
 	CTK_TextAlignment text_align;
 	SDL_Color         text;
 	SDL_Color         text_bg_selected;
@@ -74,6 +91,8 @@ typedef struct CTK_WidgetStyle {
 
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY 0xff
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_A    0xff
+
+#define CTK_THEME_TCLTK_WIDGET_HEIGHT 27
 
 #define CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY 0xed
 #define CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A    0xff
@@ -216,6 +235,23 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.focus.g = 0x68,
 	.focus.b = 0x87,
 	.focus.a = 0xff,
+
+	.size_fillratio_checkbox = 0.7,
+	.size_fillratio_radiobutton = 0.7,
+	.size_h_button = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_h_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_h_entry = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_h_label = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_h_progressbar = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_h_radiobutton = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_h_scale = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_w_button = 80,
+	.size_w_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_w_entry = 165,
+	.size_w_label = 80,
+	.size_w_progressbar = 100,
+	.size_w_radiobutton = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_w_scale = 100,
 
 	.text_align_button = CTK_TEXT_ALIGNMENT_CENTER,
 	.text_align_entry = CTK_TEXT_ALIGNMENT_LEFT,

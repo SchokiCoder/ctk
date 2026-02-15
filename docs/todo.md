@@ -4,11 +4,14 @@ which is the only reason to recreate the texture at this level.
 Decoupling that introduces another thing to keep track of.
 Not sure if it's worth it.
 
+- [ ] do we need to `TTF_SetTextColor` each time we update the texture?
+The color may have not changed at all.
+
 # 1.0.0
 
 - [ ] update version number
 
-# 0.10.0
+# 0.11.0
 
 - **thorough** compatibility tests
 (freebsd, abuse my relatives to test on their windows and apple machines)
@@ -19,7 +22,7 @@ Right now a click is just button release event on a widget, which might confuse.
 
 - [ ] update version number
 
-# 0.9.0
+# 0.10.0
 
 - [ ] is it fine to leak memory when exiting the application ?
 
@@ -33,7 +36,7 @@ if not, postpone this task
 
 - [ ] update version number
 
-# 0.8.0
+# 0.9.0
 
 - [ ] add tooltips
 - [ ] add more themes, especially a dark one
@@ -46,7 +49,7 @@ if so, a theme change should change them.
 
 - [ ] update version number
 
-# 0.7.0
+# 0.8.0
 
 - [ ] add proper borders
 also move it to the widget style
@@ -58,14 +61,14 @@ also move it to the widget style
 
 - [ ] update version number
 
-# 0.6.0
+# 0.7.0
 
 - [ ] add a way to grid widgets
 - [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] update version number
 
-# 0.5.0
+# 0.6.0
 
 - [ ] add mouse based navigation to entry
 see `TTF_GetTextSubStringForPoint`
@@ -76,6 +79,16 @@ see `TTF_GetTextSubStringForLine`
 yes, this makes sense, you did not misread
 this is down here
 because it will depend on the mouse position and doesn't use the cursor at all
+
+- [ ] update version number
+
+# 0.5.0
+
+- [ ] add combobox
+- [ ] actually, we can have fg_selected for entries. why?
+we need multiple `TTF_Text`s anyway, because combobox will need it for sure
+It will just be slightly less efficient data wise because we need to copy
+the real data text into three ttf texts
 
 - [ ] update version number
 
@@ -167,19 +180,14 @@ but the other cases keep `fg`.
 It is now `text_bg_selected`.
 `radiobutton` and `scale_slider` are now `body_`.
 
-- [ ] are all widgets correctly colored when disabled?
+- [x] add initial widget sizes to style struct
+This also moves the default values to the default theme then. Duh.
 
-- [ ] do we need to `TTF_SetTextColor` each time we update the texture?
-The color may have not changed at all.
+- [ ] are all widgets correctly colored when disabled?
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant
 checkbox will need a "body" color variant in style struct.
-
-- [ ] actually, we can have fg_selected for entries. why?
-we need multiple `TTF_Text`s anyway, because combobox will need it for sure
-It will just be slightly less efficient data wise because we need to copy
-the real data text into three ttf texts
 
 - [ ] update version number
 

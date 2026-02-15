@@ -54,7 +54,6 @@ if so, a theme change should change them.
 - [ ] add proper borders
 also move it to the widget style
 
-- [ ] make sure scale sliders are symmetric
 - [ ] add button click border change
 
 - [ ] a widget turning (un)focusable might change focused widget?
@@ -108,11 +107,11 @@ the real data text into three ttf texts
 - [ ] add text drawing to checkbox and radiobutton
 This also works as a hitbox of course.
 Many expect the text next to a checkbox or radiobutton to register clicks too.
-`text_alignment` will tell which side the text is on.
+~~`text_alignment` will tell which side the text is on.~~ <- this is dumb
 
 - [ ] update version number
 
-# 0.2.0
+# 0.2.0 Visual Cohesiveness Update
 
 - [x] add defines for the malloc functions
 
@@ -193,12 +192,16 @@ Also radiobutton now actually cares about its body color.
 Use dark blue, not black.
 Also remove unused fg from scale
 
-- [ ] add disabled style to scale
-This is also a good opportunity to ensure a parallel look of the slider,
-by just drawing two rects with borders around the point of value.
+- [x] change enabled style of scale
 Scales have no visual difference when disabled in OG Tcl/Tk.
+Enabled things also tend to be brighter, which it wasn't in the OG.
 This is one of these times were I don't mind diverging from the OG,
-since that is just broken.
+since that is just visually broken.
+
+- [ ] add disabled fg color?
+
+- [ ] make sure scale sliders are symmetric
+by just drawing two rects with borders around the point of value.
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant

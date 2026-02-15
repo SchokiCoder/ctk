@@ -247,10 +247,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.body_radiobutton_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.body_radiobutton_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
 
-	.body_scale.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.body_scale.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.body_scale.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.body_scale.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+	.body_scale.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_scale.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_scale.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_scale.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
 
 	.body_scale_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
 	.body_scale_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,

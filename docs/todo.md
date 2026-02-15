@@ -198,7 +198,7 @@ Enabled things also tend to be brighter, which it wasn't in the OG.
 This is one of these times were I don't mind diverging from the OG,
 since that is just visually broken.
 
-- [ ] add disabled fg color?
+- [x] add disabled fg color variants
 
 - [ ] make sure scale sliders are symmetric
 by just drawing two rects with borders around the point of value.

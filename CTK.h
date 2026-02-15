@@ -653,6 +653,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body_disabled = theme.body_checkbox_disabled;
 		inst->wstyle[w].body_hovered = theme.body_checkbox_hovered;
 		inst->wstyle[w].fg = theme.fg_checkbox;
+		inst->wstyle[w].fg_disabled = theme.fg_checkbox_disabled;
 		inst->wstyle[w].size_fillratio = theme.size_fillratio_checkbox;
 		break;
 
@@ -685,6 +686,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].bg = theme.bg_progressbar;
 		inst->wstyle[w].bg_hovered = theme.bg_progressbar_hovered;
 		inst->wstyle[w].fg = theme.fg_progressbar;
+		inst->wstyle[w].fg_disabled = theme.fg_progressbar_disabled;
 		break;
 
 	case CTK_WTYPE_RADIOBUTTON:
@@ -696,6 +698,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body_disabled = theme.body_radiobutton_disabled;
 		inst->wstyle[w].body_hovered = theme.body_radiobutton_hovered;
 		inst->wstyle[w].fg = theme.fg_radiobutton;
+		inst->wstyle[w].fg_disabled = theme.fg_radiobutton_disabled;
 		inst->wstyle[w].size_fillratio = theme.size_fillratio_radiobutton;
 		break;
 
@@ -794,49 +797,35 @@ void
 CTK_CreateCheckboxTexture(CTK_Instance       *inst,
                           const CTK_WidgetId  ckb)
 {
+	SDL_Color     bg_c;
+	SDL_Color     body_c;
+	SDL_Color     fg_c;
 	SDL_Renderer *r = NULL;
 	SDL_FRect     rect;
 
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != ckb) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[ckb].bg.r,
-		                       inst->wstyle[ckb].bg.g,
-		                       inst->wstyle[ckb].bg.b,
-		                       inst->wstyle[ckb].bg.a);
+		bg_c = inst->wstyle[ckb].bg;
+		body_c = inst->wstyle[ckb].body;
 	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[ckb].bg_hovered.r,
-		                       inst->wstyle[ckb].bg_hovered.g,
-		                       inst->wstyle[ckb].bg_hovered.b,
-		                       inst->wstyle[ckb].bg_hovered.a);
+		bg_c = inst->wstyle[ckb].bg_hovered;
+		body_c = inst->wstyle[ckb].body_hovered;
 	}
+	fg_c = inst->wstyle[ckb].fg;
+	if (!CTK_IsWidgetEnabled(inst, ckb)) {
+		body_c = inst->wstyle[ckb].body_disabled;
+		fg_c = inst->wstyle[ckb].fg_disabled;
+	}
+
+	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
 	rect.x = 0;
 	rect.y = 0;
 	rect.w = inst->rect[ckb].w;
 	rect.h = inst->rect[ckb].h;
-	if (!CTK_IsWidgetEnabled(inst, ckb)) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[ckb].body_disabled.r,
-		                       inst->wstyle[ckb].body_disabled.g,
-		                       inst->wstyle[ckb].body_disabled.b,
-		                       inst->wstyle[ckb].body_disabled.a);
-	} else if (inst->hovered_w != ckb) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[ckb].body.r,
-		                       inst->wstyle[ckb].body.g,
-		                       inst->wstyle[ckb].body.b,
-		                       inst->wstyle[ckb].body.a);
-	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[ckb].body_hovered.r,
-		                       inst->wstyle[ckb].body_hovered.g,
-		                       inst->wstyle[ckb].body_hovered.b,
-		                       inst->wstyle[ckb].body_hovered.a);
-	}
+	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderFillRect(r, &rect);
 
 	if (inst->toggle[ckb]) {
@@ -848,11 +837,7 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 		          inst->wstyle[ckb].size_fillratio) / 2.0;
 		rect.w = inst->rect[ckb].w * inst->wstyle[ckb].size_fillratio;
 		rect.h = inst->rect[ckb].h * inst->wstyle[ckb].size_fillratio;
-		SDL_SetRenderDrawColor(r,
-				       inst->wstyle[ckb].fg.r,
-				       inst->wstyle[ckb].fg.g,
-				       inst->wstyle[ckb].fg.b,
-				       inst->wstyle[ckb].fg.a);
+		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
 		SDL_RenderFillRect(r, &rect);
 	}
 
@@ -1060,24 +1045,24 @@ void
 CTK_CreateProgressbarTexture(CTK_Instance       *inst,
                              const CTK_WidgetId  pgb)
 {
+	SDL_Color     bg_c;
+	SDL_Color     fg_c;
 	SDL_Renderer *r = NULL;
 	SDL_FRect     rect;
 
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != pgb) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[pgb].bg.r,
-		                       inst->wstyle[pgb].bg.g,
-		                       inst->wstyle[pgb].bg.b,
-		                       inst->wstyle[pgb].bg.a);
+		bg_c = inst->wstyle[pgb].bg;
 	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[pgb].bg_hovered.r,
-		                       inst->wstyle[pgb].bg_hovered.g,
-		                       inst->wstyle[pgb].bg_hovered.b,
-		                       inst->wstyle[pgb].bg_hovered.a);
+		bg_c = inst->wstyle[pgb].bg_hovered;
 	}
+	fg_c = inst->wstyle[pgb].fg;
+	if (!CTK_IsWidgetEnabled(inst, pgb)) {
+		fg_c = inst->wstyle[pgb].fg_disabled;
+	}
+
+	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
 	rect.x = 0;
@@ -1086,11 +1071,7 @@ CTK_CreateProgressbarTexture(CTK_Instance       *inst,
 	         ((float) inst->value[pgb] /
 	          (float) inst->value_max[pgb]);
 	rect.h = inst->rect[pgb].h;
-	SDL_SetRenderDrawColor(r,
-			       inst->wstyle[pgb].fg.r,
-			       inst->wstyle[pgb].fg.g,
-			       inst->wstyle[pgb].fg.b,
-			       inst->wstyle[pgb].fg.a);
+	SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
 	SDL_RenderFillRect(r, &rect);
 
 	if (inst->border[pgb]) {
@@ -1114,7 +1095,9 @@ void
 CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
                              const CTK_WidgetId  rbn)
 {
+	SDL_Color     bg_c;
 	SDL_Color     body_c;
+	SDL_Color     fg_c;
 	SDL_Renderer *r = NULL;
 	const int     numv = 3;
 	SDL_Vertex    v[numv];
@@ -1122,18 +1105,19 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != rbn) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[rbn].bg.r,
-		                       inst->wstyle[rbn].bg.g,
-		                       inst->wstyle[rbn].bg.b,
-		                       inst->wstyle[rbn].bg.a);
+		bg_c = inst->wstyle[rbn].bg;
+		body_c = inst->wstyle[rbn].body;
 	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[rbn].bg_hovered.r,
-		                       inst->wstyle[rbn].bg_hovered.g,
-		                       inst->wstyle[rbn].bg_hovered.b,
-		                       inst->wstyle[rbn].bg_hovered.a);
+		bg_c = inst->wstyle[rbn].bg_hovered;
+		body_c = inst->wstyle[rbn].body_hovered;
 	}
+	fg_c = inst->wstyle[rbn].fg;
+	if (!CTK_IsWidgetEnabled(inst, rbn)) {
+		body_c = inst->wstyle[rbn].body_disabled;
+		fg_c = inst->wstyle[rbn].fg_disabled;
+	}
+
+	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
 	/* Technically this should be guarded by the border property,
@@ -1156,13 +1140,6 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	v[2].tex_coord.y = 0;
 	SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 
-	if (!CTK_IsWidgetEnabled(inst, rbn)) {
-		body_c = inst->wstyle[rbn].body_disabled;
-	} else if (inst->hovered_w != rbn) {
-		body_c = inst->wstyle[rbn].body;
-	} else {
-		body_c = inst->wstyle[rbn].body_hovered;
-	}
 	v[0].position.x++;
 	v[0].position.y++;
 	v[0].color = CTK_ColorIntToFColor(body_c);
@@ -1180,15 +1157,15 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 		v[0].position.y = (inst->rect[rbn].h -
 		                  inst->rect[rbn].h *
 		                  inst->wstyle[rbn].size_fillratio) / 2.0;
-		v[0].color = CTK_ColorIntToFColor(inst->wstyle[rbn].fg);
+		v[0].color = CTK_ColorIntToFColor(fg_c);
 		v[1].position.x = v[0].position.x +
 		                  (inst->rect[rbn].w *
 		                  inst->wstyle[rbn].size_fillratio);
 		v[1].position.y = v[0].position.y;
-		v[1].color = CTK_ColorIntToFColor(inst->wstyle[rbn].fg);
+		v[1].color = CTK_ColorIntToFColor(fg_c);
 		v[2].position.y = inst->rect[rbn].h *
 		                  inst->wstyle[rbn].size_fillratio;
-		v[2].color = CTK_ColorIntToFColor(inst->wstyle[rbn].fg);
+		v[2].color = CTK_ColorIntToFColor(fg_c);
 		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 	}
 }

@@ -45,8 +45,11 @@ typedef struct CTK_Style {
 	SDL_Color         body_scale_hovered;
 	SDL_Color         border;
 	SDL_Color         fg_checkbox;
+	SDL_Color         fg_checkbox_disabled;
 	SDL_Color         fg_progressbar;
+	SDL_Color         fg_progressbar_disabled;
 	SDL_Color         fg_radiobutton;
+	SDL_Color         fg_radiobutton_disabled;
 	SDL_Color         focus;
 	float             size_fillratio_checkbox;
 	float             size_fillratio_radiobutton;
@@ -84,6 +87,7 @@ typedef struct CTK_WidgetStyle {
 	SDL_Color         body_hovered;
 	SDL_Color         border;
 	SDL_Color         fg;
+	SDL_Color         fg_disabled;
 	float             size_fillratio;
 	CTK_TextAlignment text_align;
 	SDL_Color         text;
@@ -104,6 +108,9 @@ typedef struct CTK_WidgetStyle {
 #define CTK_THEME_TCLTK_WIDGET_FG_G 0x68
 #define CTK_THEME_TCLTK_WIDGET_FG_B 0x87
 #define CTK_THEME_TCLTK_WIDGET_FG_A 0xff
+
+#define CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY 0xa4
+#define CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A    0xff
 
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY 0xff
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_A    0xff
@@ -272,15 +279,30 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.fg_checkbox.b = CTK_THEME_TCLTK_WIDGET_FG_B,
 	.fg_checkbox.a = CTK_THEME_TCLTK_WIDGET_FG_A,
 
+	.fg_checkbox_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_checkbox_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_checkbox_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_checkbox_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
+
 	.fg_progressbar.r = CTK_THEME_TCLTK_WIDGET_FG_R,
 	.fg_progressbar.g = CTK_THEME_TCLTK_WIDGET_FG_G,
 	.fg_progressbar.b = CTK_THEME_TCLTK_WIDGET_FG_B,
 	.fg_progressbar.a = CTK_THEME_TCLTK_WIDGET_FG_A,
 
+	.fg_progressbar_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_progressbar_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_progressbar_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_progressbar_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
+
 	.fg_radiobutton.r = CTK_THEME_TCLTK_WIDGET_FG_R,
 	.fg_radiobutton.g = CTK_THEME_TCLTK_WIDGET_FG_G,
 	.fg_radiobutton.b = CTK_THEME_TCLTK_WIDGET_FG_B,
 	.fg_radiobutton.a = CTK_THEME_TCLTK_WIDGET_FG_A,
+
+	.fg_radiobutton_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_radiobutton_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_radiobutton_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+	.fg_radiobutton_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
 
 	.focus.r = 0x48,
 	.focus.g = 0x68,

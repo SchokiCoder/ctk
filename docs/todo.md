@@ -183,7 +183,20 @@ It is now `text_bg_selected`.
 - [x] add initial widget sizes to style struct
 This also moves the default values to the default theme then. Duh.
 
-- [ ] are all widgets correctly colored when disabled?
+- [x] fix coloring of some disabled widgets
+For this checkbox, and entry have been granted a body rect,
+which in default theme functionally replace each bg.
+Entries body (was bg), checkbox body, and radiobutton body were too bright.
+Also radiobutton now actually cares about its body color.
+
+- [ ] change some fg coloring for parity with Tcl/Tk (dark blue, not black)
+
+- [ ] add disabled style to scale
+This is also a good opportunity to ensure a parallel look of the slider,
+by just drawing two rects with borders around the point of value.
+Scales have no visual difference when disabled in OG Tcl/Tk.
+This is one of these times were I don't mind diverging from the OG,
+since that is just broken.
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant

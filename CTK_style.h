@@ -31,9 +31,17 @@ typedef struct CTK_Style {
 	SDL_Color         bg_scale_hovered;
 	SDL_Color         bg_widget;
 	SDL_Color         bg_widget_hovered;
+	SDL_Color         body_checkbox;
+	SDL_Color         body_checkbox_disabled;
+	SDL_Color         body_checkbox_hovered;
+	SDL_Color         body_entry;
+	SDL_Color         body_entry_disabled;
+	SDL_Color         body_entry_hovered;
 	SDL_Color         body_radiobutton;
+	SDL_Color         body_radiobutton_disabled;
 	SDL_Color         body_radiobutton_hovered;
 	SDL_Color         body_scale;
+	SDL_Color         body_scale_disabled;
 	SDL_Color         body_scale_hovered;
 	SDL_Color         border;
 	SDL_Color         fg_checkbox;
@@ -73,6 +81,7 @@ typedef struct CTK_WidgetStyle {
 	SDL_Color         bg;
 	SDL_Color         bg_hovered;
 	SDL_Color         body;
+	SDL_Color         body_disabled;
 	SDL_Color         body_hovered;
 	SDL_Color         border;
 	SDL_Color         fg;
@@ -88,6 +97,9 @@ typedef struct CTK_WidgetStyle {
 
 #define CTK_THEME_TCLTK_TEXT_DISABLED_GRAY 0xa4
 #define CTK_THEME_TCLTK_TEXT_DISABLED_A    0xff
+
+#define CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY 0xda
+#define CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A    0xff
 
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY 0xff
 #define CTK_THEME_TCLTK_WIDGET_INPUT_BG_A    0xff
@@ -186,10 +198,45 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg_widget_hovered.b = 0x00,
 	.bg_widget_hovered.a = 0x00,
 
+	.body_checkbox.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_checkbox.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_checkbox.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_checkbox.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+	.body_checkbox_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_checkbox_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_checkbox_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_checkbox_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
+
+	.body_checkbox_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_checkbox_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_checkbox_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_checkbox_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+	.body_entry.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_entry.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_entry.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_entry.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+	.body_entry_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_entry_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_entry_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_entry_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
+
+	.body_entry_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_entry_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_entry_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_entry_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
 	.body_radiobutton.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.body_radiobutton.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.body_radiobutton.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.body_radiobutton.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+	.body_radiobutton_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_radiobutton_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_radiobutton_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_radiobutton_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
 
 	.body_radiobutton_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.body_radiobutton_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
@@ -200,6 +247,11 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.body_scale.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.body_scale.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.body_scale.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+	.body_scale_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_scale_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_scale_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+	.body_scale_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
 
 	.body_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
 	.body_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,

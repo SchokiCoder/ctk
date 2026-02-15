@@ -649,6 +649,9 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->rect[w].w = theme.size_w_checkbox;
 		inst->wstyle[w].bg = theme.bg_checkbox;
 		inst->wstyle[w].bg_hovered = theme.bg_checkbox_hovered;
+		inst->wstyle[w].body = theme.body_checkbox;
+		inst->wstyle[w].body_disabled = theme.body_checkbox_disabled;
+		inst->wstyle[w].body_hovered = theme.body_checkbox_hovered;
 		inst->wstyle[w].fg = theme.fg_checkbox;
 		inst->wstyle[w].size_fillratio = theme.size_fillratio_checkbox;
 		break;
@@ -658,6 +661,9 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->rect[w].w = theme.size_w_entry;
 		inst->wstyle[w].bg = theme.bg_entry;
 		inst->wstyle[w].bg_hovered = theme.bg_entry_hovered;
+		inst->wstyle[w].body = theme.body_entry;
+		inst->wstyle[w].body_disabled = theme.body_entry_disabled;
+		inst->wstyle[w].body_hovered = theme.body_entry_hovered;
 		inst->wstyle[w].text_align = theme.text_align_entry;
 		inst->wstyle[w].text = theme.text_entry;
 		inst->wstyle[w].text_disabled = theme.text_entry_disabled;
@@ -687,6 +693,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].bg = theme.bg_radiobutton;
 		inst->wstyle[w].bg_hovered = theme.bg_radiobutton_hovered;
 		inst->wstyle[w].body = theme.body_radiobutton;
+		inst->wstyle[w].body_disabled = theme.body_radiobutton_disabled;
 		inst->wstyle[w].body_hovered = theme.body_radiobutton_hovered;
 		inst->wstyle[w].fg = theme.fg_radiobutton;
 		inst->wstyle[w].size_fillratio = theme.size_fillratio_radiobutton;
@@ -698,6 +705,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].bg = theme.bg_scale;
 		inst->wstyle[w].bg_hovered = theme.bg_scale_hovered;
 		inst->wstyle[w].body = theme.body_scale;
+		inst->wstyle[w].body_disabled = theme.body_scale_disabled;
 		inst->wstyle[w].body_hovered = theme.body_scale_hovered;
 		inst->wstyle[w].fg = theme.fg_scale;
 		break;
@@ -807,6 +815,31 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 	}
 	SDL_RenderClear(r);
 
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = inst->rect[ckb].w;
+	rect.h = inst->rect[ckb].h;
+	if (!CTK_IsWidgetEnabled(inst, ckb)) {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[ckb].body_disabled.r,
+		                       inst->wstyle[ckb].body_disabled.g,
+		                       inst->wstyle[ckb].body_disabled.b,
+		                       inst->wstyle[ckb].body_disabled.a);
+	} else if (inst->hovered_w != ckb) {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[ckb].body.r,
+		                       inst->wstyle[ckb].body.g,
+		                       inst->wstyle[ckb].body.b,
+		                       inst->wstyle[ckb].body.a);
+	} else {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[ckb].body_hovered.r,
+		                       inst->wstyle[ckb].body_hovered.g,
+		                       inst->wstyle[ckb].body_hovered.b,
+		                       inst->wstyle[ckb].body_hovered.a);
+	}
+	SDL_RenderFillRect(r, &rect);
+
 	if (inst->toggle[ckb]) {
 		rect.x = (inst->rect[ckb].w -
 		          inst->rect[ckb].w *
@@ -866,6 +899,31 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 		                       inst->wstyle[txt].bg_hovered.a);
 	}
 	SDL_RenderClear(r);
+
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = inst->rect[txt].w;
+	rect.h = inst->rect[txt].h;
+	if (!CTK_IsWidgetEnabled(inst, txt)) {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[txt].body_disabled.r,
+		                       inst->wstyle[txt].body_disabled.g,
+		                       inst->wstyle[txt].body_disabled.b,
+		                       inst->wstyle[txt].body_disabled.a);
+	} else if (inst->hovered_w != txt) {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[txt].body.r,
+		                       inst->wstyle[txt].body.g,
+		                       inst->wstyle[txt].body.b,
+		                       inst->wstyle[txt].body.a);
+	} else {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[txt].body_hovered.r,
+		                       inst->wstyle[txt].body_hovered.g,
+		                       inst->wstyle[txt].body_hovered.b,
+		                       inst->wstyle[txt].body_hovered.a);
+	}
+	SDL_RenderFillRect(r, &rect);
 
 	if (inst->cursor[txt] != inst->selection[txt]) {
 		if (inst->cursor[txt] > inst->selection[txt]) {
@@ -1057,6 +1115,7 @@ void
 CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
                              const CTK_WidgetId  rbn)
 {
+	SDL_Color     body_c;
 	SDL_Renderer *r = NULL;
 	const int     numv = 3;
 	SDL_Vertex    v[numv];
@@ -1098,16 +1157,21 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	v[2].tex_coord.y = 0;
 	SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 
-	/* Technically, we omit the hovered variant here. IDC.
-	 */
+	if (!CTK_IsWidgetEnabled(inst, rbn)) {
+		body_c = inst->wstyle[rbn].body_disabled;
+	} else if (inst->hovered_w != rbn) {
+		body_c = inst->wstyle[rbn].body;
+	} else {
+		body_c = inst->wstyle[rbn].body_hovered;
+	}
 	v[0].position.x++;
 	v[0].position.y++;
-	v[0].color = CTK_ColorIntToFColor(inst->wstyle[rbn].body);
+	v[0].color = CTK_ColorIntToFColor(body_c);
 	v[1].position.x--;
 	v[1].position.y++;
-	v[1].color = CTK_ColorIntToFColor(inst->wstyle[rbn].body);
+	v[1].color = CTK_ColorIntToFColor(body_c);
 	v[2].position.y--;
-	v[2].color = CTK_ColorIntToFColor(inst->wstyle[rbn].body);
+	v[2].color = CTK_ColorIntToFColor(body_c);
 	SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
 
 	if (inst->toggle[rbn]) {
@@ -1163,7 +1227,13 @@ CTK_CreateScaleTexture(CTK_Instance       *inst,
 	         (inst->rect[scl].w - rect.w);
 	rect.y = 0;
 
-	if (inst->hovered_w != scl) {
+	if (!CTK_IsWidgetEnabled(inst, scl)) {
+		SDL_SetRenderDrawColor(r,
+		                       inst->wstyle[scl].body_disabled.r,
+		                       inst->wstyle[scl].body_disabled.g,
+		                       inst->wstyle[scl].body_disabled.b,
+		                       inst->wstyle[scl].body_disabled.a);
+	} else if (inst->hovered_w != scl) {
 		SDL_SetRenderDrawColor(r,
 		                       inst->wstyle[scl].body.r,
 		                       inst->wstyle[scl].body.g,

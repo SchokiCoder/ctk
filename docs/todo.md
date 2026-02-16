@@ -204,7 +204,12 @@ since that is just visually broken.
 Now we just draw two rects with borders.
 Also move slider width to style properties.
 
-- [ ] scale slider mid isn't exactly on mouse while drag?
+- [x] fix scale value overflow
+There was a missing check, and float can go higher than int.
+It was nery noticable when `value_max` was set to `0 - 1` (overflows to max).
+`value` and `value_max` are also short now,
+because I am afraid of float imprecision in the high int ranges.
+Also set default `value_max` based on default width.
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant

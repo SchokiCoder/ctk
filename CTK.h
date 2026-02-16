@@ -113,8 +113,8 @@ typedef struct CTK_Instance {
 	SDL_Texture       *texture[CTK_INSTANCE_MAX_WIDGETS];
 	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_INSTANCE_MAX_WIDGETS];
-	unsigned int       value[CTK_INSTANCE_MAX_WIDGETS];
-	unsigned int       value_max[CTK_INSTANCE_MAX_WIDGETS];
+	unsigned short     value[CTK_INSTANCE_MAX_WIDGETS];
+	unsigned short     value_max[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_WidgetStyle    wstyle[CTK_INSTANCE_MAX_WIDGETS];
 
 	/* widget events */
@@ -518,8 +518,8 @@ CTK_AddProgressbar(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
-	inst->value_max[ret] = 100;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	inst->value_max[ret] = inst->rect[ret].w - 1;
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -558,8 +558,8 @@ CTK_AddScale(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
-	inst->value_max[ret] = 100;
 	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	inst->value_max[ret] = inst->rect[ret].w - 1;
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -1381,10 +1381,12 @@ CTK_HandleDrag(CTK_Instance *inst,
 	           (x - inst->rect[fw].x - (slider_w / 2.0));
 	raw_v = val_perc * inst->value_max[fw];
 
-	if (raw_v > 0.0)
-		inst->value[fw] = roundf(raw_v);
+	if (raw_v > (float) inst->value_max[fw])
+		inst->value[fw] = inst->value_max[fw];
+	else if (raw_v < 0.0)
+		inst->value[fw] = 0;
 	else
-		inst->value[fw] = 0.0;
+		inst->value[fw] = roundf(raw_v);
 
 	if (inst->value[fw] > inst->value_max[fw])
 		inst->value[fw] = inst->value_max[fw];

@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define SILENCE_CALLBACKS
+
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
 void
@@ -316,7 +318,7 @@ main(int    argc,
 	inst->rect[lbl_pepperoni].y = inst->rect[rbn_pepperoni].y;
 
 	scl = CTK_AddScale(inst);
-	inst->value_max[scl] = 4;
+	inst->value_max[scl] = 9;
 	CTK_SetWidgetValue(inst, scl, (rand() % inst->value_max[scl]));
 	inst->rect[scl].x = MARGIN;
 	inst->rect[scl].y = inst->rect[lbl_pepperoni].y +

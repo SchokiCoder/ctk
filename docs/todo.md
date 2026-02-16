@@ -200,8 +200,11 @@ since that is just visually broken.
 
 - [x] add disabled fg color variants
 
-- [ ] make sure scale sliders are symmetric
-by just drawing two rects with borders around the point of value.
+- [x] change scale slider look
+Now we just draw two rects with borders.
+Also move slider width to style properties.
+
+- [ ] scale slider mid isn't exactly on mouse while drag?
 
 - [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
 making them similar to the Tcl/Tk variant

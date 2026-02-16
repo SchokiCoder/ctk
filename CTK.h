@@ -29,8 +29,6 @@
 
 #define CTK_PIXELFORMAT SDL_PIXELFORMAT_RGBA8888
 
-#define CTK_SCALE_SLIDER_SIZE_FRACTION 0.3
-
 #define CTK_TEXTUREACCESS SDL_TEXTUREACCESS_TARGET
 
 #define CTK_VERSION "0.1.0"
@@ -710,6 +708,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body = theme.body_scale;
 		inst->wstyle[w].body_disabled = theme.body_scale_disabled;
 		inst->wstyle[w].body_hovered = theme.body_scale_hovered;
+		inst->wstyle[w].size_fillratio = theme.size_fillratio_scale;
 		break;
 	}
 
@@ -1176,63 +1175,47 @@ void
 CTK_CreateScaleTexture(CTK_Instance       *inst,
                        const CTK_WidgetId  scl)
 {
+	SDL_Color     bg_c;
+	SDL_Color     body_c;
+	SDL_Color     border_c;
 	SDL_Renderer *r = NULL;
 	SDL_FRect     rect;
 
 	r = SDL_GetRenderer(inst->win);
 
+	border_c = inst->style.border;
 	if (inst->hovered_w != scl) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[scl].bg.r,
-		                       inst->wstyle[scl].bg.g,
-		                       inst->wstyle[scl].bg.b,
-		                       inst->wstyle[scl].bg.a);
+		bg_c = inst->wstyle[scl].bg;
+		body_c = inst->wstyle[scl].body;
 	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[scl].bg_hovered.r,
-		                       inst->wstyle[scl].bg_hovered.g,
-		                       inst->wstyle[scl].bg_hovered.b,
-		                       inst->wstyle[scl].bg_hovered.a);
+		bg_c = inst->wstyle[scl].bg_hovered;
+		body_c = inst->wstyle[scl].body_hovered;
 	}
+	if (!CTK_IsWidgetEnabled(inst, scl)) {
+		body_c = inst->wstyle[scl].body_disabled;
+	}
+
+	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
-	rect.w = CTK_GetScaleSliderWidth(inst, scl);
+	rect.w = CTK_GetScaleSliderWidth(inst, scl) / 2;
 	rect.h = inst->rect[scl].h;
 	rect.x = ((float) inst->value[scl] /
 	          (float) inst->value_max[scl]) *
-	         (inst->rect[scl].w - rect.w);
+	         (inst->rect[scl].w - (rect.w * 2));
 	rect.y = 0;
 
-	if (!CTK_IsWidgetEnabled(inst, scl)) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[scl].body_disabled.r,
-		                       inst->wstyle[scl].body_disabled.g,
-		                       inst->wstyle[scl].body_disabled.b,
-		                       inst->wstyle[scl].body_disabled.a);
-	} else if (inst->hovered_w != scl) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[scl].body.r,
-		                       inst->wstyle[scl].body.g,
-		                       inst->wstyle[scl].body.b,
-		                       inst->wstyle[scl].body.a);
-	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[scl].body_hovered.r,
-		                       inst->wstyle[scl].body_hovered.g,
-		                       inst->wstyle[scl].body_hovered.b,
-		                       inst->wstyle[scl].body_hovered.a);
-	}
+	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderFillRect(r, &rect);
+	SDL_SetRenderDrawColor(r, border_c.r, border_c.g, border_c.b, border_c.a);
+	SDL_RenderRect(r, &rect);
 
-	rect.x += rect.w / 2.0;
-	rect.w = 1.0;
+	rect.x += rect.w;
 
-	SDL_SetRenderDrawColor(r,
-			       inst->style.border.r,
-			       inst->style.border.g,
-			       inst->style.border.b,
-			       inst->style.border.a);
+	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderFillRect(r, &rect);
+	SDL_SetRenderDrawColor(r, border_c.r, border_c.g, border_c.b, border_c.a);
+	SDL_RenderRect(r, &rect);
 
 	if (inst->border[scl]) {
 		rect.x = 0;
@@ -1241,10 +1224,8 @@ CTK_CreateScaleTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[scl].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->style.border.r,
-			               inst->style.border.g,
-			               inst->style.border.b,
-			               inst->style.border.a);
+		                       border_c.r, border_c.g, border_c.b,
+		                       border_c.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -1900,7 +1881,7 @@ float
 CTK_GetScaleSliderWidth(const CTK_Instance *inst,
                         const CTK_WidgetId widget)
 {
-	return inst->rect[widget].w * CTK_SCALE_SLIDER_SIZE_FRACTION;
+	return inst->rect[widget].w * inst->wstyle[widget].size_fillratio;
 }
 
 bool

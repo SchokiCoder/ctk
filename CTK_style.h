@@ -53,6 +53,7 @@ typedef struct CTK_Style {
 	SDL_Color         focus;
 	float             size_fillratio_checkbox;
 	float             size_fillratio_radiobutton;
+	float             size_fillratio_scale;
 	size_t            size_h_button;
 	size_t            size_h_checkbox;
 	size_t            size_h_entry;
@@ -311,6 +312,7 @@ static const CTK_Style CTK_Theme_TclTk = {
 
 	.size_fillratio_checkbox = 0.7,
 	.size_fillratio_radiobutton = 0.7,
+	.size_fillratio_scale = 0.3,
 	.size_h_button = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_entry = CTK_THEME_TCLTK_WIDGET_HEIGHT,

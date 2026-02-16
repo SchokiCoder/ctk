@@ -228,7 +228,7 @@ when every other widget lights up in some way.
 This is a minor difference from Tcl/Tk, but now the bg lights up a bit,
 while the body stays as is.
 
-- [ ] update version number
+- [x] update version number
 
 # 0.1.0
 

@@ -650,7 +650,8 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].fg_disabled = theme.fg_checkbox_disabled;
 		inst->wstyle[w].size_body_h = theme.size_body_h_checkbox;
 		inst->wstyle[w].size_body_w = theme.size_body_w_checkbox;
-		inst->wstyle[w].size_fillratio = theme.size_fillratio_checkbox;
+		inst->wstyle[w].size_fill_h = theme.size_fill_h_checkbox;
+		inst->wstyle[w].size_fill_w = theme.size_fill_w_checkbox;
 		break;
 
 	case CTK_WTYPE_ENTRY:
@@ -695,7 +696,10 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body_hovered = theme.body_radiobutton_hovered;
 		inst->wstyle[w].fg = theme.fg_radiobutton;
 		inst->wstyle[w].fg_disabled = theme.fg_radiobutton_disabled;
-		inst->wstyle[w].size_fillratio = theme.size_fillratio_radiobutton;
+		inst->wstyle[w].size_body_h = theme.size_body_h_radiobutton;
+		inst->wstyle[w].size_body_w = theme.size_body_w_radiobutton;
+		inst->wstyle[w].size_fill_h = theme.size_fill_h_radiobutton;
+		inst->wstyle[w].size_fill_w = theme.size_fill_w_radiobutton;
 		break;
 
 	case CTK_WTYPE_SCALE:
@@ -827,10 +831,8 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 	SDL_RenderFillRect(r, &rect);
 
 	if (inst->toggle[ckb]) {
-		rect.w = inst->wstyle[ckb].size_body_w *
-		         inst->wstyle[ckb].size_fillratio;
-		rect.h = inst->wstyle[ckb].size_body_h *
-		         inst->wstyle[ckb].size_fillratio;
+		rect.w = inst->wstyle[ckb].size_fill_w;
+		rect.h = inst->wstyle[ckb].size_fill_h;
 		rect.x += inst->wstyle[ckb].size_body_w - rect.w;
 		rect.y += inst->wstyle[ckb].size_body_h - rect.h;
 		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
@@ -1094,9 +1096,9 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	SDL_Color     bg_c;
 	SDL_Color     body_c;
 	SDL_Color     fg_c;
+	SDL_FRect     rect;
 	SDL_Renderer *r = NULL;
-	const int     numv = 3;
-	SDL_Vertex    v[numv];
+	SDL_Texture  *t;
 
 	r = SDL_GetRenderer(inst->win);
 
@@ -1116,54 +1118,53 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
-	/* Technically this should be guarded by the border property,
-	 * but this dumb triangle shit gets replaced soon anyway.
-	 */
-	v[0].position.x = 0;
-	v[0].position.y = 0;
-	v[0].color = CTK_ColorIntToFColor(inst->style.border);
-	v[0].tex_coord.x = 0;
-	v[0].tex_coord.y = 0;
-	v[1].position.x = inst->rect[rbn].w;
-	v[1].position.y = 0;
-	v[1].color = CTK_ColorIntToFColor(inst->style.border);
-	v[1].tex_coord.x = 0;
-	v[1].tex_coord.y = 0;
-	v[2].position.x = inst->rect[rbn].w / 2.0;
-	v[2].position.y = inst->rect[rbn].h;
-	v[2].color = CTK_ColorIntToFColor(inst->style.border);
-	v[2].tex_coord.x = 0;
-	v[2].tex_coord.y = 0;
-	SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+	t = SDL_CreateTexture(r,
+	                      CTK_PIXELFORMAT,
+	                      CTK_TEXTUREACCESS,
+	                      inst->wstyle[rbn].size_body_w,
+	                      inst->wstyle[rbn].size_body_h);
 
-	v[0].position.x++;
-	v[0].position.y++;
-	v[0].color = CTK_ColorIntToFColor(body_c);
-	v[1].position.x--;
-	v[1].position.y++;
-	v[1].color = CTK_ColorIntToFColor(body_c);
-	v[2].position.y--;
-	v[2].color = CTK_ColorIntToFColor(body_c);
-	SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+	SDL_SetRenderTarget(r, t);
+	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
+	SDL_RenderClear(r);
 
 	if (inst->toggle[rbn]) {
-		v[0].position.x = (inst->rect[rbn].w -
-		                  inst->rect[rbn].w *
-		                  inst->wstyle[rbn].size_fillratio) / 2.0;
-		v[0].position.y = (inst->rect[rbn].h -
-		                  inst->rect[rbn].h *
-		                  inst->wstyle[rbn].size_fillratio) / 2.0;
-		v[0].color = CTK_ColorIntToFColor(fg_c);
-		v[1].position.x = v[0].position.x +
-		                  (inst->rect[rbn].w *
-		                  inst->wstyle[rbn].size_fillratio);
-		v[1].position.y = v[0].position.y;
-		v[1].color = CTK_ColorIntToFColor(fg_c);
-		v[2].position.y = inst->rect[rbn].h *
-		                  inst->wstyle[rbn].size_fillratio;
-		v[2].color = CTK_ColorIntToFColor(fg_c);
-		SDL_RenderGeometry(r, NULL, v, numv, 0, 0);
+		rect.w = inst->wstyle[rbn].size_fill_w;
+		rect.h = inst->wstyle[rbn].size_fill_h;
+		rect.x = (inst->wstyle[rbn].size_body_w - rect.w) / 2;
+		rect.y = (inst->wstyle[rbn].size_body_h - rect.h) / 2;
+		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
+		SDL_RenderFillRect(r, &rect);
 	}
+
+	if (inst->border[rbn]) {
+		rect.x = 0;
+		rect.y = 0;
+		rect.w = inst->wstyle[rbn].size_body_w;
+		rect.h = inst->wstyle[rbn].size_body_h;
+
+		SDL_SetRenderDrawColor(r,
+			               inst->style.border.r,
+			               inst->style.border.g,
+			               inst->style.border.b,
+			               inst->style.border.a);
+		SDL_RenderRect(r, &rect);
+	}
+
+	SDL_SetRenderTarget(r, inst->texture[rbn]);
+	rect.x = (inst->rect[rbn].w - inst->wstyle[rbn].size_body_w) / 2;
+	rect.y = (inst->rect[rbn].h - inst->wstyle[rbn].size_body_h) / 2;
+	rect.w = inst->wstyle[rbn].size_body_w;
+	rect.h = inst->wstyle[rbn].size_body_h;
+	SDL_RenderTextureRotated(r,
+	                         t,
+	                         NULL,
+	                         &rect,
+	                         45.0,
+	                         NULL,
+	                         SDL_FLIP_NONE);
+
+	SDL_DestroyTexture(t);
 }
 
 /* This assumes RenderTarget to be set to its own texture.

@@ -9,6 +9,7 @@ The color may have not changed at all.
 
 # 1.0.0
 
+- [ ] create documentation with examples
 - [ ] update version number
 
 # 0.11.0
@@ -214,10 +215,10 @@ Checkbox got a body color variant in style struct.
 Here we also converted scale body values,
 and thus allows for a configurable slider height too.
 
-- [ ] replace style ratio floats with size size_ts
-
-- [ ] HOLD ON radiobuttons had been rotated rects the entire time?
-put a rect on texture, SDL_RenderTextureRotated
+- [x] change radiobuttons look
+Change from improvised triangle to angled square.
+Now the body and fill sizes can be set via the style.
+Also replace style ratio `float`s with size `size_t`s.
 
 - [ ] update version number
 

@@ -51,12 +51,16 @@ typedef struct CTK_Style {
 	SDL_Color         fg_radiobutton;
 	SDL_Color         fg_radiobutton_disabled;
 	SDL_Color         focus;
-	float             size_body_h_checkbox;
-	float             size_body_w_checkbox;
-	float             size_body_h_scale;
-	float             size_body_w_scale;
-	float             size_fillratio_checkbox;
-	float             size_fillratio_radiobutton;
+	size_t            size_body_h_checkbox;
+	size_t            size_body_w_checkbox;
+	size_t            size_body_h_radiobutton;
+	size_t            size_body_w_radiobutton;
+	size_t            size_body_h_scale;
+	size_t            size_body_w_scale;
+	size_t            size_fill_h_checkbox;
+	size_t            size_fill_w_checkbox;
+	size_t            size_fill_h_radiobutton;
+	size_t            size_fill_w_radiobutton;
 	size_t            size_h_button;
 	size_t            size_h_checkbox;
 	size_t            size_h_entry;
@@ -94,7 +98,8 @@ typedef struct CTK_WidgetStyle {
 	SDL_Color         fg_disabled;
 	size_t            size_body_h;
 	size_t            size_body_w;
-	float             size_fillratio;
+	size_t            size_fill_h;
+	size_t            size_fill_w;
 	CTK_TextAlignment text_align;
 	SDL_Color         text;
 	SDL_Color         text_bg_selected;
@@ -317,10 +322,16 @@ static const CTK_Style CTK_Theme_TclTk = {
 
 	.size_body_h_checkbox = 10,
 	.size_body_w_checkbox = 10,
+	.size_body_h_radiobutton = 8,
+	.size_body_w_radiobutton = 8,
 	.size_body_h_scale = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_body_w_scale = 30,
-	.size_fillratio_checkbox = 1.0,
-	.size_fillratio_radiobutton = 0.7,
+
+	.size_fill_h_checkbox = 10,
+	.size_fill_w_checkbox = 10,
+	.size_fill_h_radiobutton = 8,
+	.size_fill_w_radiobutton = 8,
+
 	.size_h_button = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_entry = CTK_THEME_TCLTK_WIDGET_HEIGHT,
@@ -328,6 +339,7 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.size_h_progressbar = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_radiobutton = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_scale = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+
 	.size_w_button = 80,
 	.size_w_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_w_entry = 165,

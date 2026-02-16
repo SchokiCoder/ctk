@@ -51,9 +51,12 @@ typedef struct CTK_Style {
 	SDL_Color         fg_radiobutton;
 	SDL_Color         fg_radiobutton_disabled;
 	SDL_Color         focus;
+	float             size_body_h_checkbox;
+	float             size_body_w_checkbox;
+	float             size_body_h_scale;
+	float             size_body_w_scale;
 	float             size_fillratio_checkbox;
 	float             size_fillratio_radiobutton;
-	float             size_fillratio_scale;
 	size_t            size_h_button;
 	size_t            size_h_checkbox;
 	size_t            size_h_entry;
@@ -89,6 +92,8 @@ typedef struct CTK_WidgetStyle {
 	SDL_Color         border;
 	SDL_Color         fg;
 	SDL_Color         fg_disabled;
+	size_t            size_body_h;
+	size_t            size_body_w;
 	float             size_fillratio;
 	CTK_TextAlignment text_align;
 	SDL_Color         text;
@@ -140,15 +145,15 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg_button_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
 	.bg_button_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
-	.bg_checkbox.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_checkbox.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_checkbox.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_checkbox.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+	.bg_checkbox.r = 0x00,
+	.bg_checkbox.g = 0x00,
+	.bg_checkbox.b = 0x00,
+	.bg_checkbox.a = 0x00,
 
-	.bg_checkbox_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_checkbox_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_checkbox_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_checkbox_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+	.bg_checkbox_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.bg_checkbox_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.bg_checkbox_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.bg_checkbox_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
 	.bg_entry.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
 	.bg_entry.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
@@ -310,9 +315,12 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.focus.b = 0x87,
 	.focus.a = 0xff,
 
-	.size_fillratio_checkbox = 0.7,
+	.size_body_h_checkbox = 10,
+	.size_body_w_checkbox = 10,
+	.size_body_h_scale = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	.size_body_w_scale = 30,
+	.size_fillratio_checkbox = 1.0,
 	.size_fillratio_radiobutton = 0.7,
-	.size_fillratio_scale = 0.3,
 	.size_h_button = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
 	.size_h_entry = CTK_THEME_TCLTK_WIDGET_HEIGHT,

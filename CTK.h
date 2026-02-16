@@ -299,10 +299,6 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
 
-float
-CTK_GetScaleSliderWidth(const CTK_Instance *inst,
-                        const CTK_WidgetId widget);
-
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
@@ -652,6 +648,8 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body_hovered = theme.body_checkbox_hovered;
 		inst->wstyle[w].fg = theme.fg_checkbox;
 		inst->wstyle[w].fg_disabled = theme.fg_checkbox_disabled;
+		inst->wstyle[w].size_body_h = theme.size_body_h_checkbox;
+		inst->wstyle[w].size_body_w = theme.size_body_w_checkbox;
 		inst->wstyle[w].size_fillratio = theme.size_fillratio_checkbox;
 		break;
 
@@ -708,7 +706,8 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->wstyle[w].body = theme.body_scale;
 		inst->wstyle[w].body_disabled = theme.body_scale_disabled;
 		inst->wstyle[w].body_hovered = theme.body_scale_hovered;
-		inst->wstyle[w].size_fillratio = theme.size_fillratio_scale;
+		inst->wstyle[w].size_body_h = theme.size_body_h_scale;
+		inst->wstyle[w].size_body_w = theme.size_body_w_scale;
 		break;
 	}
 
@@ -820,31 +819,29 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = inst->rect[ckb].w;
-	rect.h = inst->rect[ckb].h;
+	rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].size_body_w) / 2;
+	rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].size_body_h) / 2;
+	rect.w = inst->wstyle[ckb].size_body_w;
+	rect.h = inst->wstyle[ckb].size_body_h;
 	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderFillRect(r, &rect);
 
 	if (inst->toggle[ckb]) {
-		rect.x = (inst->rect[ckb].w -
-		          inst->rect[ckb].w *
-		          inst->wstyle[ckb].size_fillratio) / 2.0;
-		rect.y = (inst->rect[ckb].h -
-		          inst->rect[ckb].h *
-		          inst->wstyle[ckb].size_fillratio) / 2.0;
-		rect.w = inst->rect[ckb].w * inst->wstyle[ckb].size_fillratio;
-		rect.h = inst->rect[ckb].h * inst->wstyle[ckb].size_fillratio;
+		rect.w = inst->wstyle[ckb].size_body_w *
+		         inst->wstyle[ckb].size_fillratio;
+		rect.h = inst->wstyle[ckb].size_body_h *
+		         inst->wstyle[ckb].size_fillratio;
+		rect.x += inst->wstyle[ckb].size_body_w - rect.w;
+		rect.y += inst->wstyle[ckb].size_body_h - rect.h;
 		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
 		SDL_RenderFillRect(r, &rect);
 	}
 
 	if (inst->border[ckb]) {
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = inst->rect[ckb].w;
-		rect.h = inst->rect[ckb].h;
+		rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].size_body_w) / 2;
+		rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].size_body_h) / 2;
+		rect.w = inst->wstyle[ckb].size_body_w;
+		rect.h = inst->wstyle[ckb].size_body_h;
 
 		SDL_SetRenderDrawColor(r,
 			               inst->style.border.r,
@@ -1198,8 +1195,8 @@ CTK_CreateScaleTexture(CTK_Instance       *inst,
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
-	rect.w = CTK_GetScaleSliderWidth(inst, scl) / 2;
-	rect.h = inst->rect[scl].h;
+	rect.w = inst->wstyle[scl].size_body_w / 2;
+	rect.h = inst->wstyle[scl].size_body_h;
 	rect.x = ((float) inst->value[scl] /
 	          (float) inst->value_max[scl]) *
 	         (inst->rect[scl].w - (rect.w * 2));
@@ -1375,7 +1372,7 @@ CTK_HandleDrag(CTK_Instance *inst,
 	if (inst->type[fw] != CTK_WTYPE_SCALE)
 		return;
 
-	slider_w = CTK_GetScaleSliderWidth(inst, fw);
+	slider_w = inst->wstyle[fw].size_body_w;
 	val_perc = 1.0 /
 	           (inst->rect[fw].w - slider_w) *
 	           (x - inst->rect[fw].x - (slider_w / 2.0));
@@ -1877,13 +1874,6 @@ CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
 	return inst->focusable_w[inst->focused_w];
-}
-
-float
-CTK_GetScaleSliderWidth(const CTK_Instance *inst,
-                        const CTK_WidgetId widget)
-{
-	return inst->rect[widget].w * inst->wstyle[widget].size_fillratio;
 }
 
 bool

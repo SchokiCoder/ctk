@@ -31,9 +31,6 @@ add verbose error printing, which gets triggered by env var or compile flag
 Log function that, depending on env var, returns early?
 Log function that, depending on compile flag, is empty or not?
 
-- [ ] if sdl3-gfx is available yet, use it for radiobutton circles
-if not, postpone this task
-
 - [ ] update version number
 
 # 0.9.0
@@ -211,9 +208,16 @@ It was nery noticable when `value_max` was set to `0 - 1` (overflows to max).
 because I am afraid of float imprecision in the high int ranges.
 Also set default `value_max` based on default width.
 
-- [ ] change checkbox and radiobutton to be a bit smaller but with the same hitbox,
-making them similar to the Tcl/Tk variant
-checkbox will need a "body" color variant in style struct.
+- [x] change checkbox to be a bit smaller but with the same hitbox
+This is for parity with Tcl/Tk.
+Checkbox got a body color variant in style struct.
+Here we also converted scale body values,
+and thus allows for a configurable slider height too.
+
+- [ ] replace style ratio floats with size size_ts
+
+- [ ] HOLD ON radiobuttons had been rotated rects the entire time?
+put a rect on texture, SDL_RenderTextureRotated
 
 - [ ] update version number
 

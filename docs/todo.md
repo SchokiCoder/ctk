@@ -109,6 +109,8 @@ Many expect the text next to a checkbox or radiobutton to register clicks too.
 
 - [ ] update version number
 
+-----
+
 # 0.2.0 Visual Cohesiveness Update
 
 - [x] add defines for the malloc functions
@@ -220,9 +222,13 @@ Change from improvised triangle to angled square.
 Now the body and fill sizes can be set via the style.
 Also replace style ratio `float`s with size `size_t`s.
 
-- [ ] update version number
+- [x] adjust scale coloring to be inline with other widgets
+When hovered on, the body darkened,
+when every other widget lights up in some way.
+This is a minor difference from Tcl/Tk, but now the bg lights up a bit,
+while the body stays as is.
 
------
+- [ ] update version number
 
 # 0.1.0
 

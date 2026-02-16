@@ -205,10 +205,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg_scale.b = 0xc3,
 	.bg_scale.a = 0xff,
 
-	.bg_scale_hovered.r = 0xc3,
-	.bg_scale_hovered.g = 0xc3,
-	.bg_scale_hovered.b = 0xc3,
-	.bg_scale_hovered.a = 0xff,
+	.bg_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.bg_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.bg_scale_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.bg_scale_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
 	.bg_widget.r = 0x00,
 	.bg_widget.g = 0x00,
@@ -275,10 +275,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.body_scale_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
 	.body_scale_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
 
-	.body_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.body_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.body_scale_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.body_scale_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+	.body_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_scale_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+	.body_scale_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
 
 	.border.r = 0x83,
 	.border.g = 0x83,

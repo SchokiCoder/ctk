@@ -218,7 +218,7 @@ main(int    argc,
 		return 0;
 	}
 
-	inst = CTK_CreateInstance("test", 640, 480, 0);
+	inst = CTK_CreateInstance("C/Tk v" CTK_VERSION " - Example", 640, 480, 0);
 	if (NULL == inst) {
 		fprintf(stderr, "Could not create CTK Instance\n");
 		fprintf(stderr, "%s\n", SDL_GetError());

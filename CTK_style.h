@@ -13,80 +13,6 @@ typedef enum CTK_TextAlignment {
 	CTK_TEXT_ALIGNMENT_RIGHT,
 } CTK_TextAlignment;
 
-typedef struct CTK_Style {
-	SDL_Color         bg;
-	SDL_Color         bg_button;
-	SDL_Color         bg_button_hovered;
-	SDL_Color         bg_checkbox;
-	SDL_Color         bg_checkbox_hovered;
-	SDL_Color         bg_entry;
-	SDL_Color         bg_entry_hovered;
-	SDL_Color         bg_label;
-	SDL_Color         bg_label_hovered;
-	SDL_Color         bg_progressbar;
-	SDL_Color         bg_progressbar_hovered;
-	SDL_Color         bg_radiobutton;
-	SDL_Color         bg_radiobutton_hovered;
-	SDL_Color         bg_scale;
-	SDL_Color         bg_scale_hovered;
-	SDL_Color         bg_widget;
-	SDL_Color         bg_widget_hovered;
-	SDL_Color         body_checkbox;
-	SDL_Color         body_checkbox_disabled;
-	SDL_Color         body_checkbox_hovered;
-	SDL_Color         body_entry;
-	SDL_Color         body_entry_disabled;
-	SDL_Color         body_entry_hovered;
-	SDL_Color         body_radiobutton;
-	SDL_Color         body_radiobutton_disabled;
-	SDL_Color         body_radiobutton_hovered;
-	SDL_Color         body_scale;
-	SDL_Color         body_scale_disabled;
-	SDL_Color         body_scale_hovered;
-	SDL_Color         border;
-	SDL_Color         fg_checkbox;
-	SDL_Color         fg_checkbox_disabled;
-	SDL_Color         fg_progressbar;
-	SDL_Color         fg_progressbar_disabled;
-	SDL_Color         fg_radiobutton;
-	SDL_Color         fg_radiobutton_disabled;
-	SDL_Color         focus;
-	size_t            size_body_h_checkbox;
-	size_t            size_body_w_checkbox;
-	size_t            size_body_h_radiobutton;
-	size_t            size_body_w_radiobutton;
-	size_t            size_body_h_scale;
-	size_t            size_body_w_scale;
-	size_t            size_fill_h_checkbox;
-	size_t            size_fill_w_checkbox;
-	size_t            size_fill_h_radiobutton;
-	size_t            size_fill_w_radiobutton;
-	size_t            size_h_button;
-	size_t            size_h_checkbox;
-	size_t            size_h_entry;
-	size_t            size_h_label;
-	size_t            size_h_progressbar;
-	size_t            size_h_radiobutton;
-	size_t            size_h_scale;
-	size_t            size_w_button;
-	size_t            size_w_checkbox;
-	size_t            size_w_entry;
-	size_t            size_w_label;
-	size_t            size_w_progressbar;
-	size_t            size_w_radiobutton;
-	size_t            size_w_scale;
-	CTK_TextAlignment text_align_button;
-	CTK_TextAlignment text_align_entry;
-	CTK_TextAlignment text_align_label;
-	SDL_Color         text_bg_selected;
-	SDL_Color         text_button;
-	SDL_Color         text_button_disabled;
-	SDL_Color         text_entry;
-	SDL_Color         text_entry_disabled;
-	SDL_Color         text_label;
-	SDL_Color         text_label_disabled;
-} CTK_Style;
-
 typedef struct CTK_WidgetStyle {
 	SDL_Color         bg;
 	SDL_Color         bg_hovered;
@@ -100,11 +26,26 @@ typedef struct CTK_WidgetStyle {
 	size_t            size_body_w;
 	size_t            size_fill_h;
 	size_t            size_fill_w;
+	size_t            size_h;
+	size_t            size_w;
 	CTK_TextAlignment text_align;
 	SDL_Color         text;
 	SDL_Color         text_bg_selected;
 	SDL_Color         text_disabled;
 } CTK_WidgetStyle;
+
+typedef struct CTK_Style {
+	SDL_Color       bg;
+	SDL_Color       focus;
+	SDL_Color       text_bg_selected;
+	CTK_WidgetStyle button;
+	CTK_WidgetStyle checkbox;
+	CTK_WidgetStyle entry;
+	CTK_WidgetStyle label;
+	CTK_WidgetStyle progressbar;
+	CTK_WidgetStyle radiobutton;
+	CTK_WidgetStyle scale;
+} CTK_Style;
 
 #define CTK_THEME_TCLTK_TEXT_GRAY 0x00
 #define CTK_THEME_TCLTK_TEXT_A    0xff
@@ -114,6 +55,9 @@ typedef struct CTK_WidgetStyle {
 
 #define CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY 0xda
 #define CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A    0xff
+
+#define CTK_THEME_TCLTK_WIDGET_BORDER_GRAY 0x83
+#define CTK_THEME_TCLTK_WIDGET_BORDER_A    0xff
 
 #define CTK_THEME_TCLTK_WIDGET_FG_R 0x48
 #define CTK_THEME_TCLTK_WIDGET_FG_G 0x68
@@ -140,252 +84,296 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.bg.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.bg.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
 
-	.bg_button.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_button.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_button.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_button.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
-
-	.bg_button_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_button_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_button_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_button_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
-
-	.bg_checkbox.r = 0x00,
-	.bg_checkbox.g = 0x00,
-	.bg_checkbox.b = 0x00,
-	.bg_checkbox.a = 0x00,
-
-	.bg_checkbox_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_checkbox_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_checkbox_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_checkbox_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
-
-	.bg_entry.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_entry.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_entry.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_entry.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.bg_entry_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_entry_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_entry_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.bg_entry_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.bg_label.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_label.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_label.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_label.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
-
-	.bg_label_hovered.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_label_hovered.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_label_hovered.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
-	.bg_label_hovered.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
-
-	.bg_progressbar.r = 0xc3,
-	.bg_progressbar.g = 0xc3,
-	.bg_progressbar.b = 0xc3,
-	.bg_progressbar.a = 0xff,
-
-	.bg_progressbar_hovered.r = 0xc3,
-	.bg_progressbar_hovered.g = 0xc3,
-	.bg_progressbar_hovered.b = 0xc3,
-	.bg_progressbar_hovered.a = 0xff,
-
-	.bg_radiobutton.r = 0x00,
-	.bg_radiobutton.g = 0x00,
-	.bg_radiobutton.b = 0x00,
-	.bg_radiobutton.a = 0x00,
-
-	.bg_radiobutton_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_radiobutton_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_radiobutton_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_radiobutton_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
-
-	.bg_scale.r = 0xc3,
-	.bg_scale.g = 0xc3,
-	.bg_scale.b = 0xc3,
-	.bg_scale.a = 0xff,
-
-	.bg_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_scale_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.bg_scale_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
-
-	.bg_widget.r = 0x00,
-	.bg_widget.g = 0x00,
-	.bg_widget.b = 0x00,
-	.bg_widget.a = 0x00,
-
-	.bg_widget_hovered.r = 0x00,
-	.bg_widget_hovered.g = 0x00,
-	.bg_widget_hovered.b = 0x00,
-	.bg_widget_hovered.a = 0x00,
-
-	.body_checkbox.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_checkbox.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_checkbox.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_checkbox.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_checkbox_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_checkbox_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_checkbox_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_checkbox_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
-
-	.body_checkbox_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_checkbox_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_checkbox_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_checkbox_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_entry.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_entry.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_entry.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_entry.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_entry_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_entry_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_entry_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_entry_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
-
-	.body_entry_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_entry_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_entry_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_entry_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_radiobutton.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_radiobutton.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_radiobutton.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_radiobutton.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_radiobutton_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_radiobutton_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_radiobutton_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_radiobutton_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
-
-	.body_radiobutton_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_radiobutton_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_radiobutton_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_radiobutton_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_scale.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_scale.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_scale.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_scale.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.body_scale_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_scale_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_scale_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
-	.body_scale_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
-
-	.body_scale_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_scale_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_scale_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
-	.body_scale_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
-
-	.border.r = 0x83,
-	.border.g = 0x83,
-	.border.b = 0x83,
-	.border.a = 0xff,
-
-	.fg_checkbox.r = CTK_THEME_TCLTK_WIDGET_FG_R,
-	.fg_checkbox.g = CTK_THEME_TCLTK_WIDGET_FG_G,
-	.fg_checkbox.b = CTK_THEME_TCLTK_WIDGET_FG_B,
-	.fg_checkbox.a = CTK_THEME_TCLTK_WIDGET_FG_A,
-
-	.fg_checkbox_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_checkbox_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_checkbox_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_checkbox_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
-
-	.fg_progressbar.r = CTK_THEME_TCLTK_WIDGET_FG_R,
-	.fg_progressbar.g = CTK_THEME_TCLTK_WIDGET_FG_G,
-	.fg_progressbar.b = CTK_THEME_TCLTK_WIDGET_FG_B,
-	.fg_progressbar.a = CTK_THEME_TCLTK_WIDGET_FG_A,
-
-	.fg_progressbar_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_progressbar_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_progressbar_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_progressbar_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
-
-	.fg_radiobutton.r = CTK_THEME_TCLTK_WIDGET_FG_R,
-	.fg_radiobutton.g = CTK_THEME_TCLTK_WIDGET_FG_G,
-	.fg_radiobutton.b = CTK_THEME_TCLTK_WIDGET_FG_B,
-	.fg_radiobutton.a = CTK_THEME_TCLTK_WIDGET_FG_A,
-
-	.fg_radiobutton_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_radiobutton_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_radiobutton_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
-	.fg_radiobutton_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
-
 	.focus.r = 0x48,
 	.focus.g = 0x68,
 	.focus.b = 0x87,
 	.focus.a = 0xff,
-
-	.size_body_h_checkbox = 10,
-	.size_body_w_checkbox = 10,
-	.size_body_h_radiobutton = 8,
-	.size_body_w_radiobutton = 8,
-	.size_body_h_scale = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_body_w_scale = 30,
-
-	.size_fill_h_checkbox = 10,
-	.size_fill_w_checkbox = 10,
-	.size_fill_h_radiobutton = 8,
-	.size_fill_w_radiobutton = 8,
-
-	.size_h_button = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_h_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_h_entry = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_h_label = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_h_progressbar = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_h_radiobutton = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_h_scale = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-
-	.size_w_button = 80,
-	.size_w_checkbox = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_w_entry = 165,
-	.size_w_label = 80,
-	.size_w_progressbar = 100,
-	.size_w_radiobutton = CTK_THEME_TCLTK_WIDGET_HEIGHT,
-	.size_w_scale = 100,
-
-	.text_align_button = CTK_TEXT_ALIGNMENT_CENTER,
-	.text_align_entry = CTK_TEXT_ALIGNMENT_LEFT,
-	.text_align_label = CTK_TEXT_ALIGNMENT_LEFT,
 
 	.text_bg_selected.r = 0x7c,
 	.text_bg_selected.g = 0xb0,
 	.text_bg_selected.b = 0xe2,
 	.text_bg_selected.a = 0xff,
 
-	.text_button.r = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_button.g = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_button.b = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_button.a = CTK_THEME_TCLTK_TEXT_A,
+	.button = {
+		.bg.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
 
-	.text_button_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_button_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_button_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_button_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+		.bg_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
-	.text_entry.r = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_entry.g = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_entry.b = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_entry.a = CTK_THEME_TCLTK_TEXT_A,
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
 
-	.text_entry_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_entry_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_entry_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_entry_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = 80,
 
-	.text_label.r = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_label.g = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_label.b = CTK_THEME_TCLTK_TEXT_GRAY,
-	.text_label.a = CTK_THEME_TCLTK_TEXT_A,
+		.text_align = CTK_TEXT_ALIGNMENT_CENTER,
 
-	.text_label_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_label_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_label_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.text_label_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+		.text.r = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.g = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.b = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.a = CTK_THEME_TCLTK_TEXT_A,
+
+		.text_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+	},
+
+	.checkbox = {
+		.bg.r = 0x00,
+		.bg.g = 0x00,
+		.bg.b = 0x00,
+		.bg.a = 0x00,
+
+		.bg_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+
+		.body.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.body_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
+
+		.body_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+		.fg.r = CTK_THEME_TCLTK_WIDGET_FG_R,
+		.fg.g = CTK_THEME_TCLTK_WIDGET_FG_G,
+		.fg.b = CTK_THEME_TCLTK_WIDGET_FG_B,
+		.fg.a = CTK_THEME_TCLTK_WIDGET_FG_A,
+
+		.fg_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
+
+		.size_body_h = 10,
+		.size_body_w = 10,
+
+		.size_fill_h = 10,
+		.size_fill_w = 10,
+
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	},
+
+	.entry = {
+		.bg.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.bg.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.bg.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.bg.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.bg_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.bg_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.bg_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.bg_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.body.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.body_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
+
+		.body_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = 165,
+
+		.text_align = CTK_TEXT_ALIGNMENT_LEFT,
+
+		.text.r = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.g = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.b = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.a = CTK_THEME_TCLTK_TEXT_A,
+
+		.text_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+	},
+
+	.label = {
+		.bg.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+		.bg_hovered.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg_hovered.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg_hovered.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+		.bg_hovered.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = 80,
+
+		.text_align = CTK_TEXT_ALIGNMENT_LEFT,
+
+		.text.r = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.g = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.b = CTK_THEME_TCLTK_TEXT_GRAY,
+		.text.a = CTK_THEME_TCLTK_TEXT_A,
+
+		.text_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+	},
+
+	.progressbar = {
+		.bg.r = 0xc3,
+		.bg.g = 0xc3,
+		.bg.b = 0xc3,
+		.bg.a = 0xff,
+
+		.bg_hovered.r = 0xc3,
+		.bg_hovered.g = 0xc3,
+		.bg_hovered.b = 0xc3,
+		.bg_hovered.a = 0xff,
+
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+		.fg.r = CTK_THEME_TCLTK_WIDGET_FG_R,
+		.fg.g = CTK_THEME_TCLTK_WIDGET_FG_G,
+		.fg.b = CTK_THEME_TCLTK_WIDGET_FG_B,
+		.fg.a = CTK_THEME_TCLTK_WIDGET_FG_A,
+
+		.fg_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
+
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = 100,
+	},
+
+	.radiobutton = {
+		.bg.r = 0x00,
+		.bg.g = 0x00,
+		.bg.b = 0x00,
+		.bg.a = 0x00,
+
+		.bg_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+
+		.body.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.body_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
+
+		.body_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+		.fg.r = CTK_THEME_TCLTK_WIDGET_FG_R,
+		.fg.g = CTK_THEME_TCLTK_WIDGET_FG_G,
+		.fg.b = CTK_THEME_TCLTK_WIDGET_FG_B,
+		.fg.a = CTK_THEME_TCLTK_WIDGET_FG_A,
+
+		.fg_disabled.r = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.g = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.b = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_GRAY,
+		.fg_disabled.a = CTK_THEME_TCLTK_WIDGET_FG_DISABLED_A,
+
+		.size_body_h = 8,
+		.size_body_w = 8,
+
+		.size_fill_h = 8,
+		.size_fill_w = 8,
+
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+	},
+
+	.scale = {
+		.bg.r = 0xc3,
+		.bg.g = 0xc3,
+		.bg.b = 0xc3,
+		.bg.a = 0xff,
+
+		.bg_hovered.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+		.bg_hovered.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+
+		.body.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.body_disabled.r = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.g = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.b = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_GRAY,
+		.body_disabled.a = CTK_THEME_TCLTK_WIDGET_BODY_DISABLED_A,
+
+		.body_hovered.r = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.g = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.b = CTK_THEME_TCLTK_WIDGET_INPUT_BG_GRAY,
+		.body_hovered.a = CTK_THEME_TCLTK_WIDGET_INPUT_BG_A,
+
+		.border.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+		.border.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+		.size_body_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_body_w = 30,
+
+		.size_h = CTK_THEME_TCLTK_WIDGET_HEIGHT,
+		.size_w = 100,
+	},
 };
 
 #endif /* _CTK_STYLE_H */

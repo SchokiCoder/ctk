@@ -621,99 +621,41 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
                        const CTK_Style     theme,
                        const CTK_WidgetId  w)
 {
-	inst->wstyle[w].border = theme.border;
-	inst->wstyle[w].text_bg_selected = theme.text_bg_selected;
-
 	switch (inst->type[w]) {
 	case CTK_WTYPE_UNKNOWN:
 		break;
 
 	case CTK_WTYPE_BUTTON:
-		inst->rect[w].h = theme.size_h_button;
-		inst->rect[w].w = theme.size_w_button;
-		inst->wstyle[w].bg = theme.bg_button;
-		inst->wstyle[w].bg_hovered = theme.bg_button_hovered;
-		inst->wstyle[w].text_align = theme.text_align_button;
-		inst->wstyle[w].text = theme.text_button;
-		inst->wstyle[w].text_disabled = theme.text_button_disabled;
+		inst->wstyle[w] = theme.button;
 		break;
 
 	case CTK_WTYPE_CHECKBOX:
-		inst->rect[w].h = theme.size_h_checkbox;
-		inst->rect[w].w = theme.size_w_checkbox;
-		inst->wstyle[w].bg = theme.bg_checkbox;
-		inst->wstyle[w].bg_hovered = theme.bg_checkbox_hovered;
-		inst->wstyle[w].body = theme.body_checkbox;
-		inst->wstyle[w].body_disabled = theme.body_checkbox_disabled;
-		inst->wstyle[w].body_hovered = theme.body_checkbox_hovered;
-		inst->wstyle[w].fg = theme.fg_checkbox;
-		inst->wstyle[w].fg_disabled = theme.fg_checkbox_disabled;
-		inst->wstyle[w].size_body_h = theme.size_body_h_checkbox;
-		inst->wstyle[w].size_body_w = theme.size_body_w_checkbox;
-		inst->wstyle[w].size_fill_h = theme.size_fill_h_checkbox;
-		inst->wstyle[w].size_fill_w = theme.size_fill_w_checkbox;
+		inst->wstyle[w] = theme.checkbox;
 		break;
 
 	case CTK_WTYPE_ENTRY:
-		inst->rect[w].h = theme.size_h_entry;
-		inst->rect[w].w = theme.size_w_entry;
-		inst->wstyle[w].bg = theme.bg_entry;
-		inst->wstyle[w].bg_hovered = theme.bg_entry_hovered;
-		inst->wstyle[w].body = theme.body_entry;
-		inst->wstyle[w].body_disabled = theme.body_entry_disabled;
-		inst->wstyle[w].body_hovered = theme.body_entry_hovered;
-		inst->wstyle[w].text_align = theme.text_align_entry;
-		inst->wstyle[w].text = theme.text_entry;
-		inst->wstyle[w].text_disabled = theme.text_entry_disabled;
+		inst->wstyle[w] = theme.entry;
 		break;
 
 	case CTK_WTYPE_LABEL:
-		inst->rect[w].h = theme.size_h_label;
-		inst->rect[w].w = theme.size_w_label;
-		inst->wstyle[w].bg = theme.bg_label;
-		inst->wstyle[w].bg_hovered = theme.bg_label_hovered;
-		inst->wstyle[w].text_align = theme.text_align_label;
-		inst->wstyle[w].text = theme.text_label;
-		inst->wstyle[w].text_disabled = theme.text_label_disabled;
+		inst->wstyle[w] = theme.label;
 		break;
 
 	case CTK_WTYPE_PROGRESSBAR:
-		inst->rect[w].h = theme.size_h_progressbar;
-		inst->rect[w].w = theme.size_w_progressbar;
-		inst->wstyle[w].bg = theme.bg_progressbar;
-		inst->wstyle[w].bg_hovered = theme.bg_progressbar_hovered;
-		inst->wstyle[w].fg = theme.fg_progressbar;
-		inst->wstyle[w].fg_disabled = theme.fg_progressbar_disabled;
+		inst->wstyle[w] = theme.progressbar;
 		break;
 
 	case CTK_WTYPE_RADIOBUTTON:
-		inst->rect[w].h = theme.size_h_radiobutton;
-		inst->rect[w].w = theme.size_w_radiobutton;
-		inst->wstyle[w].bg = theme.bg_radiobutton;
-		inst->wstyle[w].bg_hovered = theme.bg_radiobutton_hovered;
-		inst->wstyle[w].body = theme.body_radiobutton;
-		inst->wstyle[w].body_disabled = theme.body_radiobutton_disabled;
-		inst->wstyle[w].body_hovered = theme.body_radiobutton_hovered;
-		inst->wstyle[w].fg = theme.fg_radiobutton;
-		inst->wstyle[w].fg_disabled = theme.fg_radiobutton_disabled;
-		inst->wstyle[w].size_body_h = theme.size_body_h_radiobutton;
-		inst->wstyle[w].size_body_w = theme.size_body_w_radiobutton;
-		inst->wstyle[w].size_fill_h = theme.size_fill_h_radiobutton;
-		inst->wstyle[w].size_fill_w = theme.size_fill_w_radiobutton;
+		inst->wstyle[w] = theme.radiobutton;
 		break;
 
 	case CTK_WTYPE_SCALE:
-		inst->rect[w].h = theme.size_h_scale;
-		inst->rect[w].w = theme.size_w_scale;
-		inst->wstyle[w].bg = theme.bg_scale;
-		inst->wstyle[w].bg_hovered = theme.bg_scale_hovered;
-		inst->wstyle[w].body = theme.body_scale;
-		inst->wstyle[w].body_disabled = theme.body_scale_disabled;
-		inst->wstyle[w].body_hovered = theme.body_scale_hovered;
-		inst->wstyle[w].size_body_h = theme.size_body_h_scale;
-		inst->wstyle[w].size_body_w = theme.size_body_w_scale;
+		inst->wstyle[w] = theme.scale;
 		break;
 	}
+
+	inst->rect[w].h = inst->wstyle[w].size_h;
+	inst->rect[w].w = inst->wstyle[w].size_w;
 
 	CTK_CreateWidgetTexture(inst, w);
 }
@@ -785,10 +727,10 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[btn].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->style.border.r,
-			               inst->style.border.g,
-			               inst->style.border.b,
-			               inst->style.border.a);
+			               inst->wstyle[btn].border.r,
+			               inst->wstyle[btn].border.g,
+			               inst->wstyle[btn].border.b,
+			               inst->wstyle[btn].border.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -846,10 +788,10 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 		rect.h = inst->wstyle[ckb].size_body_h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->style.border.r,
-			               inst->style.border.g,
-			               inst->style.border.b,
-			               inst->style.border.a);
+			               inst->wstyle[ckb].border.r,
+			               inst->wstyle[ckb].border.g,
+			               inst->wstyle[ckb].border.b,
+			               inst->wstyle[ckb].border.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -958,10 +900,10 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[txt].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->style.border.r,
-			               inst->style.border.g,
-			               inst->style.border.b,
-			               inst->style.border.a);
+			               inst->wstyle[txt].border.r,
+			               inst->wstyle[txt].border.g,
+			               inst->wstyle[txt].border.b,
+			               inst->wstyle[txt].border.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -1079,10 +1021,10 @@ CTK_CreateProgressbarTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[pgb].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->style.border.r,
-			               inst->style.border.g,
-			               inst->style.border.b,
-			               inst->style.border.a);
+			               inst->wstyle[pgb].border.r,
+			               inst->wstyle[pgb].border.g,
+			               inst->wstyle[pgb].border.b,
+			               inst->wstyle[pgb].border.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -1144,10 +1086,10 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 		rect.h = inst->wstyle[rbn].size_body_h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->style.border.r,
-			               inst->style.border.g,
-			               inst->style.border.b,
-			               inst->style.border.a);
+			               inst->wstyle[rbn].border.r,
+			               inst->wstyle[rbn].border.g,
+			               inst->wstyle[rbn].border.b,
+			               inst->wstyle[rbn].border.a);
 		SDL_RenderRect(r, &rect);
 	}
 
@@ -1181,7 +1123,7 @@ CTK_CreateScaleTexture(CTK_Instance       *inst,
 
 	r = SDL_GetRenderer(inst->win);
 
-	border_c = inst->style.border;
+	border_c = inst->wstyle[scl].border;
 	if (inst->hovered_w != scl) {
 		bg_c = inst->wstyle[scl].bg;
 		body_c = inst->wstyle[scl].body;

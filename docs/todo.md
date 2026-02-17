@@ -37,6 +37,10 @@ Log function that, depending on compile flag, is empty or not?
 # 0.9.0
 
 - [ ] add tooltips
+- [ ] move default theme to its own header,
+and add to README that there will be infinite sloc for themes
+I like theming, unlike... we shall not name it :)
+
 - [ ] add more themes, especially a dark one
 - [ ] use `SDL_GetSystemTheme`
 - [ ] do themes contain default widget sizes?
@@ -100,12 +104,27 @@ the real data text into three ttf texts
 
 # 0.3.0
 
-- [ ] add visual scrolling to entries
-
-- [ ] add text drawing to checkbox and radiobutton
-This also works as a hitbox of course.
+- [x] ~~add text drawing to checkbox and radiobutton~~
+~~This also works as a hitbox of course.
 Many expect the text next to a checkbox or radiobutton to register clicks too.
-~~`text_alignment` will tell which side the text is on.~~ <- this is dumb
+`text_alignment` will tell which side the text is on.~~
+I thought instead add a system to link labels,
+but it can be done manually soon, with mnemonics.
+
+- [x] simplify the instance style struct
+In the most obvious way even.
+Just have the instance style be made up of widget styles.
+Why didn't I do this before?
+Probably because the widget style struct came later,
+and so I didn't connect the dots.
+This also allows for per widget-type border color now.
+
+- [ ] add bool to theme apply function for resize
+
+- [ ] replace style's fill properties with padding
+- [ ] add padding property to widget style
+
+- [ ] add visual scrolling to entries
 
 - [ ] update version number
 

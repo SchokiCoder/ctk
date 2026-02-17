@@ -210,11 +210,13 @@ CTK_AddWidget(CTK_Instance *inst);
 
 void
 CTK_ApplyTheme(CTK_Instance    *inst,
-               const CTK_Style  theme);
+               const CTK_Style  theme,
+               const bool       resize);
 
 void
 CTK_ApplyThemeToWidget(CTK_Instance       *inst,
                        const CTK_Style     theme,
+                       const bool          resize,
                        const CTK_WidgetId  w);
 
 SDL_FColor
@@ -443,7 +445,7 @@ CTK_AddButton(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_BUTTON;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -462,7 +464,7 @@ CTK_AddCheckbox(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_CHECKBOX;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -481,7 +483,7 @@ CTK_AddEntry(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_ENTRY;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -497,7 +499,7 @@ CTK_AddLabel(CTK_Instance *inst)
 	inst->enabled_ws++;
 
 	inst->type[ret] = CTK_WTYPE_LABEL;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -514,7 +516,7 @@ CTK_AddProgressbar(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_PROGRESSBAR;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	inst->value_max[ret] = inst->rect[ret].w - 1;
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -535,7 +537,7 @@ CTK_AddRadiobutton(CTK_Instance *inst)
 	inst->border[ret] = true;
 	inst->group[ret] = 0;
 	inst->type[ret] = CTK_WTYPE_RADIOBUTTON;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
@@ -554,7 +556,7 @@ CTK_AddScale(CTK_Instance *inst)
 
 	inst->border[ret] = true;
 	inst->type[ret] = CTK_WTYPE_SCALE;
-	CTK_ApplyThemeToWidget(inst, inst->style, ret);
+	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	inst->value_max[ret] = inst->rect[ret].w - 1;
 	CTK_SetWidgetVisible(inst, ret, true);
 
@@ -606,19 +608,21 @@ CTK_AddWidget(CTK_Instance *inst)
 
 void
 CTK_ApplyTheme(CTK_Instance    *inst,
-               const CTK_Style  theme)
+               const CTK_Style  theme,
+               const bool       resize)
 {
 	size_t i;
 
 	inst->style = theme;
 
 	for (i = 0; i < inst->widgets; i++)
-		CTK_ApplyThemeToWidget(inst, inst->style, i);
+		CTK_ApplyThemeToWidget(inst, inst->style, i, resize);
 }
 
 void
 CTK_ApplyThemeToWidget(CTK_Instance       *inst,
                        const CTK_Style     theme,
+                       const bool          resize,
                        const CTK_WidgetId  w)
 {
 	switch (inst->type[w]) {
@@ -654,8 +658,10 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		break;
 	}
 
-	inst->rect[w].h = inst->wstyle[w].size_h;
-	inst->rect[w].w = inst->wstyle[w].size_w;
+	if (resize) {
+		inst->rect[w].h = inst->wstyle[w].size_h;
+		inst->rect[w].w = inst->wstyle[w].size_w;
+	}
 
 	CTK_CreateWidgetTexture(inst, w);
 }

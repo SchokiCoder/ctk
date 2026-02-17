@@ -119,7 +119,7 @@ Probably because the widget style struct came later,
 and so I didn't connect the dots.
 This also allows for per widget-type border color now.
 
-- [ ] add bool to theme apply function for resize
+- [x] add bool to theme apply function for widget resize
 
 - [ ] replace style's fill properties with padding
 - [ ] add padding property to widget style

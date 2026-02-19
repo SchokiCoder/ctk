@@ -139,8 +139,10 @@ Widget style had been granted a text selection color and it is used,
 but the data was never moved.
 This removes the instance text selection color, and moves the data.
 
-- [ ] fix delete key crash
-Somewhere between v0.1 and v0.2 this broke.
+- [x] fix entry text input causing a selection
+Regression from text scrolling.
+
+- [ ] fix scrolled text cursor drawing
 
 - [ ] fix odd entry text input causing selection and sometimes short scrolling
 I think there might be some
@@ -149,6 +151,13 @@ of a different substring than intended?
 
 - [ ] change cursor to be `size_t`?
 can save at least an if in shift cursor
+
+- [ ] fix delete key crash
+`TTF_DeleteTextString` is broken on latest stable release,
+which is SDL_TTF v3.2.2.
+The following pull:
+<https://github.com/libsdl-org/SDL_ttf/pull/600>
+was merged after that release and there has been no release since.
 
 - [ ] update version number
 

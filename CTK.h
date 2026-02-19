@@ -417,7 +417,8 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 void
 CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
                           const CTK_WidgetId  w,
-                          const int           shift);
+                          const int           shift,
+                          const bool          shift_selection);
 
 void
 CTK_TickInstance(CTK_Instance *inst);
@@ -1363,8 +1364,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			c_shift--;
 		}
 
-		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
-		inst->selection[fw] = inst->cursor[fw];
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
 		break;
 
 	case SDLK_C:
@@ -1410,8 +1410,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			TTF_DeleteTextString(inst->text[fw], inst->cursor[fw], 1);
 		}
 
-		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
-		inst->selection[fw] = inst->cursor[fw];
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
 		break;
 
 	case SDLK_END:
@@ -1427,7 +1426,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		else
 			CTK_UpdatePrimarySelection(inst, fw);
 
-		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, false);
 		break;
 
 	case SDLK_HOME:
@@ -1443,7 +1442,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		else
 			CTK_UpdatePrimarySelection(inst, fw);
 
-		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, false);
 		break;
 
 	case SDLK_LEFT:
@@ -1459,7 +1458,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			}
 
 			CTK_UpdatePrimarySelection(inst, fw);
-			CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
+			CTK_ShiftWidgetTextCursor(inst, fw, c_shift, false);
 			break;
 
 		case CTK_WTYPE_SCALE:
@@ -1494,7 +1493,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			}
 
 			CTK_UpdatePrimarySelection(inst, fw);
-			CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
+			CTK_ShiftWidgetTextCursor(inst, fw, c_shift, false);
 			break;
 
 		case CTK_WTYPE_SCALE:
@@ -1596,8 +1595,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		                     buf,
 		                     0);
 		c_shift += strlen(buf);
-		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
-		inst->selection[fw] = inst->cursor[fw];
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
 
 		SDL_free(buf);
 		break;
@@ -1803,8 +1801,7 @@ CTK_HandleTextInput(CTK_Instance             *inst,
 	                     e.text, 0);
 	c_shift += strlen(e.text);
 
-	CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
-	inst->selection[fw] = inst->cursor[fw];
+	CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
 }
 
 CTK_WidgetId
@@ -2207,7 +2204,8 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 void
 CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
                           const CTK_WidgetId  w,
-                          const int           shift)
+                          const int           shift,
+                          const bool          shift_selection)
 {
 	int           old_cursor_x;
 	int           shift_real;
@@ -2239,6 +2237,9 @@ CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
 		inst->scroll_x[w] = 0;
 	else if (inst->scroll_x[w] > text_w - 1)
 		inst->scroll_x[w] = text_w - 1;
+
+	if (shift_selection)
+		inst->selection[w] = inst->cursor[w];
 
 	CTK_CreateWidgetTexture(inst, w);
 }

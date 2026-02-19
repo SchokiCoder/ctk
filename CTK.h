@@ -107,8 +107,8 @@ typedef struct CTK_Instance {
 	int                cursor[CTK_INSTANCE_MAX_WIDGETS];
 	int                group[CTK_INSTANCE_MAX_WIDGETS];
 	SDL_FRect          rect[CTK_INSTANCE_MAX_WIDGETS];
+	int                scroll_x[CTK_INSTANCE_MAX_WIDGETS];
 	int                selection[CTK_INSTANCE_MAX_WIDGETS];
-	int                scroll[CTK_INSTANCE_MAX_WIDGETS];
 	TTF_Text          *text[CTK_INSTANCE_MAX_WIDGETS];
 	SDL_Texture       *texture[CTK_INSTANCE_MAX_WIDGETS];
 	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
@@ -298,6 +298,10 @@ void
 CTK_HandleMouseWheel(CTK_Instance              *inst,
                      const SDL_MouseWheelEvent  e);
 
+void
+CTK_HandleTextInput(CTK_Instance             *inst,
+                    const SDL_TextInputEvent  e);
+
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
 
@@ -363,7 +367,8 @@ CTK_MeasureTTFText(TTF_Text *text,
 bool
 CTK_RenderText(TTF_Text                *text,
                const SDL_FRect          rect,
-               const CTK_TextAlignment  ta);
+               const CTK_TextAlignment  ta,
+               const size_t             offset_x);
 
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
@@ -408,6 +413,11 @@ void
 CTK_SetWidgetVisible(CTK_Instance       *inst,
                      const CTK_WidgetId  widget,
                      const bool          visible);
+
+void
+CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
+                          const CTK_WidgetId  w,
+                          const int           shift);
 
 void
 CTK_TickInstance(CTK_Instance *inst);
@@ -578,7 +588,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->cursor[ret] = 0;
 	inst->group[ret] = -1;
 	inst->selection[ret] = inst->cursor[ret];
-	inst->scroll[ret] = 0;
+	inst->scroll_x[ret] = 0;
 	inst->toggle[ret] = false;
 	inst->type[ret] = CTK_WTYPE_UNKNOWN;
 	inst->rect[ret].x = 0;
@@ -724,7 +734,7 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 		                 inst->wstyle[btn].text_disabled.a);
 	}
 
-	CTK_RenderText(inst->text[btn], rect, inst->wstyle[btn].text_align);
+	CTK_RenderText(inst->text[btn], rect, inst->wstyle[btn].text_align, 0);
 
 	if (inst->border[btn]) {
 		rect.x = 0;
@@ -809,50 +819,36 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
                        const CTK_WidgetId  txt)
 {
 	size_t        a, b;
+	SDL_Color     bg_c;
+	SDL_Color     body_c;
 	SDL_Rect      irect;
 	SDL_Renderer *r = NULL;
 	SDL_FRect     rect;
+	SDL_Color     text_c;
 
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != txt) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[txt].bg.r,
-		                       inst->wstyle[txt].bg.g,
-		                       inst->wstyle[txt].bg.b,
-		                       inst->wstyle[txt].bg.a);
+		bg_c = inst->wstyle[txt].bg;
+		body_c = inst->wstyle[txt].body;
 	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[txt].bg_hovered.r,
-		                       inst->wstyle[txt].bg_hovered.g,
-		                       inst->wstyle[txt].bg_hovered.b,
-		                       inst->wstyle[txt].bg_hovered.a);
+		bg_c = inst->wstyle[txt].bg_hovered;
+		body_c = inst->wstyle[txt].body_hovered;
 	}
+	text_c = inst->wstyle[txt].text;
+	if (!CTK_IsWidgetEnabled(inst, txt)) {
+		body_c = inst->wstyle[txt].body_disabled;
+		text_c = inst->wstyle[txt].text_disabled;
+	}
+
+	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
 	rect.x = 0;
 	rect.y = 0;
 	rect.w = inst->rect[txt].w;
 	rect.h = inst->rect[txt].h;
-	if (!CTK_IsWidgetEnabled(inst, txt)) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[txt].body_disabled.r,
-		                       inst->wstyle[txt].body_disabled.g,
-		                       inst->wstyle[txt].body_disabled.b,
-		                       inst->wstyle[txt].body_disabled.a);
-	} else if (inst->hovered_w != txt) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[txt].body.r,
-		                       inst->wstyle[txt].body.g,
-		                       inst->wstyle[txt].body.b,
-		                       inst->wstyle[txt].body.a);
-	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[txt].body_hovered.r,
-		                       inst->wstyle[txt].body_hovered.g,
-		                       inst->wstyle[txt].body_hovered.b,
-		                       inst->wstyle[txt].body_hovered.a);
-	}
+	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderFillRect(r, &rect);
 
 	if (inst->cursor[txt] != inst->selection[txt]) {
@@ -882,22 +878,11 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 	rect.y = 0;
 	rect.w = inst->rect[txt].w;
 	rect.h = inst->rect[txt].h;
-
-	if (CTK_IsWidgetEnabled(inst, txt)) {
-		TTF_SetTextColor(inst->text[txt],
-		                 inst->wstyle[txt].text.r,
-		                 inst->wstyle[txt].text.g,
-		                 inst->wstyle[txt].text.b,
-		                 inst->wstyle[txt].text.a);
-	} else {
-		TTF_SetTextColor(inst->text[txt],
-		                 inst->wstyle[txt].text_disabled.r,
-		                 inst->wstyle[txt].text_disabled.g,
-		                 inst->wstyle[txt].text_disabled.b,
-		                 inst->wstyle[txt].text_disabled.a);
-	}
-
-	CTK_RenderText(inst->text[txt], rect, inst->wstyle[txt].text_align);
+	TTF_SetTextColor(inst->text[txt], text_c.r, text_c.g, text_c.b, text_c.a);
+	CTK_RenderText(inst->text[txt],
+	               rect,
+	               inst->wstyle[txt].text_align,
+	               inst->scroll_x[txt]);
 
 	if (inst->border[txt]) {
 		rect.x = 0;
@@ -1283,9 +1268,10 @@ CTK_DrawInstance(CTK_Instance *inst)
 	                       inst->style.focus.a);
 	SDL_RenderRect(r, &inst->rect[fw]);
 
-	/* cursor */
+	/* text cursor */
 	if (CTK_WTYPE_ENTRY == inst->type[fw]) {
 		rect = CTK_MeasureTTFText(inst->text[fw], inst->cursor[fw], 0);
+		rect.x -= inst->scroll_x[fw];
 
 		SDL_SetRenderDrawColor(r,
 			               inst->wstyle[fw].text.r,
@@ -1348,6 +1334,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
 	char *buf;
+	int c_shift = 0;
 	size_t end;
 	CTK_WidgetId fw;
 	size_t start;
@@ -1370,17 +1357,14 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			                     inst->selection[fw],
 			                     inst->cursor[fw] -
 			                     inst->selection[fw]);
-			inst->cursor[fw] -= inst->cursor[fw] -
-			                    inst->selection[fw];
+			c_shift -= inst->cursor[fw] - inst->selection[fw];
 		} else if (inst->cursor[fw] > 0) {
-			TTF_DeleteTextString(inst->text[fw],
-			                     inst->cursor[fw] - 1,
-			                     1);
-			inst->cursor[fw]--;
+			TTF_DeleteTextString(inst->text[fw], inst->cursor[fw] - 1, 1);
+			c_shift--;
 		}
 
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 		inst->selection[fw] = inst->cursor[fw];
-		CTK_CreateWidgetTexture(inst, fw);
 		break;
 
 	case SDLK_C:
@@ -1421,44 +1405,45 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			                     inst->selection[fw],
 			                     inst->cursor[fw] -
 			                     inst->selection[fw]);
-			inst->cursor[fw] -= inst->cursor[fw] -
-			                    inst->selection[fw];
+			c_shift -= inst->cursor[fw] - inst->selection[fw];
 		} else {
 			TTF_DeleteTextString(inst->text[fw], inst->cursor[fw], 1);
 		}
 
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 		inst->selection[fw] = inst->cursor[fw];
-		CTK_CreateWidgetTexture(inst, fw);
 		break;
 
 	case SDLK_END:
+	case SDLK_PAGEDOWN:
 		fw = CTK_GetFocusedWidget(inst);
 
 		if (CTK_WTYPE_ENTRY != inst->type[fw])
 			break;
 
-		inst->cursor[fw] = strlen(inst->text[fw]->text);
+		c_shift = strlen(inst->text[fw]->text) - inst->cursor[fw];
 		if (!(SDL_KMOD_SHIFT & e.mod))
-			inst->selection[fw] = inst->cursor[fw];
+			inst->selection[fw] = inst->cursor[fw] + c_shift;
 		else
 			CTK_UpdatePrimarySelection(inst, fw);
 
-		CTK_CreateWidgetTexture(inst, fw);
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 		break;
 
 	case SDLK_HOME:
+	case SDLK_PAGEUP:
 		fw = CTK_GetFocusedWidget(inst);
 
 		if (CTK_WTYPE_ENTRY != inst->type[fw])
 			break;
 
-		inst->cursor[fw] = 0;
+		c_shift = 0 - inst->cursor[fw];
 		if (!(SDL_KMOD_SHIFT & e.mod))
 			inst->selection[fw] = 0;
 		else
 			CTK_UpdatePrimarySelection(inst, fw);
 
-		CTK_CreateWidgetTexture(inst, fw);
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 		break;
 
 	case SDLK_LEFT:
@@ -1467,14 +1452,14 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		switch (inst->type[fw]) {
 		case CTK_WTYPE_ENTRY:
 			if (inst->cursor[fw] > 0) {
-				inst->cursor[fw]--;
+				c_shift--;
 			}
 			if (!(SDL_KMOD_SHIFT & e.mod)) {
-				inst->selection[fw] = inst->cursor[fw];
+				inst->selection[fw] = inst->cursor[fw] + c_shift;
 			}
 
 			CTK_UpdatePrimarySelection(inst, fw);
-			CTK_CreateWidgetTexture(inst, fw);
+			CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 			break;
 
 		case CTK_WTYPE_SCALE:
@@ -1494,36 +1479,6 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 		break;
 
-	case SDLK_PAGEDOWN:
-		fw = CTK_GetFocusedWidget(inst);
-
-		if (CTK_WTYPE_ENTRY != inst->type[fw])
-			break;
-
-		inst->cursor[fw] = strlen(inst->text[fw]->text);
-		if (!(SDL_KMOD_SHIFT & e.mod))
-			inst->selection[fw] = inst->cursor[fw];
-		else
-			CTK_UpdatePrimarySelection(inst, fw);
-
-		CTK_CreateWidgetTexture(inst, fw);
-		break;
-
-	case SDLK_PAGEUP:
-		fw = CTK_GetFocusedWidget(inst);
-
-		if (CTK_WTYPE_ENTRY != inst->type[fw])
-			break;
-
-		inst->cursor[fw] = 0;
-		if (!(SDL_KMOD_SHIFT & e.mod))
-			inst->selection[fw] = inst->cursor[fw];
-		else
-			CTK_UpdatePrimarySelection(inst, fw);
-
-		CTK_CreateWidgetTexture(inst, fw);
-		break;
-
 	case SDLK_RIGHT:
 		fw = CTK_GetFocusedWidget(inst);
 
@@ -1531,15 +1486,15 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		case CTK_WTYPE_ENTRY:
 			if ((size_t) inst->cursor[fw] <
 			    strlen(inst->text[fw]->text)) {
-				inst->cursor[fw]++;
+				c_shift++;
 			}
 
 			if (!(SDL_KMOD_SHIFT & e.mod)) {
-				inst->selection[fw] = inst->cursor[fw];
+				inst->selection[fw] = inst->cursor[fw] + c_shift;
 			}
 
 			CTK_UpdatePrimarySelection(inst, fw);
-			CTK_CreateWidgetTexture(inst, fw);
+			CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 			break;
 
 		case CTK_WTYPE_SCALE:
@@ -1633,14 +1588,16 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			                     inst->selection[fw],
 			                     inst->cursor[fw] -
 			                     inst->selection[fw]);
-			inst->cursor[fw] -= inst->cursor[fw] -
-			                    inst->selection[fw];
+			c_shift -= inst->cursor[fw] - inst->selection[fw];
 		}
 
-		TTF_InsertTextString(inst->text[fw], inst->cursor[fw], buf, 0);
-		inst->cursor[fw] += strlen(buf);
+		TTF_InsertTextString(inst->text[fw],
+		                     inst->cursor[fw] + c_shift,
+		                     buf,
+		                     0);
+		c_shift += strlen(buf);
+		CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
 		inst->selection[fw] = inst->cursor[fw];
-		CTK_CreateWidgetTexture(inst, fw);
 
 		SDL_free(buf);
 		break;
@@ -1817,6 +1774,37 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 			                     inst->mouse_wheel_data[w]);
 		}
 	}
+}
+
+void
+CTK_HandleTextInput(CTK_Instance             *inst,
+                    const SDL_TextInputEvent  e)
+{
+	int c_shift = 0;
+	CTK_WidgetId fw;
+
+	fw = CTK_GetFocusedWidget(inst);
+
+	if (inst->cursor[fw] < inst->selection[fw]) {
+		TTF_DeleteTextString(inst->text[fw],
+		                     inst->cursor[fw],
+		                     inst->selection[fw] -
+		                     inst->cursor[fw]);
+	} else if (inst->cursor[fw] > inst->selection[fw]) {
+		TTF_DeleteTextString(inst->text[fw],
+		                     inst->selection[fw],
+		                     inst->cursor[fw] -
+		                     inst->selection[fw]);
+		c_shift -= inst->cursor[fw] - inst->selection[fw];
+	}
+
+	TTF_InsertTextString(inst->text[fw],
+	                     inst->cursor[fw] + c_shift,
+	                     e.text, 0);
+	c_shift += strlen(e.text);
+
+	CTK_ShiftWidgetTextCursor(inst, fw, c_shift);
+	inst->selection[fw] = inst->cursor[fw];
 }
 
 CTK_WidgetId
@@ -1999,7 +1987,8 @@ CTK_MeasureTTFText(TTF_Text *text,
 bool
 CTK_RenderText(TTF_Text                *text,
                const SDL_FRect          rect,
-               const CTK_TextAlignment  ta)
+               const CTK_TextAlignment  ta,
+               const size_t             offset_x)
 {
 	int text_w;
 	int text_h;
@@ -2022,6 +2011,7 @@ CTK_RenderText(TTF_Text                *text,
 		break;
 	}
 
+	x -= offset_x;
 	y = (rect.h - text_h) / 2.0;
 
 	if (!TTF_DrawRendererText(text, x, y))
@@ -2215,10 +2205,48 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 }
 
 void
+CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
+                          const CTK_WidgetId  w,
+                          const int           shift)
+{
+	int           old_cursor_x;
+	int           shift_real;
+	TTF_SubString ss;
+	int           text_len;
+	int           text_w;
+
+	text_len = strlen(inst->text[w]->text);
+
+	if (inst->cursor[w] + shift < 0)
+		shift_real = shift - (inst->cursor[w] - shift);
+	else if (inst->cursor[w] + shift > text_len)
+		shift_real = shift + (inst->cursor[w] - text_len);
+	else
+		shift_real = shift;
+
+	TTF_GetTextSubString(inst->text[w], inst->cursor[w], &ss);
+	old_cursor_x = ss.rect.x;
+	inst->cursor[w] += shift_real;
+	TTF_GetTextSubString(inst->text[w], inst->cursor[w], &ss);
+
+	if (ss.rect.x - inst->scroll_x[w] > inst->rect[w].w ||
+	    ss.rect.x - inst->scroll_x[w] < 0)
+		inst->scroll_x[w] += ss.rect.x - old_cursor_x;
+
+	TTF_GetTextSize(inst->text[w], &text_w, NULL);
+
+	if (inst->scroll_x[w] < 0)
+		inst->scroll_x[w] = 0;
+	else if (inst->scroll_x[w] > text_w - 1)
+		inst->scroll_x[w] = text_w - 1;
+
+	CTK_CreateWidgetTexture(inst, w);
+}
+
+void
 CTK_TickInstance(CTK_Instance *inst)
 {
 	SDL_Event e;
-	CTK_WidgetId fw;
 
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
@@ -2246,29 +2274,7 @@ CTK_TickInstance(CTK_Instance *inst)
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:
-			fw = CTK_GetFocusedWidget(inst);
-
-			if (inst->cursor[fw] < inst->selection[fw]) {
-				TTF_DeleteTextString(inst->text[fw],
-				                     inst->cursor[fw],
-				                     inst->selection[fw] -
-				                     inst->cursor[fw]);
-			} else if (inst->cursor[fw] > inst->selection[fw]) {
-				TTF_DeleteTextString(inst->text[fw],
-				                     inst->selection[fw],
-				                     inst->cursor[fw] -
-				                     inst->selection[fw]);
-				inst->cursor[fw] -= inst->cursor[fw] -
-				                    inst->selection[fw];
-			}
-
-			TTF_InsertTextString(inst->text[fw],
-			                     inst->cursor[fw],
-			                     e.text.text, 0);
-			inst->cursor[fw] += strlen(e.text.text);
-			inst->selection[fw] = inst->cursor[fw];
-
-			CTK_CreateWidgetTexture(inst, fw);
+			CTK_HandleTextInput(inst, e.text);
 			break;
 
 		case SDL_EVENT_WINDOW_MOUSE_ENTER:

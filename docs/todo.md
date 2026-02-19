@@ -12,7 +12,7 @@ The color may have not changed at all.
 - [ ] create documentation with examples
 - [ ] update version number
 
-# 0.11.0
+# 0.12.0
 
 - **thorough** compatibility tests
 (freebsd, abuse my relatives to test on their windows and apple machines)
@@ -23,7 +23,7 @@ Right now a click is just button release event on a widget, which might confuse.
 
 - [ ] update version number
 
-# 0.10.0
+# 0.11.0
 
 - [ ] is it fine to leak memory when exiting the application ?
 
@@ -34,7 +34,7 @@ Log function that, depending on compile flag, is empty or not?
 
 - [ ] update version number
 
-# 0.9.0
+# 0.10.0
 
 - [ ] add tooltips
 - [ ] move default theme to its own header,
@@ -51,25 +51,21 @@ if so, a theme change should change them.
 
 - [ ] update version number
 
-# 0.8.0
+# 0.9.0
 
-- [ ] add proper borders
-also move it to the widget style
-
-- [ ] add button click border change
-
+- [ ] test UTF-8 and locale stuff
 - [ ] a widget turning (un)focusable might change focused widget?
 
 - [ ] update version number
 
-# 0.7.0
+# 0.8.0
 
 - [ ] add a way to grid widgets
 - [ ] add a content fitting window resize (just initially? (upon mainloop))
 
 - [ ] update version number
 
-# 0.6.0
+# 0.7.0
 
 - [ ] add mouse based navigation to entry
 see `TTF_GetTextSubStringForPoint`
@@ -83,7 +79,7 @@ because it will depend on the mouse position and doesn't use the cursor at all
 
 - [ ] update version number
 
-# 0.5.0
+# 0.6.0
 
 - [ ] add combobox
 - [ ] actually, we can have fg_selected for entries. why?
@@ -93,7 +89,22 @@ the real data text into three ttf texts
 
 - [ ] update version number
 
-# 0.4.0
+# 0.5.0 The CSS Update
+
+- [ ] unify widget spacing with margin, border, padding, content for style struct
+For example replace style's fill properties with padding.
+Right now the only widgets with something like a margin are checkbox and radiobutton.
+It's hardwired and can't be brought to others with changine the theme.
+See <https://productiveshop.com/wp-content/uploads/2024/03/Visual-representation-of-margin-and-padding-in-CSS-Box-Model-1024x401.webp>
+
+- [ ] add border styles from CSS
+also move it to the widget style
+
+- [ ] add button click border change
+
+- [ ] update version number
+
+# 0.4.0 The Handy Update
 
 - [ ] add menubar
 - [ ] add menubar accelerators
@@ -121,16 +132,29 @@ This also allows for per widget-type border color now.
 
 - [x] add bool to theme apply function for widget resize
 
-- [ ] replace style's fill properties with padding
-- [ ] add padding property to widget style
+- [x] add visual scrolling to entries
 
-- [ ] add visual scrolling to entries
+- [ ] fix text selection color
+Widget style had been granted a text selection color,
+but it the rest was never updated.
+This removes the instance text selection color.
+
+- [ ] fix delete key crash
+Somewhere between v0.1 and v0.2 this broke.
+
+- [ ] fix odd entry text input causing selection and sometimes short scrolling
+I think there might be some
+text indexing going wrong in `CTK_ShiftWidgetTextCursor` -> It gets the length
+of a different substring than intended?
+
+- [ ] change cursor to be `size_t`?
+can save at least an if in shift cursor
 
 - [ ] update version number
 
 -----
 
-# 0.2.0 Visual Cohesiveness Update
+# 0.2.0 The Visual Cohesiveness Update
 
 - [x] add defines for the malloc functions
 

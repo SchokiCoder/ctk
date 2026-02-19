@@ -37,7 +37,6 @@ typedef struct CTK_WidgetStyle {
 typedef struct CTK_Style {
 	SDL_Color       bg;
 	SDL_Color       focus;
-	SDL_Color       text_bg_selected;
 	CTK_WidgetStyle button;
 	CTK_WidgetStyle checkbox;
 	CTK_WidgetStyle entry;
@@ -89,11 +88,6 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.focus.b = 0x87,
 	.focus.a = 0xff,
 
-	.text_bg_selected.r = 0x7c,
-	.text_bg_selected.g = 0xb0,
-	.text_bg_selected.b = 0xe2,
-	.text_bg_selected.a = 0xff,
-
 	.button = {
 		.bg.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 		.bg.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
@@ -119,8 +113,8 @@ static const CTK_Style CTK_Theme_TclTk = {
 		.text.g = CTK_THEME_TCLTK_TEXT_GRAY,
 		.text.b = CTK_THEME_TCLTK_TEXT_GRAY,
 		.text.a = CTK_THEME_TCLTK_TEXT_A,
-
 		.text_disabled.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+
 		.text_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
 		.text_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
 		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
@@ -222,6 +216,11 @@ static const CTK_Style CTK_Theme_TclTk = {
 		.text_disabled.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
 		.text_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
 		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+
+		.text_bg_selected.r = 0x7c,
+		.text_bg_selected.g = 0xb0,
+		.text_bg_selected.b = 0xe2,
+		.text_bg_selected.a = 0xff,
 	},
 
 	.label = {

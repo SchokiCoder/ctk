@@ -134,10 +134,10 @@ This also allows for per widget-type border color now.
 
 - [x] add visual scrolling to entries
 
-- [ ] fix text selection color
-Widget style had been granted a text selection color,
-but it the rest was never updated.
-This removes the instance text selection color.
+- [x] fix entry text selection color
+Widget style had been granted a text selection color and it is used,
+but the data was never moved.
+This removes the instance text selection color, and moves the data.
 
 - [ ] fix delete key crash
 Somewhere between v0.1 and v0.2 this broke.

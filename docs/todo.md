@@ -142,12 +142,13 @@ This removes the instance text selection color, and moves the data.
 - [x] fix entry text input causing a selection
 Regression from text scrolling.
 
-- [ ] fix scrolled text cursor drawing
-
-- [ ] fix odd entry text input causing selection and sometimes short scrolling
-I think there might be some
-text indexing going wrong in `CTK_ShiftWidgetTextCursor` -> It gets the length
-of a different substring than intended?
+- [x] fix scrolling math, breaking on text input
+What it tried to do in some cases is to get the x_pos,
+of a character that doesn't exist yet.
+If the addressed character doesn't exist,
+the x_pos is different than what was expected.
+Instead we now get the prior character, take its x_pos and add its width.
+Also the checks for when text should scroll are a bit more aggressive.
 
 - [ ] change cursor to be `size_t`?
 can save at least an if in shift cursor

@@ -2207,6 +2207,7 @@ CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
                           const int           shift,
                           const bool          shift_selection)
 {
+	int           new_cursor_x;
 	int           old_cursor_x;
 	int           shift_real;
 	TTF_SubString ss;
@@ -2222,14 +2223,15 @@ CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
 	else
 		shift_real = shift;
 
-	TTF_GetTextSubString(inst->text[w], inst->cursor[w], &ss);
-	old_cursor_x = ss.rect.x;
+	TTF_GetTextSubString(inst->text[w], inst->cursor[w] - 1, &ss);
+	old_cursor_x = ss.rect.x + ss.rect.w;
 	inst->cursor[w] += shift_real;
-	TTF_GetTextSubString(inst->text[w], inst->cursor[w], &ss);
+	TTF_GetTextSubString(inst->text[w], inst->cursor[w] - 1, &ss);
+	new_cursor_x = ss.rect.x + ss.rect.w;
 
-	if (ss.rect.x - inst->scroll_x[w] > inst->rect[w].w ||
-	    ss.rect.x - inst->scroll_x[w] < 0)
-		inst->scroll_x[w] += ss.rect.x - old_cursor_x;
+	if (new_cursor_x - inst->scroll_x[w] >= inst->rect[w].w ||
+	    new_cursor_x - inst->scroll_x[w] <= 0)
+		inst->scroll_x[w] += new_cursor_x - old_cursor_x;
 
 	TTF_GetTextSize(inst->text[w], &text_w, NULL);
 

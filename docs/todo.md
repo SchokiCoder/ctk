@@ -150,6 +150,14 @@ the x_pos is different than what was expected.
 Instead we now get the prior character, take its x_pos and add its width.
 Also the checks for when text should scroll are a bit more aggressive.
 
+- [x] simplify `CTK_MeasureTTFText`
+This also shifts the cursor at the start of the entry to stay inside. Nice.
+
+- [ ] improve entry look: add text pos offset
+
+- [ ] what is going on with the end key and scrolling?
+It scrolls super aggressively.
+
 - [ ] change cursor to be `size_t`?
 can save at least an if in shift cursor
 

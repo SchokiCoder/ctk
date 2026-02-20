@@ -1959,24 +1959,16 @@ CTK_MeasureTTFText(TTF_Text *text,
                    size_t start,
                    size_t len)
 {
-	TTF_SubString cur;
-	TTF_SubString first;
-	size_t        i;
 	SDL_Rect      ret;
+	TTF_SubString ss;
 
-	TTF_GetTextSubString(text, 0, &first);
-	ret.x = 0;
-	for (i = 0; i < start; i++)
-		TTF_GetNextTextSubString(text, &cur, &cur);
+	TTF_GetTextSubString(text, start - 1, &ss);
+	ret.x = ss.rect.x + ss.rect.w;
+	ret.y = ss.rect.y;
 
-	ret.x = cur.rect.x;
-	ret.y = cur.rect.y;
-
-	for (i = start; i < (start + len); i++)
-		TTF_GetNextTextSubString(text, &cur, &cur);
-
-	ret.w = cur.rect.x - ret.x;
-	ret.h = first.rect.h;
+	TTF_GetTextSubString(text, start + len - 1, &ss);
+	ret.w = (ss.rect.x + ss.rect.w) - ret.x;
+	ret.h = (ss.rect.y + ss.rect.h) - ret.y;
 
 	return ret;
 }

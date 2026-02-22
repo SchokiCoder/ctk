@@ -111,7 +111,16 @@ also move it to the widget style
 
 - [ ] add mnemonics
 
+- [ ] trackk issue: delete key crash
+`TTF_DeleteTextString` is broken on latest stable release,
+which is SDL_TTF v3.2.2.
+The following pull:
+<https://github.com/libsdl-org/SDL_ttf/pull/600>
+was merged after that release and there has been no release since.
+
 - [ ] update version number
+
+-----
 
 # 0.3.0
 
@@ -153,24 +162,7 @@ Also the checks for when text should scroll are a bit more aggressive.
 - [x] simplify `CTK_MeasureTTFText`
 This also shifts the cursor at the start of the entry to stay inside. Nice.
 
-- [ ] improve entry look: add text pos offset
-
-- [ ] what is going on with the end key and scrolling?
-It scrolls super aggressively.
-
-- [ ] change cursor to be `size_t`?
-can save at least an if in shift cursor
-
-- [ ] fix delete key crash
-`TTF_DeleteTextString` is broken on latest stable release,
-which is SDL_TTF v3.2.2.
-The following pull:
-<https://github.com/libsdl-org/SDL_ttf/pull/600>
-was merged after that release and there has been no release since.
-
-- [ ] update version number
-
------
+- [x] update version number
 
 # 0.2.0 The Visual Cohesiveness Update
 

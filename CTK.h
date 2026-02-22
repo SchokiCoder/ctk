@@ -31,7 +31,7 @@
 
 #define CTK_TEXTUREACCESS SDL_TEXTUREACCESS_TARGET
 
-#define CTK_VERSION "0.2.0"
+#define CTK_VERSION "0.3.0"
 
 /* Configuration defines
  */
@@ -361,8 +361,8 @@ CTK_MainloopInstance(CTK_Instance *inst);
  */
 SDL_Rect
 CTK_MeasureTTFText(TTF_Text *text,
-                   size_t start,
-                   size_t len);
+                   size_t    start,
+                   size_t    len);
 
 bool
 CTK_RenderText(TTF_Text                *text,
@@ -1956,8 +1956,8 @@ CTK_MainloopInstance(CTK_Instance *inst)
  */
 SDL_Rect
 CTK_MeasureTTFText(TTF_Text *text,
-                   size_t start,
-                   size_t len)
+                   size_t    start,
+                   size_t    len)
 {
 	SDL_Rect      ret;
 	TTF_SubString ss;

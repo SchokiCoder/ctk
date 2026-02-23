@@ -36,8 +36,16 @@
 /* Configuration defines
  */
 
+#ifndef CTK_CASCADE_MAX_COMMANDS
+#define CTK_CASCADE_MAX_COMMANDS 32
+#endif
+
 #ifndef CTK_INSTANCE_MAX_WIDGETS
 #define CTK_INSTANCE_MAX_WIDGETS 64
+#endif
+
+#ifndef CTK_MENUBAR_MAX_CASCADES
+#define CTK_MENUBAR_MAX_CASCADES 16
 #endif
 
 #ifndef calloc
@@ -72,6 +80,19 @@ typedef enum CTK_WidgetType {
 	CTK_WTYPE_SCALE,
 } CTK_WidgetType;
 
+typedef struct CTK_Cascade {
+	TTF_Text *name;
+
+	size_t     commands;
+	TTF_Text  *label[CTK_CASCADE_MAX_COMMANDS];
+	void     (*command[CTK_CASCADE_MAX_COMMANDS])(void);
+} CTK_Cascade;
+
+typedef struct CTK_Menubar {
+	size_t      cascades;
+	CTK_Cascade cascade[CTK_MENUBAR_MAX_CASCADES];
+} CTK_Menubar;
+
 typedef struct CTK_Instance {
 	bool            active;
 	SDL_Texture    *content;
@@ -79,6 +100,7 @@ typedef struct CTK_Instance {
 	size_t          focused_w;
 	CTK_WidgetId    hovered_w;
 	Uint64          max_framerate;
+	CTK_Menubar    *menubar;
 	bool            redraw;
 	CTK_Style       style;
 	TTF_TextEngine *tengine;
@@ -197,6 +219,10 @@ CTK_AddEntry(CTK_Instance *inst);
 CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst);
 
+void
+CTK_AddMenubarCascade(CTK_Instance *inst,
+                      const char   *name);
+
 CTK_WidgetId
 CTK_AddProgressbar(CTK_Instance *inst);
 
@@ -253,6 +279,9 @@ void
 CTK_CreateLabelTexture(CTK_Instance       *inst,
                        const CTK_WidgetId  lbl);
 
+CTK_Menubar*
+CTK_CreateMenubar();
+
 void
 CTK_CreateProgressbarTexture(CTK_Instance       *inst,
                              const CTK_WidgetId  pgb);
@@ -273,7 +302,13 @@ void
 CTK_DestroyInstance(CTK_Instance *inst);
 
 void
+CTK_DestroyMenubar(CTK_Menubar* m);
+
+void
 CTK_DrawInstance(CTK_Instance *inst);
+
+void
+CTK_DrawMenubar(CTK_Instance *inst);
 
 void
 CTK_HandleDrag(CTK_Instance *inst,
@@ -515,6 +550,18 @@ CTK_AddLabel(CTK_Instance *inst)
 	CTK_SetWidgetVisible(inst, ret, true);
 
 	return ret;
+}
+
+void
+CTK_AddMenubarCascade(CTK_Instance *inst,
+                      const char   *name)
+{
+	size_t c = inst->menubar->cascades;
+
+	inst->menubar->cascade[c].name = TTF_CreateText(inst->tengine,
+	                                                CTK_font, name, 0);
+	inst->menubar->cascade[c].commands = 0;
+	inst->menubar->cascades++;
 }
 
 CTK_WidgetId
@@ -922,6 +969,7 @@ CTK_CreateInstance(const char            *title,
 	inst->focused_w = 0;
 	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
+	inst->menubar = NULL;
 	inst->style = CTK_DEFAULT_THEME;
 	inst->redraw = true;
 
@@ -980,6 +1028,17 @@ CTK_CreateLabelTexture(CTK_Instance       *inst,
 {
 	/* it's the same */
 	CTK_CreateButtonTexture(inst, lbl);
+}
+
+CTK_Menubar*
+CTK_CreateMenubar()
+{
+	CTK_Menubar *ret;
+
+	ret = malloc(sizeof(CTK_Menubar));
+	ret->cascades = 0;
+
+	return ret;
 }
 
 /* This assumes RenderTarget to be set to its own texture.
@@ -1231,6 +1290,10 @@ CTK_DestroyInstance(CTK_Instance *inst)
 {
 	size_t i;
 
+	if (NULL != inst->menubar) {
+		CTK_DestroyMenubar(inst->menubar);
+	}
+
 	for (i = 0; i < inst->widgets; i++) {
 		SDL_DestroyTexture(inst->texture[i]);
 		TTF_DestroyText(inst->text[i]);
@@ -1240,6 +1303,21 @@ CTK_DestroyInstance(CTK_Instance *inst)
 	TTF_DestroyRendererTextEngine(inst->tengine);
 	SDL_DestroyWindow(inst->win);
 	free(inst);
+}
+
+void
+CTK_DestroyMenubar(CTK_Menubar* m)
+{
+	size_t a, b;
+
+	for (a = 0; a < m->cascades; a++) {
+		for (b = 0; b < m->cascade[a].commands; b++) {
+			TTF_DestroyText(m->cascade[a].label[b]);
+		}
+		TTF_DestroyText(m->cascade[a].name);
+	}
+
+	free(m);
 }
 
 void
@@ -1302,18 +1380,77 @@ CTK_DrawInstance(CTK_Instance *inst)
 	}
 	SDL_SetRenderTarget(r, NULL);
 
-	/* final */
+	/* content */
 	frect.x = 0;
-	frect.y = 0;
+	frect.y = (NULL == inst->menubar ? 0 : inst->style.menubar_h);
 	frect.w = inst->content->w;
 	frect.h = inst->content->h;
 	SDL_RenderTexture(r, inst->content, NULL, &frect);
 
+	/* menubar */
+	if (NULL != inst->menubar) {
+		CTK_DrawMenubar(inst);
+	}
+
+	/* final */
 	SDL_RenderPresent(r);
 	inst->redraw = false;
 
 	if (NULL != inst->draw)
 		inst->draw(inst, inst->draw_data);
+}
+
+void
+CTK_DrawMenubar(CTK_Instance *inst)
+{
+	size_t        i;
+	SDL_Renderer *r;
+	SDL_Rect      rect;
+	SDL_FRect     frect;
+	float         x_cascade;
+	float         y_cascade;
+
+	r = SDL_GetRenderer(inst->win);
+
+	frect.x = 0;
+	frect.y = 0;
+	frect.w = inst->content->w;
+	frect.h = inst->style.menubar_h;
+
+	SDL_SetRenderDrawColor(r,
+		               inst->style.menubar_bg_clr.r,
+		               inst->style.menubar_bg_clr.g,
+		               inst->style.menubar_bg_clr.b,
+		               inst->style.menubar_bg_clr.a);
+	SDL_RenderFillRect(r, &frect);
+
+	x_cascade = 0;
+	for (i = 0; i < inst->menubar->cascades; i++) {
+		rect = CTK_MeasureTTFText(inst->menubar->cascade[i].name, 0,
+		                          strlen(inst->menubar->cascade[i].name->text));
+
+		y_cascade = (inst->style.menubar_h - rect.h) / 2.0;
+
+		TTF_SetTextColor(inst->menubar->cascade[i].name,
+	                         inst->style.menubar_text_clr.r,
+	                         inst->style.menubar_text_clr.g,
+	                         inst->style.menubar_text_clr.b,
+	                         inst->style.menubar_text_clr.a);
+		TTF_DrawRendererText(inst->menubar->cascade[i].name,
+		                     x_cascade,
+		                     y_cascade);
+
+		x_cascade += rect.w;
+	}
+
+	SDL_SetRenderDrawColor(r,
+		               inst->style.menubar_border_clr.r,
+		               inst->style.menubar_border_clr.g,
+		               inst->style.menubar_border_clr.b,
+		               inst->style.menubar_border_clr.a);
+	if (inst->style.menubar_border) {
+		SDL_RenderRect(r, &frect);
+	}
 }
 
 void

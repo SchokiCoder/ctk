@@ -41,6 +41,11 @@ typedef struct CTK_Style {
 	CTK_WidgetStyle checkbox;
 	CTK_WidgetStyle entry;
 	CTK_WidgetStyle label;
+	SDL_Color       menubar_bg_clr;
+	bool            menubar_border;
+	SDL_Color       menubar_border_clr;
+	SDL_Color       menubar_text_clr;
+	size_t          menubar_h;
 	CTK_WidgetStyle progressbar;
 	CTK_WidgetStyle radiobutton;
 	CTK_WidgetStyle scale;
@@ -254,6 +259,24 @@ static const CTK_Style CTK_Theme_TclTk = {
 		.text_disabled.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
 		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
 	},
+
+	.menubar_bg_clr.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.menubar_bg_clr.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.menubar_bg_clr.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.menubar_bg_clr.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+	.menubar_border = true,
+	.menubar_border_clr.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+	.menubar_border_clr.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+	.menubar_border_clr.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+	.menubar_border_clr.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+	.menubar_text_clr.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.menubar_text_clr.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.menubar_text_clr.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.menubar_text_clr.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.menubar_h = 33,
 
 	.progressbar = {
 		.bg.r = 0xc3,

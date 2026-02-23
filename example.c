@@ -229,6 +229,10 @@ main(int    argc,
 	inst->enter = enter;
 	inst->leave = leave;
 
+	inst->menubar = CTK_CreateMenubar();
+	CTK_AddMenubarCascade(inst, "File");
+	CTK_AddMenubarCascade(inst, "Help");
+
 	ckb_focusable = CTK_AddCheckbox(inst);
 	inst->rect[ckb_focusable].x = MARGIN;
 	inst->rect[ckb_focusable].y = MARGIN;

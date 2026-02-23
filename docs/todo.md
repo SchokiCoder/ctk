@@ -116,7 +116,11 @@ I suppose this will also make scrollbars easier once we get there.
 "Call SDL_GetError() for more information."
 Now for real.
 
-- [ ] add menubar
+- [x] add basic menubar with basic drawing
+- [ ] add menubar offset to mouse input coordinates
+- [ ] add menubar interaction
+
+- [ ] enforce name conformity in instance style struct (see `_clr`)
 
 - [ ] add menubar accelerators
 

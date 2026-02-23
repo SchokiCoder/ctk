@@ -111,7 +111,10 @@ This in preparation for the menubar, to avoid having to shift the y of widgets,
 since drawing under the menubar is verily useless, you can imagine.
 I suppose this will also make scrollbars easier once we get there.
 
-- [ ] add SDL error texts to instance creation
+- [x] add SDL error texts to instance creation
+"Returns valid instance or NULL on failure."
+"Call SDL_GetError() for more information."
+Now for real.
 
 - [ ] add menubar
 

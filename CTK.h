@@ -913,7 +913,7 @@ CTK_CreateInstance(const char            *title,
 
 	inst = malloc(sizeof(CTK_Instance));
 	if (NULL == inst) {
-		SDL_SetError("Could not allocate");
+		SDL_SetError("Instance could not allocate");
 		return NULL;
 	}
 
@@ -946,22 +946,26 @@ CTK_CreateInstance(const char            *title,
 		f = flags;
 
 	if (!SDL_CreateWindowAndRenderer(title, winw, winh, f, &inst->win, &r)) {
+		SDL_SetError("Instance could create window or renderer");
 		return NULL;
 	}
 
 	inst->tengine = TTF_CreateRendererTextEngine(r);
 	if (NULL == inst->tengine) {
+		SDL_SetError("Instance could no create a text engine");
 		return NULL;
 	}
 
 	if (!SDL_SetRenderLogicalPresentation(r, winw, winh,
 	                                      SDL_LOGICAL_PRESENTATION_DISABLED)) {
+		SDL_SetError("Instance could not set logical presentation");
 		return NULL;
 	}
 
 	inst->content = SDL_CreateTexture(r, CTK_PIXELFORMAT, CTK_TEXTUREACCESS,
 	                                  winw, winh);
 	if (NULL == inst->content) {
+		SDL_SetError("Instance could not create a texture");
 		return NULL;
 	}
 

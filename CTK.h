@@ -74,6 +74,7 @@ typedef enum CTK_WidgetType {
 
 typedef struct CTK_Instance {
 	bool            active;
+	SDL_Texture    *content;
 	bool            drag;
 	size_t          focused_w;
 	CTK_WidgetId    hovered_w;
@@ -958,6 +959,12 @@ CTK_CreateInstance(const char            *title,
 		return NULL;
 	}
 
+	inst->content = SDL_CreateTexture(r, CTK_PIXELFORMAT, CTK_TEXTUREACCESS,
+	                                  winw, winh);
+	if (NULL == inst->content) {
+		return NULL;
+	}
+
 	return inst;
 }
 
@@ -1225,6 +1232,7 @@ CTK_DestroyInstance(CTK_Instance *inst)
 		TTF_DestroyText(inst->text[i]);
 	}
 
+	SDL_DestroyTexture(inst->content);
 	TTF_DestroyRendererTextEngine(inst->tengine);
 	SDL_DestroyWindow(inst->win);
 	free(inst);
@@ -1234,6 +1242,7 @@ void
 CTK_DrawInstance(CTK_Instance *inst)
 {
 	size_t        i;
+	SDL_FRect     frect;
 	CTK_WidgetId  fw;
 	SDL_Renderer *r;
 	SDL_Rect      rect;
@@ -1245,7 +1254,9 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	r = SDL_GetRenderer(inst->win);
 
-	/* bg */
+	/* content: bg */
+	SDL_SetRenderTarget(r, inst->content);
+
 	SDL_SetRenderDrawColor(r,
 	                       inst->style.bg.r,
 	                       inst->style.bg.g,
@@ -1253,7 +1264,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 	                       inst->style.bg.a);
 	SDL_RenderClear(r);
 
-	/* widgets */
+	/* content: widgets */
 	for (i = 0; i < inst->visible_ws; i++) {
 		SDL_RenderTexture(r,
 		                  inst->texture[inst->visible_w[i]],
@@ -1261,7 +1272,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 		                  &inst->rect[inst->visible_w[i]]);
 	}
 
-	/* focus ring */
+	/* content: focus ring */
 	SDL_SetRenderDrawColor(r,
 	                       inst->style.focus.r,
 	                       inst->style.focus.g,
@@ -1269,7 +1280,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 	                       inst->style.focus.a);
 	SDL_RenderRect(r, &inst->rect[fw]);
 
-	/* text cursor */
+	/* content: text cursor */
 	if (CTK_WTYPE_ENTRY == inst->type[fw]) {
 		rect = CTK_MeasureTTFText(inst->text[fw], inst->cursor[fw], 0);
 		rect.x -= inst->scroll_x[fw];
@@ -1285,8 +1296,15 @@ CTK_DrawInstance(CTK_Instance *inst)
 		               inst->rect[fw].x + rect.x,
 		               inst->rect[fw].y + inst->rect[fw].h - 3);
 	}
+	SDL_SetRenderTarget(r, NULL);
 
 	/* final */
+	frect.x = 0;
+	frect.y = 0;
+	frect.w = inst->content->w;
+	frect.h = inst->content->h;
+	SDL_RenderTexture(r, inst->content, NULL, &frect);
+
 	SDL_RenderPresent(r);
 	inst->redraw = false;
 

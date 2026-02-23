@@ -10,7 +10,7 @@ The color may have not changed at all.
 # 1.0.0
 
 - [ ] create documentation with examples
-- [ ] update version number
+- [ ] set version number to 1.0.0
 
 # 0.12.0
 
@@ -21,7 +21,7 @@ The color may have not changed at all.
 Right now a click is just button release event on a widget, which might confuse.
 - [ ] add right click
 
-- [ ] update version number
+- [ ] set version number to 0.
 
 # 0.11.0
 
@@ -32,7 +32,7 @@ add verbose error printing, which gets triggered by env var or compile flag
 Log function that, depending on env var, returns early?
 Log function that, depending on compile flag, is empty or not?
 
-- [ ] update version number
+- [ ] set version number to 0.
 
 # 0.10.0
 
@@ -49,7 +49,7 @@ adding a widget should set the rect once and then leave them alone.
 (do not restrict or interfere with later size changes.)
 if so, a theme change should change them.
 
-- [ ] update version number
+- [ ] set version number to 0.
 
 # 0.9.0
 
@@ -63,7 +63,7 @@ if so, a theme change should change them.
 - [ ] add a way to grid widgets
 - [ ] add a content fitting window resize (just initially? (upon mainloop))
 
-- [ ] update version number
+- [ ] set version number to 0.
 
 # 0.7.0
 
@@ -77,7 +77,7 @@ yes, this makes sense, you did not misread
 this is down here
 because it will depend on the mouse position and doesn't use the cursor at all
 
-- [ ] update version number
+- [ ] set version number to 0.7.0
 
 # 0.6.0
 
@@ -87,9 +87,9 @@ we need multiple `TTF_Text`s anyway, because combobox will need it for sure
 It will just be slightly less efficient data wise because we need to copy
 the real data text into three ttf texts
 
-- [ ] update version number
+- [ ] set version number to 0.6.0
 
-# 0.5.0 The CSS Update
+# 0.5.0 The CSS-like Update
 
 - [ ] unify widget spacing with margin, border, padding, content for style struct
 For example replace style's fill properties with padding.
@@ -102,23 +102,31 @@ also move it to the widget style
 
 - [ ] add button click border change
 
-- [ ] update version number
+- [ ] set version number to 0.5.0
 
 # 0.4.0 The Handy Update
 
+- [x] add a instance texture for the widgets
+This in preparation for the menubar, to avoid having to shift the y of widgets,
+since drawing under the menubar is verily useless, you can imagine.
+I suppose this will also make scrollbars easier once we get there.
+
+- [ ] add SDL error texts to instance creation
+
 - [ ] add menubar
+
 - [ ] add menubar accelerators
 
 - [ ] add mnemonics
 
-- [ ] trackk issue: delete key crash
+- [ ] track issue: delete key crash
 `TTF_DeleteTextString` is broken on latest stable release,
 which is SDL_TTF v3.2.2.
 The following pull:
 <https://github.com/libsdl-org/SDL_ttf/pull/600>
 was merged after that release and there has been no release since.
 
-- [ ] update version number
+- [ ] set version number to 0.4.0
 
 -----
 

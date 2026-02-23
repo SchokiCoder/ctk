@@ -117,7 +117,7 @@ I suppose this will also make scrollbars easier once we get there.
 Now for real.
 
 - [x] add basic menubar with basic drawing
-- [ ] add menubar offset to mouse input coordinates
+- [x] add menubar offset to mouse input coordinates
 - [ ] add menubar interaction
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)

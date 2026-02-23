@@ -1773,7 +1773,7 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 		w = inst->enabled_w[i];
 
 		p.x = e.x;
-		p.y = e.y;
+		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
 		if (SDL_PointInRectFloat(&p, &inst->rect[w])) {
 			CTK_SetFocusedWidget(inst, w);
 
@@ -1806,7 +1806,7 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 		p.x = e.x;
-		p.y = e.y;
+		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
@@ -1866,7 +1866,7 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 		p.x = e.x;
-		p.y = e.y;
+		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
@@ -1903,7 +1903,7 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 		p.x = e.mouse_x;
-		p.y = e.mouse_y;
+		p.y = e.mouse_y - (inst->menubar ? inst->style.menubar_h : 0);
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;

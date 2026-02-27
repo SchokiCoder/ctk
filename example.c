@@ -231,7 +231,13 @@ main(int    argc,
 
 	inst->menubar = CTK_CreateMenubar();
 	CTK_AddMenubarCascade(inst, "File");
+	CTK_AddMenubarCascadeCommand(inst, 0, "New", NULL);
+	CTK_AddMenubarCascadeCommand(inst, 0, "Open", NULL);
+	CTK_AddMenubarCascadeCommand(inst, 0, "Save", NULL);
+	CTK_AddMenubarCascadeCommand(inst, 0, "Save As", NULL);
+	CTK_AddMenubarCascadeCommand(inst, 0, "Quit", NULL);
 	CTK_AddMenubarCascade(inst, "Help");
+	CTK_AddMenubarCascadeCommand(inst, 1, "About", NULL);
 
 	ckb_focusable = CTK_AddCheckbox(inst);
 	inst->rect[ckb_focusable].x = MARGIN;

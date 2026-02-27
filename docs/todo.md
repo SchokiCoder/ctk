@@ -119,8 +119,11 @@ Now for real.
 - [x] add basic menubar with basic drawing
 - [x] add menubar offset to mouse input coordinates
 - [x] add menubar hover feedback
-- [ ] add menubar click
-- [ ] add menubar submenu horizontal bar
+- [x] add menubar click and menu drawing
+- [ ] add missing check for max menubar cascades upon adding
+- [ ] add border to menubar cascade hover
+- [ ] add menubar cascade focus change upon hover
+- [ ] add menubar submenu horizontal rule
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 

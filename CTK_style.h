@@ -45,6 +45,7 @@ typedef struct CTK_Style {
 	SDL_Color       menubar_bg_hovered_clr;
 	bool            menubar_border;
 	SDL_Color       menubar_border_clr;
+	size_t          menubar_command_h;
 	SDL_Color       menubar_text_clr;
 	size_t          menubar_h;
 	CTK_WidgetStyle progressbar;
@@ -276,6 +277,8 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menubar_border_clr.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
 	.menubar_border_clr.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
 	.menubar_border_clr.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+	.menubar_command_h = 23,
 
 	.menubar_text_clr.r = CTK_THEME_TCLTK_TEXT_GRAY,
 	.menubar_text_clr.g = CTK_THEME_TCLTK_TEXT_GRAY,

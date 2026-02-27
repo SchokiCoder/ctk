@@ -42,6 +42,7 @@ typedef struct CTK_Style {
 	CTK_WidgetStyle entry;
 	CTK_WidgetStyle label;
 	SDL_Color       menubar_bg_clr;
+	SDL_Color       menubar_bg_hovered_clr;
 	bool            menubar_border;
 	SDL_Color       menubar_border_clr;
 	SDL_Color       menubar_text_clr;
@@ -264,6 +265,11 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menubar_bg_clr.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.menubar_bg_clr.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.menubar_bg_clr.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+	.menubar_bg_hovered_clr.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menubar_bg_hovered_clr.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menubar_bg_hovered_clr.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menubar_bg_hovered_clr.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
 	.menubar_border = true,
 	.menubar_border_clr.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,

@@ -82,6 +82,8 @@ typedef enum CTK_WidgetType {
 
 typedef struct CTK_Cascade {
 	TTF_Text *name;
+	int       name_w;
+	int       name_h;
 
 	size_t     commands;
 	TTF_Text  *label[CTK_CASCADE_MAX_COMMANDS];
@@ -98,6 +100,7 @@ typedef struct CTK_Instance {
 	SDL_Texture    *content;
 	bool            drag;
 	size_t          focused_w;
+	size_t          hovered_casc;
 	CTK_WidgetId    hovered_w;
 	Uint64          max_framerate;
 	CTK_Menubar    *menubar;
@@ -560,6 +563,9 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 
 	inst->menubar->cascade[c].name = TTF_CreateText(inst->tengine,
 	                                                CTK_font, name, 0);
+	TTF_GetTextSize(inst->menubar->cascade[c].name,
+	                &inst->menubar->cascade[c].name_w,
+	                &inst->menubar->cascade[c].name_h);
 	inst->menubar->cascade[c].commands = 0;
 	inst->menubar->cascades++;
 }
@@ -967,6 +973,7 @@ CTK_CreateInstance(const char            *title,
 	inst->active = true;
 	inst->drag = false;
 	inst->focused_w = 0;
+	inst->hovered_casc = -1;
 	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menubar = NULL;
@@ -1405,7 +1412,6 @@ CTK_DrawMenubar(CTK_Instance *inst)
 {
 	size_t        i;
 	SDL_Renderer *r;
-	SDL_Rect      rect;
 	SDL_FRect     frect;
 	float         x_cascade;
 	float         y_cascade;
@@ -1416,7 +1422,6 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	frect.y = 0;
 	frect.w = inst->content->w;
 	frect.h = inst->style.menubar_h;
-
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_bg_clr.r,
 		               inst->style.menubar_bg_clr.g,
@@ -1426,11 +1431,22 @@ CTK_DrawMenubar(CTK_Instance *inst)
 
 	x_cascade = 0;
 	for (i = 0; i < inst->menubar->cascades; i++) {
-		rect = CTK_MeasureTTFText(inst->menubar->cascade[i].name, 0,
-		                          strlen(inst->menubar->cascade[i].name->text));
+		if (inst->hovered_casc == i) {
+			frect.x = x_cascade;
+			frect.y = 0;
+			frect.w = inst->menubar->cascade[i].name_w;
+			frect.h = inst->style.menubar_h;
+			SDL_SetRenderDrawColor(r,
+					       inst->style.menubar_bg_hovered_clr.r,
+					       inst->style.menubar_bg_hovered_clr.g,
+					       inst->style.menubar_bg_hovered_clr.b,
+					       inst->style.menubar_bg_hovered_clr.a);
+			SDL_RenderFillRect(r, &frect);
+		}
 
-		y_cascade = (inst->style.menubar_h - rect.h) / 2.0;
-
+		y_cascade = (inst->style.menubar_h -
+		             inst->menubar->cascade[i].name_h) /
+		            2.0;
 		TTF_SetTextColor(inst->menubar->cascade[i].name,
 	                         inst->style.menubar_text_clr.r,
 	                         inst->style.menubar_text_clr.g,
@@ -1440,9 +1456,13 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		                     x_cascade,
 		                     y_cascade);
 
-		x_cascade += rect.w;
+		x_cascade += inst->menubar->cascade[i].name_w;
 	}
 
+	frect.x = 0;
+	frect.y = 0;
+	frect.w = inst->content->w;
+	frect.h = inst->style.menubar_h;
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_border_clr.r,
 		               inst->style.menubar_border_clr.g,
@@ -1855,13 +1875,35 @@ void
 CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
-	size_t i;
+	size_t       i;
+	size_t       new_hovered_casc = -1;
 	CTK_WidgetId old_hov_w;
-	SDL_FPoint p;
+	SDL_FPoint   p;
 	CTK_WidgetId w;
+	int          x;
 
 	old_hov_w = inst->hovered_w;
 	inst->hovered_w = -1;
+
+	if (NULL != inst->menubar &&
+	    e.y < inst->style.menubar_h) {
+		new_hovered_casc = -1;
+
+		x = 0;
+		for (i = 0; i < inst->menubar->cascades; i++) {
+			if (e.x > x &&
+			    e.x < x + inst->menubar->cascade[i].name_w) {
+				new_hovered_casc = i;
+				break;
+			}
+			x += inst->menubar->cascade[i].name_w;
+		}
+	}
+
+	if (new_hovered_casc != inst->hovered_casc) {
+		inst->hovered_casc = new_hovered_casc;
+		inst->redraw = true;
+	}
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];

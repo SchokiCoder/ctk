@@ -118,7 +118,9 @@ Now for real.
 
 - [x] add basic menubar with basic drawing
 - [x] add menubar offset to mouse input coordinates
-- [ ] add menubar interaction
+- [x] add menubar hover feedback
+- [ ] add menubar click
+- [ ] add menubar submenu horizontal bar
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 

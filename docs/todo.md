@@ -122,12 +122,13 @@ Now for real.
 - [x] add menubar click and menu drawing
 - [x] add missing check for max menubar cascades upon adding
 - [x] add border to menubar cascade hover
-- [ ] add menubar cascade focus change upon hover
+- [x] add menubar cascade focus change upon hover
+- [ ] add menubar submenu click
 - [ ] add menubar submenu horizontal rule
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 
-- [ ] add menubar accelerators
+- [ ] add menubar command accelerators
 
 - [ ] add mnemonics
 

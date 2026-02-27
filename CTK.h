@@ -2004,6 +2004,7 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
 	size_t       i;
+	size_t       new_focused_casc = inst->focused_casc;
 	size_t       new_hovered_casc = -1;
 	CTK_WidgetId old_hov_w;
 	SDL_FPoint   p;
@@ -2015,17 +2016,25 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 
 	if (NULL != inst->menubar &&
 	    e.y < inst->style.menubar_h) {
+		new_focused_casc = inst->focused_casc;
 		new_hovered_casc = -1;
 
 		x = 0;
 		for (i = 0; i < inst->menubar->cascades; i++) {
 			if (e.x > x &&
 			    e.x < x + inst->menubar->cascade[i].name_w) {
+				new_focused_casc = i;
 				new_hovered_casc = i;
 				break;
 			}
 			x += inst->menubar->cascade[i].name_w;
 		}
+	}
+
+	if (new_focused_casc != inst->focused_casc &&
+	    inst->focused_casc < inst->menubar->cascades) {
+		inst->focused_casc = new_focused_casc;
+		inst->redraw = true;
 	}
 
 	if (new_hovered_casc != inst->hovered_casc) {

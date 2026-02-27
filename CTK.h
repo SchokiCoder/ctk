@@ -223,7 +223,7 @@ CTK_AddEntry(CTK_Instance *inst);
 CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst);
 
-void
+bool
 CTK_AddMenubarCascade(CTK_Instance *inst,
                       const char   *name);
 
@@ -562,11 +562,16 @@ CTK_AddLabel(CTK_Instance *inst)
 	return ret;
 }
 
-void
+bool
 CTK_AddMenubarCascade(CTK_Instance *inst,
                       const char   *name)
 {
 	size_t c = inst->menubar->cascades;
+
+	if (inst->menubar->cascades >= CTK_MENUBAR_MAX_CASCADES) {
+		SDL_SetError("Menubar can not hold more cascades");
+		return false;
+	}
 
 	inst->menubar->cascade[c].name = TTF_CreateText(inst->tengine,
 	                                                CTK_font, name, 0);
@@ -575,6 +580,8 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 	                &inst->menubar->cascade[c].name_h);
 	inst->menubar->cascade[c].commands = 0;
 	inst->menubar->cascades++;
+
+	return true;
 }
 
 bool

@@ -120,7 +120,7 @@ Now for real.
 - [x] add menubar offset to mouse input coordinates
 - [x] add menubar hover feedback
 - [x] add menubar click and menu drawing
-- [ ] add missing check for max menubar cascades upon adding
+- [x] add missing check for max menubar cascades upon adding
 - [ ] add border to menubar cascade hover
 - [ ] add menubar cascade focus change upon hover
 - [ ] add menubar submenu horizontal rule

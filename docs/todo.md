@@ -121,7 +121,7 @@ Now for real.
 - [x] add menubar hover feedback
 - [x] add menubar click and menu drawing
 - [x] add missing check for max menubar cascades upon adding
-- [ ] add border to menubar cascade hover
+- [x] add border to menubar cascade hover
 - [ ] add menubar cascade focus change upon hover
 - [ ] add menubar submenu horizontal rule
 

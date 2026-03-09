@@ -80,19 +80,18 @@ typedef enum CTK_WidgetType {
 	CTK_WTYPE_SCALE,
 } CTK_WidgetType;
 
-typedef struct CTK_Cascade {
-	TTF_Text *name;
-	int       name_w;
-	int       name_h;
-
+typedef struct CTK_Menu {
 	size_t     commands;
 	TTF_Text  *label[CTK_CASCADE_MAX_COMMANDS];
 	void     (*command[CTK_CASCADE_MAX_COMMANDS])(void);
-} CTK_Cascade;
+} CTK_Menu;
 
 typedef struct CTK_Menubar {
 	size_t      cascades;
-	CTK_Cascade cascade[CTK_MENUBAR_MAX_CASCADES];
+	TTF_Text   *cascade[CTK_MENUBAR_MAX_CASCADES];
+	int         cascade_w[CTK_MENUBAR_MAX_CASCADES];
+	int         cascade_h[CTK_MENUBAR_MAX_CASCADES];
+	CTK_Menu    menu[CTK_MENUBAR_MAX_CASCADES];
 } CTK_Menubar;
 
 typedef struct CTK_Instance {
@@ -108,6 +107,9 @@ typedef struct CTK_Instance {
 	bool            redraw;
 	CTK_Style       style;
 	TTF_TextEngine *tengine;
+	CTK_Menu       *visible_menu;
+	int             visible_menu_x;
+	int             visible_menu_y;
 	SDL_Window     *win;
 
 	/* instance events */
@@ -316,6 +318,12 @@ CTK_DestroyMenubar(CTK_Menubar* m);
 
 void
 CTK_DrawInstance(CTK_Instance *inst);
+
+void
+CTK_DrawMenu(CTK_Instance *inst,
+             CTK_Menu     *menu,
+             const int     x,
+             const int     y);
 
 void
 CTK_DrawMenubar(CTK_Instance *inst);
@@ -573,12 +581,12 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 		return false;
 	}
 
-	inst->menubar->cascade[c].name = TTF_CreateText(inst->tengine,
-	                                                CTK_font, name, 0);
-	TTF_GetTextSize(inst->menubar->cascade[c].name,
-	                &inst->menubar->cascade[c].name_w,
-	                &inst->menubar->cascade[c].name_h);
-	inst->menubar->cascade[c].commands = 0;
+	inst->menubar->cascade[c] = TTF_CreateText(inst->tengine,
+	                                           CTK_font, name, 0);
+	TTF_GetTextSize(inst->menubar->cascade[c],
+	                &inst->menubar->cascade_w[c],
+	                &inst->menubar->cascade_h[c]);
+	inst->menubar->menu[c].commands = 0;
 	inst->menubar->cascades++;
 
 	return true;
@@ -592,17 +600,17 @@ CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
 {
 	size_t id;
 
-	if (inst->menubar->cascade[c].commands >= CTK_CASCADE_MAX_COMMANDS) {
-		SDL_SetError("Menubar cascade can not hold more commands");
+	if (inst->menubar->menu[c].commands >= CTK_CASCADE_MAX_COMMANDS) {
+		SDL_SetError("Menu can not hold more commands");
 		return false;
 	}
 
-	id = inst->menubar->cascade[c].commands;
-	inst->menubar->cascade[c].label[id] = TTF_CreateText(inst->tengine,
-	                                                           CTK_font,
-	                                                           label, 0);
-	inst->menubar->cascade[c].command[id] = fn;
-	inst->menubar->cascade[c].commands++;
+	id = inst->menubar->menu[c].commands;
+	inst->menubar->menu[c].label[id] = TTF_CreateText(inst->tengine,
+	                                                  CTK_font,
+	                                                  label, 0);
+	inst->menubar->menu[c].command[id] = fn;
+	inst->menubar->menu[c].commands++;
 
 	return true;
 }
@@ -1015,6 +1023,9 @@ CTK_CreateInstance(const char            *title,
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menubar = NULL;
 	inst->style = CTK_DEFAULT_THEME;
+	inst->visible_menu = NULL;
+	inst->visible_menu_x = 0;
+	inst->visible_menu_y = 0;
 	inst->redraw = true;
 
 	inst->draw = NULL;
@@ -1355,10 +1366,10 @@ CTK_DestroyMenubar(CTK_Menubar* m)
 	size_t a, b;
 
 	for (a = 0; a < m->cascades; a++) {
-		for (b = 0; b < m->cascade[a].commands; b++) {
-			TTF_DestroyText(m->cascade[a].label[b]);
+		for (b = 0; b < m->menu[a].commands; b++) {
+			TTF_DestroyText(m->menu[a].label[b]);
 		}
-		TTF_DestroyText(m->cascade[a].name);
+		TTF_DestroyText(m->cascade[a]);
 	}
 
 	free(m);
@@ -1445,16 +1456,76 @@ CTK_DrawInstance(CTK_Instance *inst)
 }
 
 void
+CTK_DrawMenu(CTK_Instance *inst,
+             CTK_Menu     *menu,
+             const int     x,
+             const int     y)
+{
+	float         command_x;
+	float         command_y;
+	int           h;
+	size_t        i;
+	SDL_FRect     frect;
+	SDL_Renderer *r;
+	int           w;
+
+	r = SDL_GetRenderer(inst->win);
+
+	frect.x = x;
+	frect.y = y;
+	frect.w = 0;
+	frect.h = 0;
+	for (i = 0; i < menu->commands; i++) {
+		TTF_GetTextSize(menu->label[i], &w, NULL);
+		frect.h += inst->style.menubar_command_h;
+		if (w > frect.w) {
+			frect.w = w;
+		}
+	}
+	SDL_SetRenderDrawColor(r,
+			       inst->style.menubar_bg_clr.r,
+			       inst->style.menubar_bg_clr.g,
+			       inst->style.menubar_bg_clr.b,
+			       inst->style.menubar_bg_clr.a);
+	SDL_RenderFillRect(r, &frect);
+
+	SDL_SetRenderDrawColor(r,
+	               inst->style.menubar_border_clr.r,
+	               inst->style.menubar_border_clr.g,
+	               inst->style.menubar_border_clr.b,
+	               inst->style.menubar_border_clr.a);
+	if (inst->style.menubar_border) {
+		SDL_RenderRect(r, &frect);
+	}
+
+	command_x = frect.x;
+	command_y = frect.y;
+	for (i = 0; i < menu->commands; i++) {
+		TTF_GetTextSize(menu->label[i], &w, &h);
+
+		TTF_SetTextColor(menu->label[i],
+		                 inst->style.menubar_text_clr.r,
+		                 inst->style.menubar_text_clr.g,
+		                 inst->style.menubar_text_clr.b,
+		                 inst->style.menubar_text_clr.a);
+		TTF_DrawRendererText(menu->label[i],
+		                     command_x,
+		                     command_y +
+		                     ((inst->style.menubar_command_h - h) /
+		                     2.0));
+
+		command_y += inst->style.menubar_command_h;
+	}
+}
+
+void
 CTK_DrawMenubar(CTK_Instance *inst)
 {
 	float         cascade_x;
 	float         cascade_y;
-	float         command_x;
-	float         command_y;
 	size_t        i;
 	SDL_Renderer *r;
 	SDL_FRect     frect;
-	int           w, h;
 
 	r = SDL_GetRenderer(inst->win);
 
@@ -1474,7 +1545,7 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		if (inst->hovered_casc == i) {
 			frect.x = cascade_x;
 			frect.y = 0;
-			frect.w = inst->menubar->cascade[i].name_w;
+			frect.w = inst->menubar->cascade_w[i];
 			frect.h = inst->style.menubar_h;
 			SDL_SetRenderDrawColor(r,
 					       inst->style.menubar_bg_hovered_clr.r,
@@ -1492,18 +1563,18 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		}
 
 		cascade_y = (inst->style.menubar_h -
-		             inst->menubar->cascade[i].name_h) /
+		             inst->menubar->cascade_h[i]) /
 		            2.0;
-		TTF_SetTextColor(inst->menubar->cascade[i].name,
+		TTF_SetTextColor(inst->menubar->cascade[i],
 	                         inst->style.menubar_text_clr.r,
 	                         inst->style.menubar_text_clr.g,
 	                         inst->style.menubar_text_clr.b,
 	                         inst->style.menubar_text_clr.a);
-		TTF_DrawRendererText(inst->menubar->cascade[i].name,
+		TTF_DrawRendererText(inst->menubar->cascade[i],
 		                     cascade_x,
 		                     cascade_y);
 
-		cascade_x += inst->menubar->cascade[i].name_w;
+		cascade_x += inst->menubar->cascade_w[i];
 	}
 
 	frect.x = 0;
@@ -1519,63 +1590,11 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		SDL_RenderRect(r, &frect);
 	}
 
-	if (inst->focused_casc < inst->menubar->cascades) {
-		frect.x = 0;
-		frect.y = inst->style.menubar_h;
-		for (i = 0; i < inst->focused_casc; i++) {
-			TTF_GetTextSize(inst->menubar->cascade[i].name, &w, &h);
-			frect.x += w;
-		}
-
-		frect.w = 0;
-		frect.h = 0;
-		for (i = 0;
-		     i < inst->menubar->cascade[inst->focused_casc].commands;
-		     i++) {
-			TTF_GetTextSize(inst->menubar->cascade[inst->focused_casc].label[i],
-			                &w, NULL);
-			frect.h += inst->style.menubar_command_h;
-			if (w > frect.w) {
-				frect.w = w;
-			}
-		}
-		SDL_SetRenderDrawColor(r,
-				       inst->style.menubar_bg_clr.r,
-				       inst->style.menubar_bg_clr.g,
-				       inst->style.menubar_bg_clr.b,
-				       inst->style.menubar_bg_clr.a);
-		SDL_RenderFillRect(r, &frect);
-
-		SDL_SetRenderDrawColor(r,
-		               inst->style.menubar_border_clr.r,
-		               inst->style.menubar_border_clr.g,
-		               inst->style.menubar_border_clr.b,
-		               inst->style.menubar_border_clr.a);
-		if (inst->style.menubar_border) {
-			SDL_RenderRect(r, &frect);
-		}
-
-		command_x = frect.x;
-		command_y = frect.y;
-		for (i = 0;
-		     i < inst->menubar->cascade[inst->focused_casc].commands;
-		     i++) {
-			TTF_GetTextSize(inst->menubar->cascade[inst->focused_casc].label[i],
-			                &w, &h);
-
-			TTF_SetTextColor(inst->menubar->cascade[inst->focused_casc].label[i],
-			                 inst->style.menubar_text_clr.r,
-			                 inst->style.menubar_text_clr.g,
-			                 inst->style.menubar_text_clr.b,
-			                 inst->style.menubar_text_clr.a);
-			TTF_DrawRendererText(inst->menubar->cascade[inst->focused_casc].label[i],
-			                     command_x,
-			                     command_y +
-			                     ((inst->style.menubar_command_h - h) /
-			                     2.0));
-
-			command_y += inst->style.menubar_command_h;
-		}
+	if (NULL != inst->visible_menu) {
+		CTK_DrawMenu(inst,
+		             inst->visible_menu,
+		             inst->visible_menu_x,
+		             inst->visible_menu_y);
 	}
 }
 
@@ -1892,32 +1911,46 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
                           const SDL_MouseButtonEvent  e)
 {
 	size_t       i;
+	CTK_Menubar *mb;
 	size_t       new_focused_casc;
 	SDL_FPoint   p;
 	CTK_WidgetId w;
 	int          x;
 
-	if (NULL != inst->menubar &&
+	mb = inst->menubar;
+
+	if (NULL != mb &&
 	    e.y < inst->style.menubar_h) {
 		new_focused_casc = -1;
 		x = 0;
-		for (i = 0; i < inst->menubar->cascades; i++) {
+		for (i = 0; i < mb->cascades; i++) {
 			if (e.x > x &&
-			    e.x < x + inst->menubar->cascade[i].name_w) {
+			    e.x < x + mb->cascade_w[i]) {
 				new_focused_casc = i;
 				break;
 			}
-			x += inst->menubar->cascade[i].name_w;
+			x += mb->cascade_w[i];
 		}
 	}
 
-	if (new_focused_casc != inst->focused_casc) {
+	if (inst->visible_menu != &mb->menu[new_focused_casc]) {
 		inst->focused_casc = new_focused_casc;
+		inst->visible_menu_y = inst->style.menubar_h;
 		inst->redraw = true;
+
+		if (new_focused_casc < mb->cascades) {
+			inst->visible_menu = &mb->menu[new_focused_casc];
+			inst->visible_menu_x = 0;
+			for (i = 0; i < inst->focused_casc; i++) {
+				inst->visible_menu_x += mb->cascade_w[i];
+			}
+		} else {
+			inst->visible_menu = NULL;
+		}
 	}
 
 	p.x = e.x;
-	p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
+	p.y = e.y - (mb ? inst->style.menubar_h : 0);
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
@@ -2004,6 +2037,7 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
 	size_t       i;
+	CTK_Menubar *mb;
 	size_t       new_focused_casc = inst->focused_casc;
 	size_t       new_hovered_casc = -1;
 	CTK_WidgetId old_hov_w;
@@ -2011,30 +2045,41 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	CTK_WidgetId w;
 	int          x;
 
+	mb = inst->menubar;
 	old_hov_w = inst->hovered_w;
 	inst->hovered_w = -1;
 
-	if (NULL != inst->menubar &&
+	if (NULL != mb &&
 	    e.y < inst->style.menubar_h) {
-		new_focused_casc = inst->focused_casc;
 		new_hovered_casc = -1;
 
 		x = 0;
-		for (i = 0; i < inst->menubar->cascades; i++) {
+		for (i = 0; i < mb->cascades; i++) {
 			if (e.x > x &&
-			    e.x < x + inst->menubar->cascade[i].name_w) {
+			    e.x < x + mb->cascade_w[i]) {
 				new_focused_casc = i;
 				new_hovered_casc = i;
 				break;
 			}
-			x += inst->menubar->cascade[i].name_w;
+			x += mb->cascade_w[i];
 		}
 	}
 
-	if (new_focused_casc != inst->focused_casc &&
-	    inst->focused_casc < inst->menubar->cascades) {
+	if (inst->visible_menu != &mb->menu[new_focused_casc] &&
+	    inst->focused_casc < mb->cascades) {
 		inst->focused_casc = new_focused_casc;
+		inst->visible_menu_y = inst->style.menubar_h;
 		inst->redraw = true;
+
+		if (new_focused_casc < mb->cascades) {
+			inst->visible_menu = &mb->menu[new_focused_casc];
+			inst->visible_menu_x = 0;
+			for (i = 0; i < inst->focused_casc; i++) {
+				inst->visible_menu_x += mb->cascade_w[i];
+			}
+		} else {
+			inst->visible_menu = NULL;
+		}
 	}
 
 	if (new_hovered_casc != inst->hovered_casc) {
@@ -2045,7 +2090,7 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 		p.x = e.x;
-		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
+		p.y = e.y - (mb ? inst->style.menubar_h : 0);
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;

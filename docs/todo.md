@@ -123,6 +123,11 @@ Now for real.
 - [x] add missing check for max menubar cascades upon adding
 - [x] add border to menubar cascade hover
 - [x] add menubar cascade focus change upon hover
+
+- [x] change menu data structure to make menus more sovereign
+Also move menu drawing to its own function.
+
+- [ ] add menubar submenu hover
 - [ ] add menubar submenu click
 - [ ] add menubar submenu horizontal rule
 
@@ -131,6 +136,9 @@ Now for real.
 - [ ] add menubar command accelerators
 
 - [ ] add mnemonics
+
+- [ ] add right click menu for entries
+For cut, copy, paste, etc.
 
 - [ ] track issue: delete key crash
 `TTF_DeleteTextString` is broken on latest stable release,

@@ -127,16 +127,18 @@ Now for real.
 - [x] change menu data structure to make menus more sovereign
 Also move menu drawing to its own function.
 
-- [ ] add menubar submenu hover
-- [ ] add menubar submenu click
-- [ ] add menubar submenu horizontal rule
+- [x] add menu hover feedback
+- [ ] add menu click
+- [ ] add menu horizontal rule
+- [ ] add menu enabled property for commands
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 
-- [ ] add menubar command accelerators
+- [ ] add menu command accelerators
 
 - [ ] add mnemonics
 
+- [ ] add menu
 - [ ] add right click menu for entries
 For cut, copy, paste, etc.
 

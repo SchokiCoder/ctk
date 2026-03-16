@@ -101,6 +101,7 @@ typedef struct CTK_Instance {
 	size_t          focused_casc;
 	size_t          focused_w;
 	size_t          hovered_casc;
+	size_t          hovered_cmd;
 	CTK_WidgetId    hovered_w;
 	Uint64          max_framerate;
 	CTK_Menubar    *menubar;
@@ -358,6 +359,10 @@ CTK_HandleTextInput(CTK_Instance             *inst,
 
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
+
+SDL_FRect
+CTK_GetMenuSize(const CTK_Instance *inst,
+                const CTK_Menu     *m);
 
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
@@ -1019,6 +1024,7 @@ CTK_CreateInstance(const char            *title,
 	inst->drag = false;
 	inst->focused_w = 0;
 	inst->hovered_casc = -1;
+	inst->hovered_cmd = -1;
 	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menubar = NULL;
@@ -1471,17 +1477,9 @@ CTK_DrawMenu(CTK_Instance *inst,
 
 	r = SDL_GetRenderer(inst->win);
 
+	frect = CTK_GetMenuSize(inst, menu);
 	frect.x = x;
 	frect.y = y;
-	frect.w = 0;
-	frect.h = 0;
-	for (i = 0; i < menu->commands; i++) {
-		TTF_GetTextSize(menu->label[i], &w, NULL);
-		frect.h += inst->style.menubar_command_h;
-		if (w > frect.w) {
-			frect.w = w;
-		}
-	}
 	SDL_SetRenderDrawColor(r,
 			       inst->style.menubar_bg_clr.r,
 			       inst->style.menubar_bg_clr.g,
@@ -1489,15 +1487,28 @@ CTK_DrawMenu(CTK_Instance *inst,
 			       inst->style.menubar_bg_clr.a);
 	SDL_RenderFillRect(r, &frect);
 
-	SDL_SetRenderDrawColor(r,
-	               inst->style.menubar_border_clr.r,
-	               inst->style.menubar_border_clr.g,
-	               inst->style.menubar_border_clr.b,
-	               inst->style.menubar_border_clr.a);
 	if (inst->style.menubar_border) {
+		SDL_SetRenderDrawColor(r,
+	                               inst->style.menubar_border_clr.r,
+	                               inst->style.menubar_border_clr.g,
+	                               inst->style.menubar_border_clr.b,
+	                               inst->style.menubar_border_clr.a);
 		SDL_RenderRect(r, &frect);
 	}
 
+	if (inst->hovered_cmd < menu->commands) {
+		frect.x = x;
+		frect.y = y + (inst->style.menubar_command_h * inst->hovered_cmd);
+		frect.h = inst->style.menubar_command_h;
+		SDL_SetRenderDrawColor(r,
+	                               inst->style.menubar_bg_hovered_clr.r,
+	                               inst->style.menubar_bg_hovered_clr.g,
+	                               inst->style.menubar_bg_hovered_clr.b,
+	                               inst->style.menubar_bg_hovered_clr.a);
+		SDL_RenderFillRect(r, &frect);
+	}
+
+	frect.y = y;
 	command_x = frect.x;
 	command_y = frect.y;
 	for (i = 0; i < menu->commands; i++) {
@@ -2037,9 +2048,11 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
 	size_t       i;
+	SDL_FRect    menu_r;
 	CTK_Menubar *mb;
 	size_t       new_focused_casc = inst->focused_casc;
 	size_t       new_hovered_casc = -1;
+	size_t       new_hovered_cmd = -1;
 	CTK_WidgetId old_hov_w;
 	SDL_FPoint   p;
 	CTK_WidgetId w;
@@ -2084,6 +2097,24 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 
 	if (new_hovered_casc != inst->hovered_casc) {
 		inst->hovered_casc = new_hovered_casc;
+		inst->redraw = true;
+	}
+
+	if (NULL != inst->visible_menu) {
+		menu_r = CTK_GetMenuSize(inst, inst->visible_menu);
+		menu_r.x = inst->visible_menu_x;
+		menu_r.y = inst->visible_menu_y;
+
+		p.x = e.x;
+		p.y = e.y;
+		if (SDL_PointInRectFloat(&p, &menu_r)) {
+			new_hovered_cmd = (p.y - menu_r.y - 1) /
+			                  inst->style.menubar_command_h;
+		}
+	}
+
+	if (new_hovered_cmd != inst->hovered_cmd) {
+		inst->hovered_cmd = new_hovered_cmd;
 		inst->redraw = true;
 	}
 
@@ -2191,6 +2222,30 @@ CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst)
 {
 	return inst->focusable_w[inst->focused_w];
+}
+
+SDL_FRect
+CTK_GetMenuSize(const CTK_Instance *inst,
+                const CTK_Menu     *m)
+{
+	size_t i;
+	SDL_FRect ret;
+	int w;
+
+	ret.x = 0;
+	ret.y = 0;
+	ret.w = 0;
+	ret.h = 0;
+
+	for (i = 0; i < m->commands; i++) {
+		TTF_GetTextSize(m->label[i], &w, NULL);
+		ret.h += inst->style.menubar_command_h;
+		if (w > ret.w) {
+			ret.w = w;
+		}
+	}
+
+	return ret;
 }
 
 bool

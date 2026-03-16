@@ -129,9 +129,15 @@ Also move menu drawing to its own function.
 
 - [x] add menu hover feedback
 - [x] add motion handling block for widgets when a menu is visible
-- [ ] add menu click
+- [x] add menu click
+- [ ] fix menu motion handling regarding invisible menus
+There is a problem after clicking a command.
+
 - [ ] add menu horizontal rule
 - [ ] add menu enabled property for commands
+
+- [ ] replace `CTK_AddMenubarCascadeCommand`
+see "change menu data structure to make menus more sovereign"
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 

@@ -83,7 +83,8 @@ typedef enum CTK_WidgetType {
 typedef struct CTK_Menu {
 	size_t     commands;
 	TTF_Text  *label[CTK_CASCADE_MAX_COMMANDS];
-	void     (*command[CTK_CASCADE_MAX_COMMANDS])(void);
+	void     (*command[CTK_CASCADE_MAX_COMMANDS])(void *data);
+	void      *command_data[CTK_CASCADE_MAX_COMMANDS];
 } CTK_Menu;
 
 typedef struct CTK_Menubar {
@@ -234,7 +235,8 @@ bool
 CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
                              const size_t   c,
                              const char    *label,
-                             void         (*fn)());
+                             void         (*fn)(),
+                             void          *fn_data);
 
 CTK_WidgetId
 CTK_AddProgressbar(CTK_Instance *inst);
@@ -601,7 +603,8 @@ bool
 CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
                              const size_t   c,
                              const char    *label,
-                             void         (*fn)())
+                             void         (*fn)(),
+                             void          *fn_data)
 {
 	size_t id;
 
@@ -615,6 +618,7 @@ CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
 	                                                  CTK_font,
 	                                                  label, 0);
 	inst->menubar->menu[c].command[id] = fn;
+	inst->menubar->menu[c].command_data[id] = fn_data;
 	inst->menubar->menu[c].commands++;
 
 	return true;
@@ -1930,6 +1934,10 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 
 	mb = inst->menubar;
 
+	if (NULL != inst->visible_menu) {
+		return;
+	}
+
 	if (NULL != mb &&
 	    e.y < inst->style.menubar_h) {
 		new_focused_casc = -1;
@@ -1989,11 +1997,29 @@ void
 CTK_HandleMouseButtonUp(CTK_Instance               *inst,
                         const SDL_MouseButtonEvent  e)
 {
-	size_t i;
-	SDL_FPoint p;
+	size_t       i;
+	SDL_FRect    menu_r;
+	SDL_FPoint   p;
 	CTK_WidgetId w;
 
 	inst->drag = false;
+
+	if (NULL != inst->visible_menu) {
+		menu_r = CTK_GetMenuSize(inst, inst->visible_menu);
+		menu_r.x = inst->visible_menu_x;
+		menu_r.y = inst->visible_menu_y;
+		p.x = e.x;
+		p.y = e.y;
+		if (SDL_PointInRectFloat(&p, &menu_r)) {
+			i = (p.y - menu_r.y - 1) / inst->style.menubar_command_h;
+			if (NULL != inst->visible_menu->command[i]) {
+				inst->visible_menu->command[i](inst->visible_menu->command_data[i]);
+			}
+			inst->visible_menu = NULL;
+			inst->redraw = true;
+			return;
+		}
+	}
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];

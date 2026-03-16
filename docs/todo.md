@@ -128,6 +128,7 @@ Now for real.
 Also move menu drawing to its own function.
 
 - [x] add menu hover feedback
+- [x] add motion handling block for widgets when a menu is visible
 - [ ] add menu click
 - [ ] add menu horizontal rule
 - [ ] add menu enabled property for commands

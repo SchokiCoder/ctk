@@ -2118,23 +2118,25 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 		inst->redraw = true;
 	}
 
-	for (i = 0; i < inst->enabled_ws; i++) {
-		w = inst->enabled_w[i];
-		p.x = e.x;
-		p.y = e.y - (mb ? inst->style.menubar_h : 0);
+	if (NULL == inst->visible_menu) {
+		for (i = 0; i < inst->enabled_ws; i++) {
+			w = inst->enabled_w[i];
+			p.x = e.x;
+			p.y = e.y - (mb ? inst->style.menubar_h : 0);
 
-		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
-			continue;
+			if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
+				continue;
 
-		inst->hovered_w = w;
+			inst->hovered_w = w;
 
-		if (inst->mouse_motion[w]) {
-			inst->mouse_motion[w](inst,
-			                      e,
-			                      w,
-			                      inst->mouse_motion_data);
+			if (inst->mouse_motion[w]) {
+				inst->mouse_motion[w](inst,
+					              e,
+					              w,
+					              inst->mouse_motion_data);
+			}
+			break;
 		}
-		break;
 	}
 
 	if (old_hov_w == inst->hovered_w)

@@ -2015,6 +2015,7 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 			if (NULL != inst->visible_menu->command[i]) {
 				inst->visible_menu->command[i](inst->visible_menu->command_data[i]);
 			}
+			inst->focused_casc = -1;
 			inst->visible_menu = NULL;
 			inst->redraw = true;
 			return;

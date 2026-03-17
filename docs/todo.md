@@ -130,8 +130,7 @@ Also move menu drawing to its own function.
 - [x] add menu hover feedback
 - [x] add motion handling block for widgets when a menu is visible
 - [x] add menu click
-- [ ] fix menu motion handling regarding invisible menus
-There is a problem after clicking a command.
+- [x] fix menu click not unfocusing the menubar
 
 - [ ] add menu horizontal rule
 - [ ] add menu enabled property for commands

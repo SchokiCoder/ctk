@@ -132,11 +132,14 @@ Also move menu drawing to its own function.
 - [x] add menu click
 - [x] fix menu click not unfocusing the menubar
 
-- [ ] add menu horizontal rule
+- [x] add menu separator
 - [ ] add menu enabled property for commands
 
-- [ ] replace `CTK_AddMenubarCascadeCommand`
-see "change menu data structure to make menus more sovereign"
+- [ ] rename and reorganize `CTK_AddMenubarCascade`, `CTK_AddMenubarCascadeCommand`, `CTK_CASCADE_MAX_COMMANDS`, also sytel variables
+see `CTK_AddMenuSeparator` or "change menu data structure to make menus more sovereign"
+Adding a menu to menubar should return a menu pointer, not an index, because Menu is a struct unlike widgets.
+
+- [ ] fix menu command hover overlaying the border
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 

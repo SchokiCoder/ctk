@@ -85,6 +85,7 @@ typedef struct CTK_Menu {
 	TTF_Text  *label[CTK_CASCADE_MAX_COMMANDS];
 	void     (*command[CTK_CASCADE_MAX_COMMANDS])(void *data);
 	void      *command_data[CTK_CASCADE_MAX_COMMANDS];
+	bool       is_separator[CTK_CASCADE_MAX_COMMANDS];
 } CTK_Menu;
 
 typedef struct CTK_Menubar {
@@ -237,6 +238,9 @@ CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
                              const char    *label,
                              void         (*fn)(),
                              void          *fn_data);
+
+bool
+CTK_AddMenuSeparator(CTK_Menu *menu);
 
 CTK_WidgetId
 CTK_AddProgressbar(CTK_Instance *inst);
@@ -609,7 +613,7 @@ CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
 	size_t id;
 
 	if (inst->menubar->menu[c].commands >= CTK_CASCADE_MAX_COMMANDS) {
-		SDL_SetError("Menu can not hold more commands");
+		SDL_SetError("Menu can not hold more items");
 		return false;
 	}
 
@@ -619,7 +623,28 @@ CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
 	                                                  label, 0);
 	inst->menubar->menu[c].command[id] = fn;
 	inst->menubar->menu[c].command_data[id] = fn_data;
+	inst->menubar->menu[c].is_separator[id] = false;
 	inst->menubar->menu[c].commands++;
+
+	return true;
+}
+
+bool
+CTK_AddMenuSeparator(CTK_Menu *menu)
+{
+	size_t id;
+
+	if (menu->commands >= CTK_CASCADE_MAX_COMMANDS) {
+		SDL_SetError("Menu can not hold more items");
+		return false;
+	}
+
+	id = menu->commands;
+	menu->label[id] = NULL;
+	menu->command[id] = NULL;
+	menu->command_data[id] = NULL;
+	menu->is_separator[id] = true;
+	menu->commands++;
 
 	return true;
 }
@@ -1473,15 +1498,17 @@ CTK_DrawMenu(CTK_Instance *inst,
 {
 	float         command_x;
 	float         command_y;
+	SDL_FRect     frect;
 	int           h;
 	size_t        i;
-	SDL_FRect     frect;
+	SDL_FRect     menu_r;
 	SDL_Renderer *r;
 	int           w;
 
 	r = SDL_GetRenderer(inst->win);
 
-	frect = CTK_GetMenuSize(inst, menu);
+	menu_r = CTK_GetMenuSize(inst, menu);
+	frect = menu_r;
 	frect.x = x;
 	frect.y = y;
 	SDL_SetRenderDrawColor(r,
@@ -1500,9 +1527,11 @@ CTK_DrawMenu(CTK_Instance *inst,
 		SDL_RenderRect(r, &frect);
 	}
 
-	if (inst->hovered_cmd < menu->commands) {
+	if (inst->hovered_cmd < menu->commands &&
+	    !menu->is_separator[inst->hovered_cmd]) {
 		frect.x = x;
 		frect.y = y + (inst->style.menubar_command_h * inst->hovered_cmd);
+		frect.w = menu_r.w;
 		frect.h = inst->style.menubar_command_h;
 		SDL_SetRenderDrawColor(r,
 	                               inst->style.menubar_bg_hovered_clr.r,
@@ -1512,24 +1541,38 @@ CTK_DrawMenu(CTK_Instance *inst,
 		SDL_RenderFillRect(r, &frect);
 	}
 
-	frect.y = y;
 	command_x = frect.x;
-	command_y = frect.y;
+	command_y = y;
 	for (i = 0; i < menu->commands; i++) {
-		TTF_GetTextSize(menu->label[i], &w, &h);
+		if (menu->is_separator[i]) {
+			frect.x = x + 2;
+			frect.y = command_y + (inst->style.menubar_separator_h / 2);
+			frect.w = menu_r.w - 4;
+			frect.h = 2;
+			SDL_SetRenderDrawColor(r,
+	                                       inst->style.menubar_border_clr.r,
+	                                       inst->style.menubar_border_clr.g,
+	                                       inst->style.menubar_border_clr.b,
+	                                       inst->style.menubar_border_clr.a);
+			SDL_RenderRect(r, &frect);
 
-		TTF_SetTextColor(menu->label[i],
-		                 inst->style.menubar_text_clr.r,
-		                 inst->style.menubar_text_clr.g,
-		                 inst->style.menubar_text_clr.b,
-		                 inst->style.menubar_text_clr.a);
-		TTF_DrawRendererText(menu->label[i],
-		                     command_x,
-		                     command_y +
-		                     ((inst->style.menubar_command_h - h) /
-		                     2.0));
+			command_y += inst->style.menubar_separator_h;
+		} else {
+			TTF_GetTextSize(menu->label[i], &w, &h);
 
-		command_y += inst->style.menubar_command_h;
+			TTF_SetTextColor(menu->label[i],
+				         inst->style.menubar_text_clr.r,
+				         inst->style.menubar_text_clr.g,
+				         inst->style.menubar_text_clr.b,
+				         inst->style.menubar_text_clr.a);
+			TTF_DrawRendererText(menu->label[i],
+				             command_x,
+				             command_y +
+				             ((inst->style.menubar_command_h - h) /
+				             2.0));
+
+			command_y += inst->style.menubar_command_h;
+		}
 	}
 }
 

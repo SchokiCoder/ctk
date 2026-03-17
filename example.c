@@ -281,8 +281,10 @@ main(int    argc,
 	CTK_AddMenubarCascade(inst, "File");
 	CTK_AddMenubarCascadeCommand(inst, 0, "New", menuFileNew, NULL);
 	CTK_AddMenubarCascadeCommand(inst, 0, "Open", menuFileOpen, NULL);
+	CTK_AddMenuSeparator(&inst->menubar->menu[0]);
 	CTK_AddMenubarCascadeCommand(inst, 0, "Save", menuFileSave, NULL);
 	CTK_AddMenubarCascadeCommand(inst, 0, "Save As", menuFileSaveAs, NULL);
+	CTK_AddMenuSeparator(&inst->menubar->menu[0]);
 	CTK_AddMenubarCascadeCommand(inst, 0, "Quit", menuFileQuit, NULL);
 	CTK_AddMenubarCascade(inst, "Help");
 	CTK_AddMenubarCascadeCommand(inst, 1, "About", menuHelpAbout, NULL);

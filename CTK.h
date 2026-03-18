@@ -85,6 +85,7 @@ typedef struct CTK_Menu {
 	TTF_Text  *label[CTK_CASCADE_MAX_COMMANDS];
 	void     (*command[CTK_CASCADE_MAX_COMMANDS])(void *data);
 	void      *command_data[CTK_CASCADE_MAX_COMMANDS];
+	bool       enabled[CTK_CASCADE_MAX_COMMANDS];
 	bool       is_separator[CTK_CASCADE_MAX_COMMANDS];
 } CTK_Menu;
 
@@ -623,6 +624,7 @@ CTK_AddMenubarCascadeCommand(CTK_Instance  *inst,
 	                                                  label, 0);
 	inst->menubar->menu[c].command[id] = fn;
 	inst->menubar->menu[c].command_data[id] = fn_data;
+	inst->menubar->menu[c].enabled[id] = true;
 	inst->menubar->menu[c].is_separator[id] = false;
 	inst->menubar->menu[c].commands++;
 
@@ -643,6 +645,7 @@ CTK_AddMenuSeparator(CTK_Menu *menu)
 	menu->label[id] = NULL;
 	menu->command[id] = NULL;
 	menu->command_data[id] = NULL;
+	menu->enabled[id] = false;
 	menu->is_separator[id] = true;
 	menu->commands++;
 
@@ -1528,7 +1531,7 @@ CTK_DrawMenu(CTK_Instance *inst,
 	}
 
 	if (inst->hovered_cmd < menu->commands &&
-	    !menu->is_separator[inst->hovered_cmd]) {
+	    menu->enabled[inst->hovered_cmd]) {
 		frect.x = x;
 		frect.y = y + (inst->style.menubar_command_h * inst->hovered_cmd);
 		frect.w = menu_r.w;
@@ -1557,22 +1560,31 @@ CTK_DrawMenu(CTK_Instance *inst,
 			SDL_RenderRect(r, &frect);
 
 			command_y += inst->style.menubar_separator_h;
-		} else {
-			TTF_GetTextSize(menu->label[i], &w, &h);
-
-			TTF_SetTextColor(menu->label[i],
-				         inst->style.menubar_text_clr.r,
-				         inst->style.menubar_text_clr.g,
-				         inst->style.menubar_text_clr.b,
-				         inst->style.menubar_text_clr.a);
-			TTF_DrawRendererText(menu->label[i],
-				             command_x,
-				             command_y +
-				             ((inst->style.menubar_command_h - h) /
-				             2.0));
-
-			command_y += inst->style.menubar_command_h;
+			continue;
 		}
+
+		TTF_GetTextSize(menu->label[i], &w, &h);
+
+		if (menu->enabled[i]) {
+			TTF_SetTextColor(menu->label[i],
+					 inst->style.menubar_text_clr.r,
+					 inst->style.menubar_text_clr.g,
+					 inst->style.menubar_text_clr.b,
+					 inst->style.menubar_text_clr.a);
+		} else {
+			TTF_SetTextColor(menu->label[i],
+					 inst->style.menubar_text_disabled_clr.r,
+					 inst->style.menubar_text_disabled_clr.g,
+					 inst->style.menubar_text_disabled_clr.b,
+					 inst->style.menubar_text_disabled_clr.a);
+		}
+		TTF_DrawRendererText(menu->label[i],
+			             command_x,
+			             command_y +
+			             ((inst->style.menubar_command_h - h) /
+			             2.0));
+
+		command_y += inst->style.menubar_command_h;
 	}
 }
 
@@ -2055,7 +2067,8 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 		p.y = e.y;
 		if (SDL_PointInRectFloat(&p, &menu_r)) {
 			i = (p.y - menu_r.y - 1) / inst->style.menubar_command_h;
-			if (NULL != inst->visible_menu->command[i]) {
+			if (NULL != inst->visible_menu->command[i] &&
+			    inst->visible_menu->enabled[i]) {
 				inst->visible_menu->command[i](inst->visible_menu->command_data[i]);
 			}
 			inst->focused_casc = -1;

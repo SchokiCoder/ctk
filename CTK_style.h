@@ -48,6 +48,7 @@ typedef struct CTK_Style {
 	size_t          menubar_command_h;
 	size_t          menubar_separator_h;
 	SDL_Color       menubar_text_clr;
+	SDL_Color       menubar_text_disabled_clr;
 	size_t          menubar_h;
 	CTK_WidgetStyle progressbar;
 	CTK_WidgetStyle radiobutton;
@@ -286,6 +287,11 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menubar_text_clr.g = CTK_THEME_TCLTK_TEXT_GRAY,
 	.menubar_text_clr.b = CTK_THEME_TCLTK_TEXT_GRAY,
 	.menubar_text_clr.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.menubar_text_disabled_clr.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.menubar_text_disabled_clr.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.menubar_text_disabled_clr.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.menubar_text_disabled_clr.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
 
 	.menubar_h = 33,
 

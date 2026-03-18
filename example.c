@@ -208,6 +208,14 @@ menuHelpAbout(void *data)
 }
 
 void
+menuHelpDisabled(void *data)
+{
+	(void) data;
+
+	printf("This MUST NOT run!\n");
+}
+
+void
 sclEdit(CTK_Instance               *inst,
         const CTK_WidgetId          widget,
         void                       *data)
@@ -288,6 +296,8 @@ main(int    argc,
 	CTK_AddMenubarCascadeCommand(inst, 0, "Quit", menuFileQuit, NULL);
 	CTK_AddMenubarCascade(inst, "Help");
 	CTK_AddMenubarCascadeCommand(inst, 1, "About", menuHelpAbout, NULL);
+	CTK_AddMenubarCascadeCommand(inst, 1, "Disabled", menuHelpDisabled, NULL);
+	inst->menubar->menu[1].enabled[1] = false;
 
 	ckb_focusable = CTK_AddCheckbox(inst);
 	inst->rect[ckb_focusable].x = MARGIN;

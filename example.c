@@ -194,9 +194,9 @@ menuFileSaveAs(void *data)
 void
 menuFileQuit(void *data)
 {
-	(void) data;
+	bool *active = data;
 
-	printf("Menu \"File\" Command \"Quit\"\n");
+	*active = false;
 }
 
 void
@@ -251,6 +251,8 @@ main(int    argc,
 	const int MARGIN = 5;
 
 	CTK_Instance *inst;
+	CTK_Menu *menuFile;
+	CTK_Menu *menuAbout;
 	CTK_WidgetId lbl_focusable,
 	             lbl_enabled,
 	             lbl_visible;
@@ -286,18 +288,22 @@ main(int    argc,
 	inst->leave = leave;
 
 	inst->menubar = CTK_CreateMenubar();
-	CTK_AddMenubarCascade(inst, "File");
-	CTK_AddMenubarCascadeCommand(inst, 0, "New", menuFileNew, NULL);
-	CTK_AddMenubarCascadeCommand(inst, 0, "Open", menuFileOpen, NULL);
-	CTK_AddMenuSeparator(&inst->menubar->menu[0]);
-	CTK_AddMenubarCascadeCommand(inst, 0, "Save", menuFileSave, NULL);
-	CTK_AddMenubarCascadeCommand(inst, 0, "Save As", menuFileSaveAs, NULL);
-	CTK_AddMenuSeparator(&inst->menubar->menu[0]);
-	CTK_AddMenubarCascadeCommand(inst, 0, "Quit", menuFileQuit, NULL);
-	CTK_AddMenubarCascade(inst, "Help");
-	CTK_AddMenubarCascadeCommand(inst, 1, "About", menuHelpAbout, NULL);
-	CTK_AddMenubarCascadeCommand(inst, 1, "Disabled", menuHelpDisabled, NULL);
-	inst->menubar->menu[1].enabled[1] = false;
+
+	menuFile = CTK_CreateMenu();
+	CTK_AddMenuCommand(inst, menuFile, "New", menuFileNew, NULL);
+	CTK_AddMenuCommand(inst, menuFile, "Open", menuFileOpen, NULL);
+	CTK_AddMenuSeparator(menuFile);
+	CTK_AddMenuCommand(inst, menuFile, "Save", menuFileSave, NULL);
+	CTK_AddMenuCommand(inst, menuFile, "Save As", menuFileSaveAs, NULL);
+	CTK_AddMenuSeparator(menuFile);
+	CTK_AddMenuCommand(inst, menuFile, "Quit", menuFileQuit, &inst->active);
+	CTK_AddMenubarCascade(inst, "File", menuFile);
+
+	menuAbout = CTK_CreateMenu();
+	CTK_AddMenuCommand(inst, menuAbout, "About", menuHelpAbout, NULL);
+	CTK_AddMenuCommand(inst, menuAbout, "Disabled", menuHelpDisabled, NULL);
+	menuAbout->enabled[1] = false;
+	CTK_AddMenubarCascade(inst, "Help", menuAbout);
 
 	ckb_focusable = CTK_AddCheckbox(inst);
 	inst->rect[ckb_focusable].x = MARGIN;

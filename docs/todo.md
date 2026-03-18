@@ -135,15 +135,12 @@ Also move menu drawing to its own function.
 - [x] add menu separator
 - [x] add menu "enabled" property for commands
 
-- [ ] rename and reorganize `CTK_AddMenubarCascade`, `CTK_AddMenubarCascadeCommand`, `CTK_CASCADE_MAX_COMMANDS`, also sytel variables
-see `CTK_AddMenuSeparator` or "change menu data structure to make menus more sovereign"
-Adding a menu to menubar should return a menu pointer, not an index, because Menu is a struct unlike widgets.
+- [x] clearly separate menu from menubar
+Menubar data, Menu-style, -values, -code, and -API now have a clear separation.
+This also fixes `if (inst->visible_menu != &mb->menu[new_focused_casc] &&`,
+because it got touched in the process and then actually caused crashes.
 
 - [ ] fix menu command hover overlaying the border
-
-- [ ] fix runtime error (didn't crash)
-`CTK.h:2163:28: runtime error: pointer index expression with base 0x527000026900 overflowed to 0xe1e23451e1e44978` in
-`if (inst->visible_menu != &mb->menu[new_focused_casc] &&`
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 

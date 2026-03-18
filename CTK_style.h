@@ -41,14 +41,19 @@ typedef struct CTK_Style {
 	CTK_WidgetStyle checkbox;
 	CTK_WidgetStyle entry;
 	CTK_WidgetStyle label;
+	SDL_Color       menu_bg_clr;
+	SDL_Color       menu_bg_hovered_clr;
+	bool            menu_border;
+	SDL_Color       menu_border_clr;
+	size_t          menu_command_h;
+	size_t          menu_separator_h;
+	SDL_Color       menu_text_clr;
+	SDL_Color       menu_text_disabled_clr;
 	SDL_Color       menubar_bg_clr;
 	SDL_Color       menubar_bg_hovered_clr;
 	bool            menubar_border;
 	SDL_Color       menubar_border_clr;
-	size_t          menubar_command_h;
-	size_t          menubar_separator_h;
 	SDL_Color       menubar_text_clr;
-	SDL_Color       menubar_text_disabled_clr;
 	size_t          menubar_h;
 	CTK_WidgetStyle progressbar;
 	CTK_WidgetStyle radiobutton;
@@ -264,6 +269,35 @@ static const CTK_Style CTK_Theme_TclTk = {
 		.text_disabled.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
 	},
 
+	.menu_bg_clr.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.menu_bg_clr.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.menu_bg_clr.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
+	.menu_bg_clr.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
+
+	.menu_bg_hovered_clr.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menu_bg_hovered_clr.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menu_bg_hovered_clr.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menu_bg_hovered_clr.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+
+	.menu_border = true,
+	.menu_border_clr.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+	.menu_border_clr.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+	.menu_border_clr.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
+	.menu_border_clr.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
+
+	.menu_command_h = 23,
+	.menu_separator_h = 23,
+
+	.menu_text_clr.r = CTK_THEME_TCLTK_TEXT_GRAY,
+	.menu_text_clr.g = CTK_THEME_TCLTK_TEXT_GRAY,
+	.menu_text_clr.b = CTK_THEME_TCLTK_TEXT_GRAY,
+	.menu_text_clr.a = CTK_THEME_TCLTK_TEXT_A,
+
+	.menu_text_disabled_clr.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.menu_text_disabled_clr.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.menu_text_disabled_clr.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
+	.menu_text_disabled_clr.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
+
 	.menubar_bg_clr.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.menubar_bg_clr.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.menubar_bg_clr.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
@@ -280,18 +314,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menubar_border_clr.b = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
 	.menubar_border_clr.a = CTK_THEME_TCLTK_WIDGET_BORDER_A,
 
-	.menubar_command_h = 23,
-	.menubar_separator_h = 23,
-
 	.menubar_text_clr.r = CTK_THEME_TCLTK_TEXT_GRAY,
 	.menubar_text_clr.g = CTK_THEME_TCLTK_TEXT_GRAY,
 	.menubar_text_clr.b = CTK_THEME_TCLTK_TEXT_GRAY,
 	.menubar_text_clr.a = CTK_THEME_TCLTK_TEXT_A,
-
-	.menubar_text_disabled_clr.r = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.menubar_text_disabled_clr.g = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.menubar_text_disabled_clr.b = CTK_THEME_TCLTK_TEXT_DISABLED_GRAY,
-	.menubar_text_disabled_clr.a = CTK_THEME_TCLTK_TEXT_DISABLED_A,
 
 	.menubar_h = 33,
 

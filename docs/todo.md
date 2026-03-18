@@ -143,7 +143,10 @@ because it got touched in the process and then actually caused crashes.
 - [x] fix menu draw order
 This fixes menu command hover overlaying the border.
 
-- [ ] enforce name conformity in instance style struct (see `_clr`)
+- [x] enforce name conformity in instance style struct
+Struct members are now sorted primarily by type size (smallest first).
+
+- [ ] first click when on widget crashes?
 
 - [ ] add menu command accelerators
 

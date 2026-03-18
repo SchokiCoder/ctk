@@ -813,8 +813,8 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 	}
 
 	if (resize) {
-		inst->rect[w].h = inst->wstyle[w].size_h;
-		inst->rect[w].w = inst->wstyle[w].size_w;
+		inst->rect[w].h = inst->wstyle[w].h;
+		inst->rect[w].w = inst->wstyle[w].w;
 	}
 
 	CTK_CreateWidgetTexture(inst, w);
@@ -846,16 +846,16 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 
 	if (inst->hovered_w != btn) {
 		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[btn].bg.r,
-		                       inst->wstyle[btn].bg.g,
-		                       inst->wstyle[btn].bg.b,
-		                       inst->wstyle[btn].bg.a);
+		                       inst->wstyle[btn].bg_clr.r,
+		                       inst->wstyle[btn].bg_clr.g,
+		                       inst->wstyle[btn].bg_clr.b,
+		                       inst->wstyle[btn].bg_clr.a);
 	} else {
 		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[btn].bg_hovered.r,
-		                       inst->wstyle[btn].bg_hovered.g,
-		                       inst->wstyle[btn].bg_hovered.b,
-		                       inst->wstyle[btn].bg_hovered.a);
+		                       inst->wstyle[btn].bg_hovered_clr.r,
+		                       inst->wstyle[btn].bg_hovered_clr.g,
+		                       inst->wstyle[btn].bg_hovered_clr.b,
+		                       inst->wstyle[btn].bg_hovered_clr.a);
 	}
 	SDL_RenderClear(r);
 
@@ -866,16 +866,16 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 
 	if (CTK_IsWidgetEnabled(inst, btn)) {
 		TTF_SetTextColor(inst->text[btn],
-		                 inst->wstyle[btn].text.r,
-		                 inst->wstyle[btn].text.g,
-		                 inst->wstyle[btn].text.b,
-		                 inst->wstyle[btn].text.a);
+		                 inst->wstyle[btn].text_clr.r,
+		                 inst->wstyle[btn].text_clr.g,
+		                 inst->wstyle[btn].text_clr.b,
+		                 inst->wstyle[btn].text_clr.a);
 	} else {
 		TTF_SetTextColor(inst->text[btn],
-		                 inst->wstyle[btn].text_disabled.r,
-		                 inst->wstyle[btn].text_disabled.g,
-		                 inst->wstyle[btn].text_disabled.b,
-		                 inst->wstyle[btn].text_disabled.a);
+		                 inst->wstyle[btn].text_disabled_clr.r,
+		                 inst->wstyle[btn].text_disabled_clr.g,
+		                 inst->wstyle[btn].text_disabled_clr.b,
+		                 inst->wstyle[btn].text_disabled_clr.a);
 	}
 
 	CTK_RenderText(inst->text[btn], rect, inst->wstyle[btn].text_align, 0);
@@ -887,10 +887,10 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[btn].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[btn].border.r,
-			               inst->wstyle[btn].border.g,
-			               inst->wstyle[btn].border.b,
-			               inst->wstyle[btn].border.a);
+			               inst->wstyle[btn].border_clr.r,
+			               inst->wstyle[btn].border_clr.g,
+			               inst->wstyle[btn].border_clr.b,
+			               inst->wstyle[btn].border_clr.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -910,48 +910,48 @@ CTK_CreateCheckboxTexture(CTK_Instance       *inst,
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != ckb) {
-		bg_c = inst->wstyle[ckb].bg;
-		body_c = inst->wstyle[ckb].body;
+		bg_c = inst->wstyle[ckb].bg_clr;
+		body_c = inst->wstyle[ckb].body_clr;
 	} else {
-		bg_c = inst->wstyle[ckb].bg_hovered;
-		body_c = inst->wstyle[ckb].body_hovered;
+		bg_c = inst->wstyle[ckb].bg_hovered_clr;
+		body_c = inst->wstyle[ckb].body_hovered_clr;
 	}
-	fg_c = inst->wstyle[ckb].fg;
+	fg_c = inst->wstyle[ckb].fg_clr;
 	if (!CTK_IsWidgetEnabled(inst, ckb)) {
-		body_c = inst->wstyle[ckb].body_disabled;
-		fg_c = inst->wstyle[ckb].fg_disabled;
+		body_c = inst->wstyle[ckb].body_disabled_clr;
+		fg_c = inst->wstyle[ckb].fg_disabled_clr;
 	}
 
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
-	rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].size_body_w) / 2;
-	rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].size_body_h) / 2;
-	rect.w = inst->wstyle[ckb].size_body_w;
-	rect.h = inst->wstyle[ckb].size_body_h;
+	rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].body_w) / 2;
+	rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].body_h) / 2;
+	rect.w = inst->wstyle[ckb].body_w;
+	rect.h = inst->wstyle[ckb].body_h;
 	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderFillRect(r, &rect);
 
 	if (inst->toggle[ckb]) {
-		rect.w = inst->wstyle[ckb].size_fill_w;
-		rect.h = inst->wstyle[ckb].size_fill_h;
-		rect.x += inst->wstyle[ckb].size_body_w - rect.w;
-		rect.y += inst->wstyle[ckb].size_body_h - rect.h;
+		rect.w = inst->wstyle[ckb].fill_w;
+		rect.h = inst->wstyle[ckb].fill_h;
+		rect.x += inst->wstyle[ckb].body_w - rect.w;
+		rect.y += inst->wstyle[ckb].body_h - rect.h;
 		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
 		SDL_RenderFillRect(r, &rect);
 	}
 
 	if (inst->border[ckb]) {
-		rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].size_body_w) / 2;
-		rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].size_body_h) / 2;
-		rect.w = inst->wstyle[ckb].size_body_w;
-		rect.h = inst->wstyle[ckb].size_body_h;
+		rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].body_w) / 2;
+		rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].body_h) / 2;
+		rect.w = inst->wstyle[ckb].body_w;
+		rect.h = inst->wstyle[ckb].body_h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[ckb].border.r,
-			               inst->wstyle[ckb].border.g,
-			               inst->wstyle[ckb].border.b,
-			               inst->wstyle[ckb].border.a);
+			               inst->wstyle[ckb].border_clr.r,
+			               inst->wstyle[ckb].border_clr.g,
+			               inst->wstyle[ckb].border_clr.b,
+			               inst->wstyle[ckb].border_clr.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -973,16 +973,16 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != txt) {
-		bg_c = inst->wstyle[txt].bg;
-		body_c = inst->wstyle[txt].body;
+		bg_c = inst->wstyle[txt].bg_clr;
+		body_c = inst->wstyle[txt].body_clr;
 	} else {
-		bg_c = inst->wstyle[txt].bg_hovered;
-		body_c = inst->wstyle[txt].body_hovered;
+		bg_c = inst->wstyle[txt].bg_hovered_clr;
+		body_c = inst->wstyle[txt].body_hovered_clr;
 	}
-	text_c = inst->wstyle[txt].text;
+	text_c = inst->wstyle[txt].text_clr;
 	if (!CTK_IsWidgetEnabled(inst, txt)) {
-		body_c = inst->wstyle[txt].body_disabled;
-		text_c = inst->wstyle[txt].text_disabled;
+		body_c = inst->wstyle[txt].body_disabled_clr;
+		text_c = inst->wstyle[txt].text_disabled_clr;
 	}
 
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
@@ -1011,10 +1011,10 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 		rect.h = irect.h;
 
 		SDL_SetRenderDrawColor(r,
-				       inst->wstyle[txt].text_bg_selected.r,
-				       inst->wstyle[txt].text_bg_selected.g,
-				       inst->wstyle[txt].text_bg_selected.b,
-				       inst->wstyle[txt].text_bg_selected.a);
+				       inst->wstyle[txt].text_bg_selected_clr.r,
+				       inst->wstyle[txt].text_bg_selected_clr.g,
+				       inst->wstyle[txt].text_bg_selected_clr.b,
+				       inst->wstyle[txt].text_bg_selected_clr.a);
 		SDL_RenderFillRect(r, &rect);
 	}
 
@@ -1035,10 +1035,10 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[txt].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[txt].border.r,
-			               inst->wstyle[txt].border.g,
-			               inst->wstyle[txt].border.b,
-			               inst->wstyle[txt].border.a);
+			               inst->wstyle[txt].border_clr.r,
+			               inst->wstyle[txt].border_clr.g,
+			               inst->wstyle[txt].border_clr.b,
+			               inst->wstyle[txt].border_clr.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -1166,13 +1166,13 @@ CTK_CreateProgressbarTexture(CTK_Instance       *inst,
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != pgb) {
-		bg_c = inst->wstyle[pgb].bg;
+		bg_c = inst->wstyle[pgb].bg_clr;
 	} else {
-		bg_c = inst->wstyle[pgb].bg_hovered;
+		bg_c = inst->wstyle[pgb].bg_hovered_clr;
 	}
-	fg_c = inst->wstyle[pgb].fg;
+	fg_c = inst->wstyle[pgb].fg_clr;
 	if (!CTK_IsWidgetEnabled(inst, pgb)) {
-		fg_c = inst->wstyle[pgb].fg_disabled;
+		fg_c = inst->wstyle[pgb].fg_disabled_clr;
 	}
 
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
@@ -1194,10 +1194,10 @@ CTK_CreateProgressbarTexture(CTK_Instance       *inst,
 		rect.h = inst->rect[pgb].h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[pgb].border.r,
-			               inst->wstyle[pgb].border.g,
-			               inst->wstyle[pgb].border.b,
-			               inst->wstyle[pgb].border.a);
+			               inst->wstyle[pgb].border_clr.r,
+			               inst->wstyle[pgb].border_clr.g,
+			               inst->wstyle[pgb].border_clr.b,
+			               inst->wstyle[pgb].border_clr.a);
 		SDL_RenderRect(r, &rect);
 	}
 }
@@ -1218,16 +1218,16 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	r = SDL_GetRenderer(inst->win);
 
 	if (inst->hovered_w != rbn) {
-		bg_c = inst->wstyle[rbn].bg;
-		body_c = inst->wstyle[rbn].body;
+		bg_c = inst->wstyle[rbn].bg_clr;
+		body_c = inst->wstyle[rbn].body_clr;
 	} else {
-		bg_c = inst->wstyle[rbn].bg_hovered;
-		body_c = inst->wstyle[rbn].body_hovered;
+		bg_c = inst->wstyle[rbn].bg_hovered_clr;
+		body_c = inst->wstyle[rbn].body_hovered_clr;
 	}
-	fg_c = inst->wstyle[rbn].fg;
+	fg_c = inst->wstyle[rbn].fg_clr;
 	if (!CTK_IsWidgetEnabled(inst, rbn)) {
-		body_c = inst->wstyle[rbn].body_disabled;
-		fg_c = inst->wstyle[rbn].fg_disabled;
+		body_c = inst->wstyle[rbn].body_disabled_clr;
+		fg_c = inst->wstyle[rbn].fg_disabled_clr;
 	}
 
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
@@ -1236,18 +1236,18 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	t = SDL_CreateTexture(r,
 	                      CTK_PIXELFORMAT,
 	                      CTK_TEXTUREACCESS,
-	                      inst->wstyle[rbn].size_body_w,
-	                      inst->wstyle[rbn].size_body_h);
+	                      inst->wstyle[rbn].body_w,
+	                      inst->wstyle[rbn].body_h);
 
 	SDL_SetRenderTarget(r, t);
 	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
 	SDL_RenderClear(r);
 
 	if (inst->toggle[rbn]) {
-		rect.w = inst->wstyle[rbn].size_fill_w;
-		rect.h = inst->wstyle[rbn].size_fill_h;
-		rect.x = (inst->wstyle[rbn].size_body_w - rect.w) / 2;
-		rect.y = (inst->wstyle[rbn].size_body_h - rect.h) / 2;
+		rect.w = inst->wstyle[rbn].fill_w;
+		rect.h = inst->wstyle[rbn].fill_h;
+		rect.x = (inst->wstyle[rbn].body_w - rect.w) / 2;
+		rect.y = (inst->wstyle[rbn].body_h - rect.h) / 2;
 		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
 		SDL_RenderFillRect(r, &rect);
 	}
@@ -1255,22 +1255,22 @@ CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
 	if (inst->border[rbn]) {
 		rect.x = 0;
 		rect.y = 0;
-		rect.w = inst->wstyle[rbn].size_body_w;
-		rect.h = inst->wstyle[rbn].size_body_h;
+		rect.w = inst->wstyle[rbn].body_w;
+		rect.h = inst->wstyle[rbn].body_h;
 
 		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[rbn].border.r,
-			               inst->wstyle[rbn].border.g,
-			               inst->wstyle[rbn].border.b,
-			               inst->wstyle[rbn].border.a);
+			               inst->wstyle[rbn].border_clr.r,
+			               inst->wstyle[rbn].border_clr.g,
+			               inst->wstyle[rbn].border_clr.b,
+			               inst->wstyle[rbn].border_clr.a);
 		SDL_RenderRect(r, &rect);
 	}
 
 	SDL_SetRenderTarget(r, inst->texture[rbn]);
-	rect.x = (inst->rect[rbn].w - inst->wstyle[rbn].size_body_w) / 2;
-	rect.y = (inst->rect[rbn].h - inst->wstyle[rbn].size_body_h) / 2;
-	rect.w = inst->wstyle[rbn].size_body_w;
-	rect.h = inst->wstyle[rbn].size_body_h;
+	rect.x = (inst->rect[rbn].w - inst->wstyle[rbn].body_w) / 2;
+	rect.y = (inst->rect[rbn].h - inst->wstyle[rbn].body_h) / 2;
+	rect.w = inst->wstyle[rbn].body_w;
+	rect.h = inst->wstyle[rbn].body_h;
 	SDL_RenderTextureRotated(r,
 	                         t,
 	                         NULL,
@@ -1296,23 +1296,23 @@ CTK_CreateScaleTexture(CTK_Instance       *inst,
 
 	r = SDL_GetRenderer(inst->win);
 
-	border_c = inst->wstyle[scl].border;
+	border_c = inst->wstyle[scl].border_clr;
 	if (inst->hovered_w != scl) {
-		bg_c = inst->wstyle[scl].bg;
-		body_c = inst->wstyle[scl].body;
+		bg_c = inst->wstyle[scl].bg_clr;
+		body_c = inst->wstyle[scl].body_clr;
 	} else {
-		bg_c = inst->wstyle[scl].bg_hovered;
-		body_c = inst->wstyle[scl].body_hovered;
+		bg_c = inst->wstyle[scl].bg_hovered_clr;
+		body_c = inst->wstyle[scl].body_hovered_clr;
 	}
 	if (!CTK_IsWidgetEnabled(inst, scl)) {
-		body_c = inst->wstyle[scl].body_disabled;
+		body_c = inst->wstyle[scl].body_disabled_clr;
 	}
 
 	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
 	SDL_RenderClear(r);
 
-	rect.w = inst->wstyle[scl].size_body_w / 2;
-	rect.h = inst->wstyle[scl].size_body_h;
+	rect.w = inst->wstyle[scl].body_w / 2;
+	rect.h = inst->wstyle[scl].body_h;
 	rect.x = ((float) inst->value[scl] /
 	          (float) inst->value_max[scl]) *
 	         (inst->rect[scl].w - (rect.w * 2));
@@ -1461,10 +1461,10 @@ CTK_DrawInstance(CTK_Instance *inst)
 	SDL_SetRenderTarget(r, inst->content);
 
 	SDL_SetRenderDrawColor(r,
-	                       inst->style.bg.r,
-	                       inst->style.bg.g,
-	                       inst->style.bg.b,
-	                       inst->style.bg.a);
+	                       inst->style.bg_clr.r,
+	                       inst->style.bg_clr.g,
+	                       inst->style.bg_clr.b,
+	                       inst->style.bg_clr.a);
 	SDL_RenderClear(r);
 
 	/* content: widgets */
@@ -1477,10 +1477,10 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	/* content: focus ring */
 	SDL_SetRenderDrawColor(r,
-	                       inst->style.focus.r,
-	                       inst->style.focus.g,
-	                       inst->style.focus.b,
-	                       inst->style.focus.a);
+	                       inst->style.focus_clr.r,
+	                       inst->style.focus_clr.g,
+	                       inst->style.focus_clr.b,
+	                       inst->style.focus_clr.a);
 	SDL_RenderRect(r, &inst->rect[fw]);
 
 	/* content: text cursor */
@@ -1489,10 +1489,10 @@ CTK_DrawInstance(CTK_Instance *inst)
 		rect.x -= inst->scroll_x[fw];
 
 		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[fw].text.r,
-			               inst->wstyle[fw].text.g,
-			               inst->wstyle[fw].text.b,
-			               inst->wstyle[fw].text.a);
+			               inst->wstyle[fw].text_clr.r,
+			               inst->wstyle[fw].text_clr.g,
+			               inst->wstyle[fw].text_clr.b,
+			               inst->wstyle[fw].text_clr.a);
 		SDL_RenderLine(r,
 		               inst->rect[fw].x + rect.x,
 		               inst->rect[fw].y + 2,
@@ -1713,7 +1713,7 @@ CTK_HandleDrag(CTK_Instance *inst,
 	if (inst->type[fw] != CTK_WTYPE_SCALE)
 		return;
 
-	slider_w = inst->wstyle[fw].size_body_w;
+	slider_w = inst->wstyle[fw].body_w;
 	val_perc = 1.0 /
 	           (inst->rect[fw].w - slider_w) *
 	           (x - inst->rect[fw].x - (slider_w / 2.0));

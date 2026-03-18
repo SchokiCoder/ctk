@@ -1555,15 +1555,6 @@ CTK_DrawMenu(CTK_Instance *inst,
 			       inst->style.menu_bg_clr.a);
 	SDL_RenderFillRect(r, &frect);
 
-	if (inst->style.menu_border) {
-		SDL_SetRenderDrawColor(r,
-	                               inst->style.menu_border_clr.r,
-	                               inst->style.menu_border_clr.g,
-	                               inst->style.menu_border_clr.b,
-	                               inst->style.menu_border_clr.a);
-		SDL_RenderRect(r, &frect);
-	}
-
 	if (inst->hovered_cmd < menu->commands &&
 	    menu->enabled[inst->hovered_cmd]) {
 		frect.x = x;
@@ -1619,6 +1610,19 @@ CTK_DrawMenu(CTK_Instance *inst,
 			             2.0));
 
 		command_y += inst->style.menu_command_h;
+	}
+
+	if (inst->style.menu_border) {
+		frect = menu_r;
+		frect.x = x;
+		frect.y = y;
+
+		SDL_SetRenderDrawColor(r,
+	                               inst->style.menu_border_clr.r,
+	                               inst->style.menu_border_clr.g,
+	                               inst->style.menu_border_clr.b,
+	                               inst->style.menu_border_clr.a);
+		SDL_RenderRect(r, &frect);
 	}
 }
 

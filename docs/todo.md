@@ -140,7 +140,8 @@ Menubar data, Menu-style, -values, -code, and -API now have a clear separation.
 This also fixes `if (inst->visible_menu != &mb->menu[new_focused_casc] &&`,
 because it got touched in the process and then actually caused crashes.
 
-- [ ] fix menu command hover overlaying the border
+- [x] fix menu draw order
+This fixes menu command hover overlaying the border.
 
 - [ ] enforce name conformity in instance style struct (see `_clr`)
 

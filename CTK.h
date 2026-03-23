@@ -2038,7 +2038,8 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 		}
 	}
 
-	if (inst->visible_menu != mb->menu[new_focused_casc]) {
+	if (new_focused_casc < CTK_MENUBAR_MAX_CASCADES &&
+	    inst->visible_menu != mb->menu[new_focused_casc]) {
 		inst->focused_casc = new_focused_casc;
 		inst->visible_menu_y = inst->style.menubar_h;
 		inst->redraw = true;

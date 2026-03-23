@@ -146,7 +146,8 @@ This fixes menu command hover overlaying the border.
 - [x] enforce name conformity in instance style struct
 Struct members are now sorted primarily by type size (smallest first).
 
-- [ ] first click when on widget crashes?
+- [x] fix unguarded array access
+This caused crashes upon clicks on a widget.
 
 - [ ] add menu command accelerators
 

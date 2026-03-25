@@ -154,7 +154,7 @@ We just copy the Tcl/Tk way,
 where menu accelerators and mnemonics need to be manually given a function,
 because we don't know how API users might want to hook things up.
 
-- [ ] unify function description comment formatting
+- [x] unify function description format
 
 - [ ] add data and visual of mnemonics
 - [ ] add data and visual of menu accelerators

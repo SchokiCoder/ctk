@@ -282,10 +282,10 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
                        const bool          resize,
                        const CTK_WidgetId  w);
 
-/* @inst: instance to initialize.
- * @keystr: keybind definition in the strict format "KEY+KEY"
- * @fn: function to run when bind is used
- * @fn_data: data that is passed to fn
+/* @inst: Instance to initialize.
+ * @keystr: Keybind definition in the strict format "KEY+KEY".
+ * @fn: Function to run when bind is used.
+ * @fn_data: Data that is passed to fn.
  *
  * Returns true on success or false on failure.
  */
@@ -310,11 +310,12 @@ void
 CTK_CreateEntryTexture(CTK_Instance       *inst,
                        const CTK_WidgetId  txt);
 
-/* inst = Instance to initialize.
- * title = Used as window title.
- * winw = Window width.
- * winh = Window height.
- * flags = SDL window flags. May be 0 to use defaults.
+/* @inst: Instance to initialize.
+ * @title: Used as window title.
+ * @winw: Window width.
+ * @winh: Window height.
+ * @flags: SDL window flags. May be 0 to use defaults.
+ *
  * Returns valid instance or NULL on failure.
  * Call SDL_GetError() for more information.
  */
@@ -371,7 +372,10 @@ CTK_DrawMenu(CTK_Instance *inst,
 void
 CTK_DrawMenubar(CTK_Instance *inst);
 
-/* This is needed since the given SDL function is not portable for some reason.
+/* @name: Name of the key.
+ *
+ * This is needed since the builtin SDL equivalent is not portable.
+ * Returns valid SDL scancode or SDL_SCANCODE_UNKNOWN otherwise.
  */
 SDL_Scancode
 CTK_GetScancodeFromName(const char *name);
@@ -429,9 +433,10 @@ CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
                        int                *cacheId);
 
-/* appname = Name of application, duh.
- * appversion = Eg. "1.2.5".
- * appidentifier = Eg. "com.brave.Browser".
+/* @appname: Name of application, duh.
+ * @appversion: Eg. "1.2.5".
+ * @appidentifier: Eg. "com.brave.Browser".
+ *
  * Returns true on success or false on failure.
  * Call SDL_GetError() for more information.
  */
@@ -456,17 +461,19 @@ bool
 CTK_IsWidgetVisible(const CTK_Instance *inst,
                     const CTK_WidgetId  widget);
 
-/* Alternatively, if more control is needed,
- * you can call CTK_DrawInstance and CTK_TickInstance yourself.
+/* @inst: Instance to mainloop of.
+ *
+ * Alternatively, if more control is needed,
+ * you can call CTK_DrawInstance and CTK_TickInstance in a custom loop.
  */
 void
 CTK_MainloopInstance(CTK_Instance *inst);
 
-/* @text: TTF_Text
- * @start: position at which to start measuring the text
- * @len: amount chars that should be measured
+/* @text: Text to measure.
+ * @start: Position at which to start measuring the text.
+ * @len: Amount of chars that should be measured.
  *
- * Returns size in pixels of a TTF_Text portion.
+ * Returns size in pixels of the text portion.
  */
 SDL_Rect
 CTK_MeasureTTFText(TTF_Text *text,

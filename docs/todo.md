@@ -149,12 +149,18 @@ Struct members are now sorted primarily by type size (smallest first).
 - [x] fix unguarded array access
 This caused crashes upon clicks on a widget.
 
-- [ ] add menu command accelerators
+- [x] add bind function for defining keyboard shortcuts
+We just copy the Tcl/Tk way,
+where menu accelerators and mnemonics need to be manually given a function,
+because we don't know how API users might want to hook things up.
 
-- [ ] add mnemonics
+- [ ] unify function description comment formatting
 
-- [ ] add menu
-- [ ] add right click menu for entries
+- [ ] add data and visual of mnemonics
+- [ ] add data and visual of menu accelerators
+
+- [ ] add right click menu for each widget
+- [ ] add default right click menu for entries
 For cut, copy, paste, etc.
 
 - [ ] track issue: delete key crash

@@ -297,6 +297,8 @@ main(int    argc,
 	CTK_AddMenuCommand(inst, menuFile, "Save As", menuFileSaveAs, NULL);
 	CTK_AddMenuSeparator(menuFile);
 	CTK_AddMenuCommand(inst, menuFile, "Quit", menuFileQuit, &inst->active);
+	/* TODO: remove temporarily manually bound accelerator */
+	CTK_Bind(inst, "Control+Q", menuFileQuit, &inst->active);
 	CTK_AddMenubarCascade(inst, "File", menuFile);
 
 	menuAbout = CTK_CreateMenu();

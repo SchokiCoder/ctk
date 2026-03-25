@@ -36,8 +36,16 @@
 /* Configuration defines
  */
 
+#ifndef CTK_BIND_MAXKEYS
+#define CTK_BIND_MAXKEYS 8
+#endif
+
 #ifndef CTK_INSTANCE_MAX_WIDGETS
 #define CTK_INSTANCE_MAX_WIDGETS 64
+#endif
+
+#ifndef CTK_MAX_BINDS
+#define CTK_MAX_BINDS 64
 #endif
 
 #ifndef CTK_MENU_MAX_ITEMS
@@ -115,6 +123,13 @@ typedef struct CTK_Instance {
 	int             visible_menu_x;
 	int             visible_menu_y;
 	SDL_Window     *win;
+
+	/* keybinds */
+	size_t        binds;
+	void        (*bind_fn[CTK_MAX_BINDS])(void*);
+	void         *bind_fn_data[CTK_MAX_BINDS];
+	size_t        bind_keys[CTK_MAX_BINDS];
+	SDL_Scancode  bind_key[CTK_MAX_BINDS][CTK_BIND_MAXKEYS];
 
 	/* instance events */
 	void (*draw)(struct CTK_Instance*, void*);
@@ -267,6 +282,19 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
                        const bool          resize,
                        const CTK_WidgetId  w);
 
+/* @inst: instance to initialize.
+ * @keystr: keybind definition in the strict format "KEY+KEY"
+ * @fn: function to run when bind is used
+ * @fn_data: data that is passed to fn
+ *
+ * Returns true on success or false on failure.
+ */
+bool
+CTK_Bind(CTK_Instance  *inst,
+         const char    *keystr,
+         void         (*fn)(void*),
+         void          *fn_data);
+
 SDL_FColor
 CTK_ColorIntToFColor(const SDL_Color c);
 
@@ -343,9 +371,17 @@ CTK_DrawMenu(CTK_Instance *inst,
 void
 CTK_DrawMenubar(CTK_Instance *inst);
 
+/* This is needed since the given SDL function is not portable for some reason.
+ */
+SDL_Scancode
+CTK_GetScancodeFromName(const char *name);
+
 void
 CTK_HandleDrag(CTK_Instance *inst,
                const float   x);
+
+void
+CTK_HandleKeybinds(CTK_Instance *inst);
 
 void
 CTK_HandleKeyDown(CTK_Instance            *inst,
@@ -820,6 +856,60 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 	CTK_CreateWidgetTexture(inst, w);
 }
 
+bool
+CTK_Bind(CTK_Instance  *inst,
+         const char    *keystr,
+         void         (*fn)(void*),
+         void          *fn_data)
+{
+	size_t       begin = 0;
+	size_t       i;
+	size_t       keys = 0;
+	SDL_Scancode key[CTK_BIND_MAXKEYS];
+	const size_t strsize = 32;
+	char         str[strsize];
+	char         temp;
+
+	if (strlen(keystr) > strsize) {
+		SDL_SetError("Bind-string is too long");
+		return false;
+	}
+	strncpy(str, keystr, strsize);
+
+	/* this only accepts "$KEY+$KEY", no spaces or nonsense */
+	for (i = 0; i < strlen(str); i++) {
+		if (str[i + 1] == '\0' ||
+		    str[i + 1] == '+') {
+			if (keys >= CTK_BIND_MAXKEYS) {
+				SDL_SetError("Bind tried to set too many keys");
+				return false;
+			}
+
+			temp = str[i + 1];
+			str[i + 1] = '\0';
+
+			key[keys] = CTK_GetScancodeFromName(&str[begin]);
+			if (SDL_SCANCODE_UNKNOWN == key[keys]) {
+				SDL_SetError("Bind tried to set invalid keys");
+				return false;
+			}
+			keys++;
+
+			str[i + 1] = temp;
+			begin = i + 2;
+		}
+	}
+
+	inst->bind_keys[inst->binds] = keys;
+	for (i = 0; i < keys; i++)
+		inst->bind_key[inst->binds][i] = key[i];
+	inst->bind_fn[inst->binds] = fn;
+	inst->bind_fn_data[inst->binds] = fn_data;
+	inst->binds++;
+
+	return true;
+}
+
 SDL_FColor
 CTK_ColorIntToFColor(const SDL_Color c)
 {
@@ -1072,6 +1162,8 @@ CTK_CreateInstance(const char            *title,
 	inst->visible_menu_x = 0;
 	inst->visible_menu_y = 0;
 	inst->redraw = true;
+
+	inst->binds = 0;
 
 	inst->draw = NULL;
 	inst->draw_data = NULL;
@@ -1699,6 +1791,102 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	}
 }
 
+SDL_Scancode
+CTK_GetScancodeFromName(const char *name)
+{
+	if (strcmp(name, "1") == 0) {
+		return SDL_SCANCODE_1;
+	} else if (strcmp(name, "2") == 0) {
+		return SDL_SCANCODE_2;
+	} else if (strcmp(name, "3") == 0) {
+		return SDL_SCANCODE_3;
+	} else if (strcmp(name, "4") == 0) {
+		return SDL_SCANCODE_4;
+	} else if (strcmp(name, "5") == 0) {
+		return SDL_SCANCODE_5;
+	} else if (strcmp(name, "6") == 0) {
+		return SDL_SCANCODE_6;
+	} else if (strcmp(name, "7") == 0) {
+		return SDL_SCANCODE_7;
+	} else if (strcmp(name, "8") == 0) {
+		return SDL_SCANCODE_8;
+	} else if (strcmp(name, "9") == 0) {
+		return SDL_SCANCODE_9;
+	} else if (strcmp(name, "0") == 0) {
+		return SDL_SCANCODE_0;
+	} else if (strcmp(name, "A") == 0) {
+		return SDL_SCANCODE_A;
+	} else if (strcmp(name, "B") == 0) {
+		return SDL_SCANCODE_B;
+	} else if (strcmp(name, "C") == 0) {
+		return SDL_SCANCODE_C;
+	} else if (strcmp(name, "D") == 0) {
+		return SDL_SCANCODE_D;
+	} else if (strcmp(name, "E") == 0) {
+		return SDL_SCANCODE_E;
+	} else if (strcmp(name, "F") == 0) {
+		return SDL_SCANCODE_F;
+	} else if (strcmp(name, "G") == 0) {
+		return SDL_SCANCODE_G;
+	} else if (strcmp(name, "H") == 0) {
+		return SDL_SCANCODE_H;
+	} else if (strcmp(name, "I") == 0) {
+		return SDL_SCANCODE_I;
+	} else if (strcmp(name, "J") == 0) {
+		return SDL_SCANCODE_J;
+	} else if (strcmp(name, "K") == 0) {
+		return SDL_SCANCODE_K;
+	} else if (strcmp(name, "L") == 0) {
+		return SDL_SCANCODE_L;
+	} else if (strcmp(name, "M") == 0) {
+		return SDL_SCANCODE_M;
+	} else if (strcmp(name, "N") == 0) {
+		return SDL_SCANCODE_N;
+	} else if (strcmp(name, "O") == 0) {
+		return SDL_SCANCODE_O;
+	} else if (strcmp(name, "P") == 0) {
+		return SDL_SCANCODE_P;
+	} else if (strcmp(name, "Q") == 0) {
+		return SDL_SCANCODE_Q;
+	} else if (strcmp(name, "R") == 0) {
+		return SDL_SCANCODE_R;
+	} else if (strcmp(name, "S") == 0) {
+		return SDL_SCANCODE_S;
+	} else if (strcmp(name, "T") == 0) {
+		return SDL_SCANCODE_T;
+	} else if (strcmp(name, "U") == 0) {
+		return SDL_SCANCODE_U;
+	} else if (strcmp(name, "V") == 0) {
+		return SDL_SCANCODE_V;
+	} else if (strcmp(name, "W") == 0) {
+		return SDL_SCANCODE_W;
+	} else if (strcmp(name, "X") == 0) {
+		return SDL_SCANCODE_X;
+	} else if (strcmp(name, "Y") == 0) {
+		return SDL_SCANCODE_Y;
+	} else if (strcmp(name, "Z") == 0) {
+		return SDL_SCANCODE_Z;
+	} else if (strcmp(name, "Control") == 0) {
+		return SDL_SCANCODE_LCTRL;
+	} else if (strcmp(name, "Shift") == 0) {
+		return SDL_SCANCODE_LSHIFT;
+	} else if (strcmp(name, "Capslock") == 0) {
+		return SDL_SCANCODE_CAPSLOCK;
+	} else if (strcmp(name, "Tab") == 0) {
+		return SDL_SCANCODE_TAB;
+	} else if (strcmp(name, "Meta") == 0) {
+		return SDL_SCANCODE_LGUI;
+	} else if (strcmp(name, "Alt") == 0) {
+		return SDL_SCANCODE_LALT;
+	} else if (strcmp(name, "Space") == 0) {
+		return SDL_SCANCODE_SPACE;
+	} else if (strcmp(name, "AltGr") == 0) {
+		return SDL_SCANCODE_RALT;
+	}
+
+	return SDL_SCANCODE_UNKNOWN;
+}
+
 void
 CTK_HandleDrag(CTK_Instance *inst,
                const float   x)
@@ -1733,6 +1921,31 @@ CTK_HandleDrag(CTK_Instance *inst,
 
 	if (NULL != inst->edit[fw])
 		inst->edit[fw](inst, fw, inst->edit_data[fw]);
+}
+
+void
+CTK_HandleKeybinds(CTK_Instance *inst)
+{
+	size_t a, b;
+	bool match;
+	const bool *sdlkeys;
+
+	sdlkeys = SDL_GetKeyboardState(NULL);
+
+	for (a = 0; a < inst->binds; a++) {
+		match = true;
+		for (b = 0; b < inst->bind_keys[a]; b++) {
+			if (!sdlkeys[inst->bind_key[a][b]]) {
+				match = false;
+				break;
+			}
+		}
+
+		if (match) {
+			inst->bind_fn[a](inst->bind_fn_data[a]);
+			break;
+		}
+	}
 }
 
 void
@@ -2822,6 +3035,7 @@ CTK_TickInstance(CTK_Instance *inst)
 
 		case SDL_EVENT_KEY_DOWN:
 			CTK_HandleKeyDown(inst, e.key);
+			CTK_HandleKeybinds(inst);
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:

@@ -160,59 +160,83 @@ leave(CTK_Instance *inst,
 }
 
 void
-menuFileNew(void *data)
+menuFileNew(CTK_Instance *inst,
+            void *data)
 {
+	(void) inst;
 	(void) data;
 
 	printf("Menu \"File\" Command \"New\"\n");
 }
 
 void
-menuFileOpen(void *data)
+menuFileOpen(CTK_Instance *inst,
+             void *data)
 {
+	(void) inst;
 	(void) data;
 
 	printf("Menu \"File\" Command \"Open\"\n");
 }
 
 void
-menuFileSave(void *data)
+menuFileSave(CTK_Instance *inst,
+             void *data)
 {
+	(void) inst;
 	(void) data;
 
 	printf("Menu \"File\" Command \"Save\"\n");
 }
 
 void
-menuFileSaveAs(void *data)
+menuFileSaveAs(CTK_Instance *inst,
+               void *data)
 {
+	(void) inst;
 	(void) data;
 
 	printf("Menu \"File\" Command \"SaveAs\"\n");
 }
 
 void
-menuFileQuit(void *data)
+menuFileQuit(CTK_Instance *inst,
+             void *data)
 {
 	bool *active = data;
+
+	(void) inst;
 
 	*active = false;
 }
 
 void
-menuHelpAbout(void *data)
+menuHelpAbout(CTK_Instance *inst,
+              void *data)
 {
+	(void) inst;
 	(void) data;
 
 	printf("Menu \"Help\" Command \"About\"\n");
 }
 
 void
-menuHelpDisabled(void *data)
+menuHelpDisabled(CTK_Instance *inst,
+                 void *data)
 {
+	(void) inst;
 	(void) data;
 
 	printf("This MUST NOT run!\n");
+}
+
+void
+mnemonicMenubar(CTK_Instance *inst,
+                void *data)
+{
+	size_t *casc = data;
+
+	CTK_FocusMenubar(inst, *casc);
 }
 
 void
@@ -251,8 +275,10 @@ main(int    argc,
 	const int MARGIN = 5;
 
 	CTK_Instance *inst;
+	size_t cascFile;
+	size_t cascHelp;
 	CTK_Menu *menuFile;
-	CTK_Menu *menuAbout;
+	CTK_Menu *menuHelp;
 	CTK_WidgetId lbl_focusable,
 	             lbl_enabled,
 	             lbl_visible;
@@ -299,13 +325,13 @@ main(int    argc,
 	CTK_AddMenuCommand(inst, menuFile, "Quit", menuFileQuit, &inst->active);
 	/* TODO: remove temporarily manually bound accelerator */
 	CTK_Bind(inst, "Control+Q", menuFileQuit, &inst->active);
-	CTK_AddMenubarCascade(inst, "File", menuFile);
+	cascFile = CTK_AddMenubarCascade(inst, "File", menuFile, 0);
 
-	menuAbout = CTK_CreateMenu();
-	CTK_AddMenuCommand(inst, menuAbout, "About", menuHelpAbout, NULL);
-	CTK_AddMenuCommand(inst, menuAbout, "Disabled", menuHelpDisabled, NULL);
-	menuAbout->enabled[1] = false;
-	CTK_AddMenubarCascade(inst, "Help", menuAbout);
+	menuHelp = CTK_CreateMenu();
+	CTK_AddMenuCommand(inst, menuHelp, "About", menuHelpAbout, NULL);
+	CTK_AddMenuCommand(inst, menuHelp, "Disabled", menuHelpDisabled, NULL);
+	menuHelp->enabled[1] = false;
+	cascHelp = CTK_AddMenubarCascade(inst, "Help", menuHelp, 0);
 
 	ckb_focusable = CTK_AddCheckbox(inst);
 	inst->rect[ckb_focusable].x = MARGIN;
@@ -412,6 +438,9 @@ main(int    argc,
 	inst->rect[pgb].y = inst->rect[scl].y;
 
 	CTK_SetFocusedWidget(inst, txt);
+
+	CTK_Bind(inst, "Alt+F", mnemonicMenubar, &cascFile);
+	CTK_Bind(inst, "Alt+H", mnemonicMenubar, &cascHelp);
 
 	CTK_MainloopInstance(inst);
 

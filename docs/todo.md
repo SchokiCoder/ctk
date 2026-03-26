@@ -156,8 +156,15 @@ because we don't know how API users might want to hook things up.
 
 - [x] unify function description format
 
-- [ ] add data and visual of mnemonics
+- [x] add data and visual of mnemonics to menubars
+- [ ] add data and visual of mnemonics to menus
+- [ ] add function of mnemonics to menus
+They trigger on menus without the alt key, as long as they are focused/visible.
+
+- [ ] add data and visual of mnemonics to widgets
 - [ ] add data and visual of menu accelerators
+
+- [ ] fix: can't unfocus a menu by clicking elsewhere?
 
 - [ ] add right click menu for each widget
 - [ ] add default right click menu for entries

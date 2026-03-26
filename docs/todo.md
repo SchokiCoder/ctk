@@ -157,7 +157,10 @@ because we don't know how API users might want to hook things up.
 - [x] unify function description format
 
 - [x] add data and visual of mnemonics to menubars
-- [ ] add data and visual of mnemonics to menus
+This also changes many things so that actually binding mnemonics to focus a
+cascade is a lot easier.
+
+- [x] add data and visual of mnemonics to menus
 - [ ] add function of mnemonics to menus
 They trigger on menus without the alt key, as long as they are focused/visible.
 
@@ -169,6 +172,9 @@ They trigger on menus without the alt key, as long as they are focused/visible.
 - [ ] add right click menu for each widget
 - [ ] add default right click menu for entries
 For cut, copy, paste, etc.
+
+- [ ] fix bg drawing not changing along window size
+- [ ] fix menubar width not changing along window size
 
 - [ ] track issue: delete key crash
 `TTF_DeleteTextString` is broken on latest stable release,

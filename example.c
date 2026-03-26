@@ -316,20 +316,20 @@ main(int    argc,
 	inst->menubar = CTK_CreateMenubar();
 
 	menuFile = CTK_CreateMenu();
-	CTK_AddMenuCommand(inst, menuFile, "New", menuFileNew, NULL);
-	CTK_AddMenuCommand(inst, menuFile, "Open", menuFileOpen, NULL);
+	CTK_AddMenuCommand(inst, menuFile, "New", menuFileNew, NULL, 0);
+	CTK_AddMenuCommand(inst, menuFile, "Open", menuFileOpen, NULL, 0);
 	CTK_AddMenuSeparator(menuFile);
-	CTK_AddMenuCommand(inst, menuFile, "Save", menuFileSave, NULL);
-	CTK_AddMenuCommand(inst, menuFile, "Save As", menuFileSaveAs, NULL);
+	CTK_AddMenuCommand(inst, menuFile, "Save", menuFileSave, NULL, 0);
+	CTK_AddMenuCommand(inst, menuFile, "Save As", menuFileSaveAs, NULL, 5);
 	CTK_AddMenuSeparator(menuFile);
-	CTK_AddMenuCommand(inst, menuFile, "Quit", menuFileQuit, &inst->active);
+	CTK_AddMenuCommand(inst, menuFile, "Quit", menuFileQuit, &inst->active, 0);
 	/* TODO: remove temporarily manually bound accelerator */
 	CTK_Bind(inst, "Control+Q", menuFileQuit, &inst->active);
 	cascFile = CTK_AddMenubarCascade(inst, "File", menuFile, 0);
 
 	menuHelp = CTK_CreateMenu();
-	CTK_AddMenuCommand(inst, menuHelp, "About", menuHelpAbout, NULL);
-	CTK_AddMenuCommand(inst, menuHelp, "Disabled", menuHelpDisabled, NULL);
+	CTK_AddMenuCommand(inst, menuHelp, "About", menuHelpAbout, NULL, 0);
+	CTK_AddMenuCommand(inst, menuHelp, "Disabled", menuHelpDisabled, NULL, 0);
 	menuHelp->enabled[1] = false;
 	cascHelp = CTK_AddMenubarCascade(inst, "Help", menuHelp, 0);
 

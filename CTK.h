@@ -189,6 +189,7 @@ typedef struct CTK_Menu {
 	void      *command_data[CTK_MENU_MAX_ITEMS];
 	bool       enabled[CTK_MENU_MAX_ITEMS];
 	bool       is_separator[CTK_MENU_MAX_ITEMS];
+	size_t     underline[CTK_MENUBAR_MAX_CASCADES];
 } CTK_Menu;
 
 typedef struct CTK_Menubar {
@@ -277,12 +278,22 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
                       CTK_Menu     *menu,
                       const size_t  underline);
 
+/* @inst: Instance to add to.
+ * @menu: Menu to add command to.
+ * @label: Displayed name of command.
+ * @fn: Function to run when command is used.
+ * @fn_data: Data that is passed to fn.
+ * @underline: Underline within label. If not used, give -1.
+ *
+ * Returns true on success or false on failure.
+ */
 bool
 CTK_AddMenuCommand(CTK_Instance *inst,
                    CTK_Menu     *menu,
                    const char   *label,
                    void        (*fn)(CTK_Instance*, void*),
-                   void         *fn_data);
+                   void         *fn_data,
+                   const size_t  underline);
 
 bool
 CTK_AddMenuSeparator(CTK_Menu *menu);
@@ -714,7 +725,8 @@ CTK_AddMenuCommand(CTK_Instance *inst,
                    CTK_Menu     *menu,
                    const char   *label,
                    void        (*fn)(CTK_Instance*, void*),
-                   void         *fn_data)
+                   void         *fn_data,
+                   const size_t  underline)
 {
 	size_t id;
 
@@ -729,6 +741,7 @@ CTK_AddMenuCommand(CTK_Instance *inst,
 	menu->command_data[id] = fn_data;
 	menu->enabled[id] = true;
 	menu->is_separator[id] = false;
+	menu->underline[id] = underline;
 	menu->commands++;
 
 	return true;
@@ -1687,7 +1700,9 @@ CTK_DrawMenu(CTK_Instance *inst,
 	SDL_FRect     frect;
 	int           h;
 	size_t        i;
+	float         label_y;
 	SDL_Renderer *r;
+	SDL_Rect      underline_r;
 	int           w;
 
 	r = SDL_GetRenderer(inst->win);
@@ -1752,11 +1767,27 @@ CTK_DrawMenu(CTK_Instance *inst,
 					 inst->style.menu_text_disabled_clr.b,
 					 inst->style.menu_text_disabled_clr.a);
 		}
+		label_y = command_y + ((inst->style.menu_command_h - h) / 2.0);
 		TTF_DrawRendererText(menu->label[i],
 			             command_x,
-			             command_y +
-			             ((inst->style.menu_command_h - h) /
-			             2.0));
+			             label_y);
+
+		if (menu->underline[i] < strlen(menu->label[i]->text)) {
+			SDL_SetRenderDrawColor(r,
+	                                       inst->style.menu_text_clr.r,
+	                                       inst->style.menu_text_clr.g,
+	                                       inst->style.menu_text_clr.b,
+	                                       inst->style.menu_text_clr.a);
+			underline_r = CTK_MeasureTTFText(menu->label[i],
+			                                 menu->underline[i],
+			                                 1);
+
+			SDL_RenderLine(r,
+			               command_x + underline_r.x,
+			               label_y + h,
+			               command_x + underline_r.x + underline_r.w,
+			               label_y + h);
+		}
 
 		command_y += inst->style.menu_command_h;
 	}

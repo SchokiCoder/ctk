@@ -161,13 +161,14 @@ This also changes many things so that actually binding mnemonics to focus a
 cascade is a lot easier.
 
 - [x] add data and visual of mnemonics to menus
-- [ ] add function of mnemonics to menus
+- [x] add function of mnemonics to menus
 They trigger on menus without the alt key, as long as they are focused/visible.
 
 - [ ] add data and visual of mnemonics to widgets
 - [ ] add data and visual of menu accelerators
 
 - [ ] fix: can't unfocus a menu by clicking elsewhere?
+- [ ] fix: stop text input when a menu is focused
 
 - [ ] add right click menu for each widget
 - [ ] add default right click menu for entries

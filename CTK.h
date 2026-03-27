@@ -5,6 +5,7 @@
 #ifndef _CTK_H
 #define _CTK_H
 
+#include <ctype.h>
 #include <math.h>
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
@@ -599,6 +600,9 @@ CTK_ToggleCheckbox(CTK_Instance *inst,
 void
 CTK_ToggleRadiobutton(CTK_Instance *inst,
                       CTK_WidgetId  widget);
+
+void
+CTK_UnfocusMenubar(CTK_Instance *inst);
 
 void
 CTK_UpdateMenuSize(const CTK_Instance *inst,
@@ -1913,7 +1917,7 @@ CTK_FocusMenubar(CTK_Instance *inst,
 	if (cascade < inst->menubar->cascades) {
 		inst->visible_menu = inst->menubar->menu[cascade];
 	} else {
-		inst->visible_menu = NULL;
+		CTK_UnfocusMenubar(inst);
 	}
 }
 
@@ -2078,12 +2082,36 @@ void
 CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
-	char *buf;
-	int c_shift = 0;
-	size_t end;
-	CTK_WidgetId fw;
-	size_t start;
-	char temp;
+	char         *buf;
+	int           c_shift = 0;
+	size_t        end;
+	size_t        i;
+	CTK_WidgetId  fw;
+	size_t        start;
+	char          temp;
+
+	if (NULL != inst->visible_menu &&
+	    ((e.key >= SDLK_A && e.key <= SDLK_Z) ||
+	     (e.key >= SDLK_0 && e.key <= SDLK_9))) {
+		for (i = 0; i < inst->visible_menu->commands; i++) {
+			if (!inst->visible_menu->enabled[i] ||
+			    inst->visible_menu->is_separator[i]) {
+				continue;
+			}
+
+			temp = inst->visible_menu->label[i]->text[inst->visible_menu->underline[i]];
+			temp = toupper(temp);
+
+			if (SDL_GetKeyName(e.key)[0] == temp) {
+				inst->visible_menu->command[i](inst,
+				                               inst->visible_menu->command_data[i]);
+				CTK_UnfocusMenubar(inst);
+				break;
+			}
+		}
+
+		return;
+	}
 
 	switch (e.key) {
 	case SDLK_BACKSPACE:
@@ -2425,9 +2453,7 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 			    inst->visible_menu->enabled[i]) {
 				inst->visible_menu->command[i](inst, inst->visible_menu->command_data[i]);
 			}
-			inst->focused_casc = -1;
-			inst->visible_menu = NULL;
-			inst->redraw = true;
+			CTK_UnfocusMenubar(inst);
 			return;
 		}
 	}
@@ -3177,6 +3203,14 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 	if (NULL != inst->edit[widget]) {
 		inst->edit[widget](inst, widget, inst->edit_data[widget]);
 	}
+}
+
+void
+CTK_UnfocusMenubar(CTK_Instance *inst)
+{
+	inst->focused_casc = -1;
+	inst->visible_menu = NULL;
+	inst->redraw = true;
 }
 
 void

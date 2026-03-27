@@ -91,6 +91,12 @@ the real data text into three ttf texts
 
 # 0.5.0 The CSS-like Update
 
+data:
+```
+menubar cascade padding_x: 4
+menu label to accelerator distance: 12
+```
+
 - [ ] unify widget spacing with margin, border, padding, content for style struct
 For example replace style's fill properties with padding.
 Right now the only widgets with something like a margin are checkbox and radiobutton.
@@ -172,8 +178,10 @@ The fix in question regards the positioning.
 This also removes the offset_x parameter,
 because x is now properly used from the given rect.
 
-- [ ] add menu accelerators
+- [x] add menu accelerators
 
+- [ ] fix: don't prematurely match keybinds if keys are left
+see example: ctrl+s ctrl+shift+s
 - [ ] add error message to bind, if shortcut is already used
 - [ ] fix: can't unfocus a menu by clicking elsewhere?
 - [ ] fix: stop text input when a menu is focused

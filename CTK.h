@@ -186,6 +186,7 @@ typedef struct CTK_Instance {
 typedef struct CTK_Menu {
 	SDL_Rect   rect;
 	size_t     commands;
+	TTF_Text  *accelerator[CTK_MENU_MAX_ITEMS];
 	TTF_Text  *label[CTK_MENU_MAX_ITEMS];
 	void     (*command[CTK_MENU_MAX_ITEMS])(CTK_Instance*, void*);
 	void      *command_data[CTK_MENU_MAX_ITEMS];
@@ -287,9 +288,9 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
  * @fn_data: Data that is passed to fn.
  * @underline: Underline within label. If not used, give -1.
  *
- * Returns true on success or false on failure.
+ * Returns command index on success or -1 on failure.
  */
-bool
+size_t
 CTK_AddMenuCommand(CTK_Instance *inst,
                    CTK_Menu     *menu,
                    const char   *label,
@@ -412,10 +413,10 @@ void
 CTK_DestroyInstance(CTK_Instance *inst);
 
 void
-CTK_DestroyMenu(CTK_Menu* m);
+CTK_DestroyMenu(CTK_Menu *m);
 
 void
-CTK_DestroyMenubar(CTK_Menubar* mb);
+CTK_DestroyMenubar(CTK_Menubar *mb);
 
 void
 CTK_DrawInstance(CTK_Instance *inst);
@@ -430,14 +431,6 @@ CTK_DrawMenubar(CTK_Instance *inst);
 void
 CTK_FocusMenubar(CTK_Instance *inst,
                  const size_t  cascade);
-
-/* @name: Name of the key.
- *
- * This is needed since the builtin SDL equivalent is not portable.
- * Returns valid SDL scancode or SDL_SCANCODE_UNKNOWN otherwise.
- */
-SDL_Scancode
-CTK_GetScancodeFromName(const char *name);
 
 void
 CTK_HandleDrag(CTK_Instance *inst,
@@ -472,6 +465,14 @@ CTK_HandleTextInput(CTK_Instance             *inst,
 
 CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
+
+/* @name: Name of the key.
+ *
+ * This is needed since the builtin SDL equivalent is not portable.
+ * Returns valid SDL scancode or SDL_SCANCODE_UNKNOWN otherwise.
+ */
+SDL_Scancode
+CTK_GetScancodeFromName(const char *name);
 
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
@@ -555,6 +556,19 @@ CTK_RenderText(SDL_Renderer            *r,
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
                      const CTK_WidgetId  widget);
+
+/* @inst: Parent instance.
+ * @menu: Parent menu.
+ * @cmd_id: Command index.
+ * @keystr: Bind string. See CTK_Bind.
+ *
+ * Returns true on success or false on failure.
+ */
+bool
+CTK_SetMenuCommandAccelerator(CTK_Instance *inst,
+                              CTK_Menu     *menu,
+                              const size_t  cmd_id,
+                              const char   *keystr);
 
 void
 CTK_SetWidgetEnabled(CTK_Instance       *inst,
@@ -745,7 +759,7 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 	return c;
 }
 
-bool
+size_t
 CTK_AddMenuCommand(CTK_Instance *inst,
                    CTK_Menu     *menu,
                    const char   *label,
@@ -757,10 +771,11 @@ CTK_AddMenuCommand(CTK_Instance *inst,
 
 	if (menu->commands >= CTK_MENU_MAX_ITEMS) {
 		SDL_SetError("Menu can not hold more items");
-		return false;
+		return -1;
 	}
 
 	id = menu->commands;
+	menu->accelerator[id] = TTF_CreateText(inst->tengine, CTK_font, "", 0);
 	menu->label[id] = TTF_CreateText(inst->tengine, CTK_font, label, 0);
 	menu->command[id] = fn;
 	menu->command_data[id] = fn_data;
@@ -769,7 +784,7 @@ CTK_AddMenuCommand(CTK_Instance *inst,
 	menu->underline[id] = underline;
 	menu->commands++;
 
-	return true;
+	return id;
 }
 
 bool
@@ -783,6 +798,7 @@ CTK_AddMenuSeparator(CTK_Menu *menu)
 	}
 
 	id = menu->commands;
+	menu->accelerator[id] = NULL;
 	menu->label[id] = NULL;
 	menu->command[id] = NULL;
 	menu->command_data[id] = NULL;
@@ -1617,11 +1633,12 @@ CTK_DestroyInstance(CTK_Instance *inst)
 }
 
 void
-CTK_DestroyMenu(CTK_Menu* m)
+CTK_DestroyMenu(CTK_Menu *m)
 {
 	size_t i;
 
 	for (i = 0; i < m->commands; i++) {
+		TTF_DestroyText(m->accelerator[i]);
 		TTF_DestroyText(m->label[i]);
 	}
 
@@ -1629,7 +1646,7 @@ CTK_DestroyMenu(CTK_Menu* m)
 }
 
 void
-CTK_DestroyMenubar(CTK_Menubar* mb)
+CTK_DestroyMenubar(CTK_Menubar *mb)
 {
 	size_t i;
 
@@ -1728,6 +1745,7 @@ void
 CTK_DrawMenu(CTK_Instance *inst,
              CTK_Menu     *menu)
 {
+	SDL_Color     command_c;
 	float         command_x;
 	float         command_y;
 	SDL_FRect     frect;
@@ -1787,17 +1805,9 @@ CTK_DrawMenu(CTK_Instance *inst,
 		TTF_GetTextSize(menu->label[i], &w, &h);
 
 		if (menu->enabled[i]) {
-			TTF_SetTextColor(menu->label[i],
-					 inst->style.menu_text_clr.r,
-					 inst->style.menu_text_clr.g,
-					 inst->style.menu_text_clr.b,
-					 inst->style.menu_text_clr.a);
+			command_c = inst->style.menu_text_clr;
 		} else {
-			TTF_SetTextColor(menu->label[i],
-					 inst->style.menu_text_disabled_clr.r,
-					 inst->style.menu_text_disabled_clr.g,
-					 inst->style.menu_text_disabled_clr.b,
-					 inst->style.menu_text_disabled_clr.a);
+			command_c = inst->style.menu_text_disabled_clr;
 		}
 
 		label_y = command_y + ((inst->style.menu_command_h - h) / 2.0);
@@ -1806,11 +1816,32 @@ CTK_DrawMenu(CTK_Instance *inst,
 		frect.w = w;
 		frect.h = h;
 
+		TTF_SetTextColor(menu->label[i],
+		                 command_c.r,
+				 command_c.g,
+				 command_c.b,
+				 command_c.a);
 		CTK_RenderText(r,
 		               menu->label[i],
 		               frect,
 		               CTK_TEXT_ALIGNMENT_LEFT,
 		               menu->underline[i],
+		               inst->style.menu_text_clr);
+
+		frect.x += frect.w;
+		frect.w = menu->rect.w - frect.w;
+		frect.h = h;
+
+		TTF_SetTextColor(menu->accelerator[i],
+		                 command_c.r,
+				 command_c.g,
+				 command_c.b,
+				 command_c.a);
+		CTK_RenderText(r,
+		               menu->accelerator[i],
+		               frect,
+		               CTK_TEXT_ALIGNMENT_RIGHT,
+		               -1,
 		               inst->style.menu_text_clr);
 
 		command_y += inst->style.menu_command_h;
@@ -1930,102 +1961,6 @@ CTK_FocusMenubar(CTK_Instance *inst,
 	} else {
 		CTK_UnfocusMenubar(inst);
 	}
-}
-
-SDL_Scancode
-CTK_GetScancodeFromName(const char *name)
-{
-	if (strcmp(name, "1") == 0) {
-		return SDL_SCANCODE_1;
-	} else if (strcmp(name, "2") == 0) {
-		return SDL_SCANCODE_2;
-	} else if (strcmp(name, "3") == 0) {
-		return SDL_SCANCODE_3;
-	} else if (strcmp(name, "4") == 0) {
-		return SDL_SCANCODE_4;
-	} else if (strcmp(name, "5") == 0) {
-		return SDL_SCANCODE_5;
-	} else if (strcmp(name, "6") == 0) {
-		return SDL_SCANCODE_6;
-	} else if (strcmp(name, "7") == 0) {
-		return SDL_SCANCODE_7;
-	} else if (strcmp(name, "8") == 0) {
-		return SDL_SCANCODE_8;
-	} else if (strcmp(name, "9") == 0) {
-		return SDL_SCANCODE_9;
-	} else if (strcmp(name, "0") == 0) {
-		return SDL_SCANCODE_0;
-	} else if (strcmp(name, "A") == 0) {
-		return SDL_SCANCODE_A;
-	} else if (strcmp(name, "B") == 0) {
-		return SDL_SCANCODE_B;
-	} else if (strcmp(name, "C") == 0) {
-		return SDL_SCANCODE_C;
-	} else if (strcmp(name, "D") == 0) {
-		return SDL_SCANCODE_D;
-	} else if (strcmp(name, "E") == 0) {
-		return SDL_SCANCODE_E;
-	} else if (strcmp(name, "F") == 0) {
-		return SDL_SCANCODE_F;
-	} else if (strcmp(name, "G") == 0) {
-		return SDL_SCANCODE_G;
-	} else if (strcmp(name, "H") == 0) {
-		return SDL_SCANCODE_H;
-	} else if (strcmp(name, "I") == 0) {
-		return SDL_SCANCODE_I;
-	} else if (strcmp(name, "J") == 0) {
-		return SDL_SCANCODE_J;
-	} else if (strcmp(name, "K") == 0) {
-		return SDL_SCANCODE_K;
-	} else if (strcmp(name, "L") == 0) {
-		return SDL_SCANCODE_L;
-	} else if (strcmp(name, "M") == 0) {
-		return SDL_SCANCODE_M;
-	} else if (strcmp(name, "N") == 0) {
-		return SDL_SCANCODE_N;
-	} else if (strcmp(name, "O") == 0) {
-		return SDL_SCANCODE_O;
-	} else if (strcmp(name, "P") == 0) {
-		return SDL_SCANCODE_P;
-	} else if (strcmp(name, "Q") == 0) {
-		return SDL_SCANCODE_Q;
-	} else if (strcmp(name, "R") == 0) {
-		return SDL_SCANCODE_R;
-	} else if (strcmp(name, "S") == 0) {
-		return SDL_SCANCODE_S;
-	} else if (strcmp(name, "T") == 0) {
-		return SDL_SCANCODE_T;
-	} else if (strcmp(name, "U") == 0) {
-		return SDL_SCANCODE_U;
-	} else if (strcmp(name, "V") == 0) {
-		return SDL_SCANCODE_V;
-	} else if (strcmp(name, "W") == 0) {
-		return SDL_SCANCODE_W;
-	} else if (strcmp(name, "X") == 0) {
-		return SDL_SCANCODE_X;
-	} else if (strcmp(name, "Y") == 0) {
-		return SDL_SCANCODE_Y;
-	} else if (strcmp(name, "Z") == 0) {
-		return SDL_SCANCODE_Z;
-	} else if (strcmp(name, "Control") == 0) {
-		return SDL_SCANCODE_LCTRL;
-	} else if (strcmp(name, "Shift") == 0) {
-		return SDL_SCANCODE_LSHIFT;
-	} else if (strcmp(name, "Capslock") == 0) {
-		return SDL_SCANCODE_CAPSLOCK;
-	} else if (strcmp(name, "Tab") == 0) {
-		return SDL_SCANCODE_TAB;
-	} else if (strcmp(name, "Meta") == 0) {
-		return SDL_SCANCODE_LGUI;
-	} else if (strcmp(name, "Alt") == 0) {
-		return SDL_SCANCODE_LALT;
-	} else if (strcmp(name, "Space") == 0) {
-		return SDL_SCANCODE_SPACE;
-	} else if (strcmp(name, "AltGr") == 0) {
-		return SDL_SCANCODE_RALT;
-	}
-
-	return SDL_SCANCODE_UNKNOWN;
 }
 
 void
@@ -2684,6 +2619,102 @@ CTK_GetFocusedWidget(const CTK_Instance *inst)
 	return inst->focusable_w[inst->focused_w];
 }
 
+SDL_Scancode
+CTK_GetScancodeFromName(const char *name)
+{
+	if (strcmp(name, "1") == 0) {
+		return SDL_SCANCODE_1;
+	} else if (strcmp(name, "2") == 0) {
+		return SDL_SCANCODE_2;
+	} else if (strcmp(name, "3") == 0) {
+		return SDL_SCANCODE_3;
+	} else if (strcmp(name, "4") == 0) {
+		return SDL_SCANCODE_4;
+	} else if (strcmp(name, "5") == 0) {
+		return SDL_SCANCODE_5;
+	} else if (strcmp(name, "6") == 0) {
+		return SDL_SCANCODE_6;
+	} else if (strcmp(name, "7") == 0) {
+		return SDL_SCANCODE_7;
+	} else if (strcmp(name, "8") == 0) {
+		return SDL_SCANCODE_8;
+	} else if (strcmp(name, "9") == 0) {
+		return SDL_SCANCODE_9;
+	} else if (strcmp(name, "0") == 0) {
+		return SDL_SCANCODE_0;
+	} else if (strcmp(name, "A") == 0) {
+		return SDL_SCANCODE_A;
+	} else if (strcmp(name, "B") == 0) {
+		return SDL_SCANCODE_B;
+	} else if (strcmp(name, "C") == 0) {
+		return SDL_SCANCODE_C;
+	} else if (strcmp(name, "D") == 0) {
+		return SDL_SCANCODE_D;
+	} else if (strcmp(name, "E") == 0) {
+		return SDL_SCANCODE_E;
+	} else if (strcmp(name, "F") == 0) {
+		return SDL_SCANCODE_F;
+	} else if (strcmp(name, "G") == 0) {
+		return SDL_SCANCODE_G;
+	} else if (strcmp(name, "H") == 0) {
+		return SDL_SCANCODE_H;
+	} else if (strcmp(name, "I") == 0) {
+		return SDL_SCANCODE_I;
+	} else if (strcmp(name, "J") == 0) {
+		return SDL_SCANCODE_J;
+	} else if (strcmp(name, "K") == 0) {
+		return SDL_SCANCODE_K;
+	} else if (strcmp(name, "L") == 0) {
+		return SDL_SCANCODE_L;
+	} else if (strcmp(name, "M") == 0) {
+		return SDL_SCANCODE_M;
+	} else if (strcmp(name, "N") == 0) {
+		return SDL_SCANCODE_N;
+	} else if (strcmp(name, "O") == 0) {
+		return SDL_SCANCODE_O;
+	} else if (strcmp(name, "P") == 0) {
+		return SDL_SCANCODE_P;
+	} else if (strcmp(name, "Q") == 0) {
+		return SDL_SCANCODE_Q;
+	} else if (strcmp(name, "R") == 0) {
+		return SDL_SCANCODE_R;
+	} else if (strcmp(name, "S") == 0) {
+		return SDL_SCANCODE_S;
+	} else if (strcmp(name, "T") == 0) {
+		return SDL_SCANCODE_T;
+	} else if (strcmp(name, "U") == 0) {
+		return SDL_SCANCODE_U;
+	} else if (strcmp(name, "V") == 0) {
+		return SDL_SCANCODE_V;
+	} else if (strcmp(name, "W") == 0) {
+		return SDL_SCANCODE_W;
+	} else if (strcmp(name, "X") == 0) {
+		return SDL_SCANCODE_X;
+	} else if (strcmp(name, "Y") == 0) {
+		return SDL_SCANCODE_Y;
+	} else if (strcmp(name, "Z") == 0) {
+		return SDL_SCANCODE_Z;
+	} else if (strcmp(name, "Control") == 0) {
+		return SDL_SCANCODE_LCTRL;
+	} else if (strcmp(name, "Shift") == 0) {
+		return SDL_SCANCODE_LSHIFT;
+	} else if (strcmp(name, "Capslock") == 0) {
+		return SDL_SCANCODE_CAPSLOCK;
+	} else if (strcmp(name, "Tab") == 0) {
+		return SDL_SCANCODE_TAB;
+	} else if (strcmp(name, "Meta") == 0) {
+		return SDL_SCANCODE_LGUI;
+	} else if (strcmp(name, "Alt") == 0) {
+		return SDL_SCANCODE_LALT;
+	} else if (strcmp(name, "Space") == 0) {
+		return SDL_SCANCODE_SPACE;
+	} else if (strcmp(name, "AltGr") == 0) {
+		return SDL_SCANCODE_RALT;
+	}
+
+	return SDL_SCANCODE_UNKNOWN;
+}
+
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
@@ -2927,6 +2958,24 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 		SDL_StopTextInput(inst->win);
 	}
 	inst->redraw = true;
+}
+
+bool
+CTK_SetMenuCommandAccelerator(CTK_Instance *inst,
+                              CTK_Menu     *menu,
+                              const size_t  cmd_id,
+                              const char   *keystr)
+{
+	if (cmd_id >= menu->commands ||
+	   !CTK_Bind(inst,
+	             keystr,
+	             menu->command[cmd_id],
+	             menu->command_data[cmd_id]))
+		return false;
+
+	TTF_AppendTextString(menu->accelerator[cmd_id], keystr, 0);
+
+	return true;
 }
 
 void
@@ -3262,14 +3311,15 @@ CTK_UpdateMenuSize(const CTK_Instance *inst,
                    CTK_Menu           *m)
 {
 	size_t i;
-	int w;
+	int w1, w2;
 
 	m->rect.h = 0;
 	for (i = 0; i < m->commands; i++) {
-		TTF_GetTextSize(m->label[i], &w, NULL);
+		TTF_GetTextSize(m->accelerator[i], &w1, NULL);
+		TTF_GetTextSize(m->label[i], &w2, NULL);
 		m->rect.h += inst->style.menu_command_h;
-		if (w > m->rect.w) {
-			m->rect.w = w;
+		if (w1 + w2 > m->rect.w) {
+			m->rect.w = w1 + w2;
 		}
 	}
 }

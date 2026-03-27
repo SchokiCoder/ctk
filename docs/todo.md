@@ -167,8 +167,10 @@ They trigger on menus without the alt key, as long as they are focused/visible.
 - [x] add data and visual of mnemonics to widgets
 Aka. add underlines again.
 
-- [ ] spread the holy `CTK_RenderText` across the world !!!
-(it draws underlines too for me now)
+- [x] fix and instate `CTK_RenderText` for all text drawing
+The fix in question regards the positioning.
+This also removes the offset_x parameter,
+because x is now properly used from the given rect.
 
 - [ ] add menu accelerators
 
@@ -180,6 +182,7 @@ Aka. add underlines again.
 - [ ] add default right click menu for entries
 For cut, copy, paste, etc.
 
+- [ ] fix delete key on entry when cursor == 0
 - [ ] fix `CTK_ToggleCheckbox` not running the "trigger" callback
 - [ ] fix bg drawing not changing along window size
 - [ ] fix menubar width not changing along window size

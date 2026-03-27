@@ -535,12 +535,20 @@ CTK_MeasureTTFText(TTF_Text *text,
                    size_t    start,
                    size_t    len);
 
+/* @r: SDL Renderer.
+ * @text: Text to draw.
+ * @rect: Rect within the text should be.
+ * @ta: Horizontal alignment within the rect.
+ * @underline: Underline within text. If not used, give -1.
+ * @underline_clr: Color of underline to draw.
+ *
+ * Returns true on success or false on failure.
+ */
 bool
 CTK_RenderText(SDL_Renderer            *r,
                TTF_Text                *text,
                const SDL_FRect          rect,
                const CTK_TextAlignment  ta,
-               const size_t             offset_x,
                const size_t             underline,
                const SDL_Color          underline_clr);
 
@@ -578,6 +586,10 @@ CTK_SetWidgetToggle(CTK_Instance       *inst,
                     const CTK_WidgetId  widget,
                     const bool          toggle);
 
+/* @inst: Parenting instance of widget.
+ * @widget: Widget index.
+ * @underline: Underline within text. If not used, give -1.
+ */
 void
 CTK_SetWidgetUnderline(CTK_Instance       *inst,
                        const CTK_WidgetId  widget,
@@ -1059,7 +1071,6 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 	               inst->text[btn],
 	               rect,
 	               inst->wstyle[btn].text_align,
-	               0,
 	               inst->underline[btn],
 	               inst->wstyle[btn].text_clr);
 
@@ -1201,7 +1212,7 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 		SDL_RenderFillRect(r, &rect);
 	}
 
-	rect.x = 0;
+	rect.x = 0 - inst->scroll_x[txt];
 	rect.y = 0;
 	rect.w = inst->rect[txt].w;
 	rect.h = inst->rect[txt].h;
@@ -1210,7 +1221,6 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 	               inst->text[txt],
 	               rect,
 	               inst->wstyle[txt].text_align,
-	               inst->scroll_x[txt],
 	               -1, /* no underlines for entries */
 	               text_c);
 
@@ -1725,7 +1735,6 @@ CTK_DrawMenu(CTK_Instance *inst,
 	size_t        i;
 	float         label_y;
 	SDL_Renderer *r;
-	SDL_Rect      underline_r;
 	int           w;
 
 	r = SDL_GetRenderer(inst->win);
@@ -1790,27 +1799,19 @@ CTK_DrawMenu(CTK_Instance *inst,
 					 inst->style.menu_text_disabled_clr.b,
 					 inst->style.menu_text_disabled_clr.a);
 		}
+
 		label_y = command_y + ((inst->style.menu_command_h - h) / 2.0);
-		TTF_DrawRendererText(menu->label[i],
-			             command_x,
-			             label_y);
+		frect.x = command_x;
+		frect.y = label_y;
+		frect.w = w;
+		frect.h = h;
 
-		if (menu->underline[i] < strlen(menu->label[i]->text)) {
-			SDL_SetRenderDrawColor(r,
-	                                       inst->style.menu_text_clr.r,
-	                                       inst->style.menu_text_clr.g,
-	                                       inst->style.menu_text_clr.b,
-	                                       inst->style.menu_text_clr.a);
-			underline_r = CTK_MeasureTTFText(menu->label[i],
-			                                 menu->underline[i],
-			                                 1);
-
-			SDL_RenderLine(r,
-			               command_x + underline_r.x,
-			               label_y + h,
-			               command_x + underline_r.x + underline_r.w,
-			               label_y + h);
-		}
+		CTK_RenderText(r,
+		               menu->label[i],
+		               frect,
+		               CTK_TEXT_ALIGNMENT_LEFT,
+		               menu->underline[i],
+		               inst->style.menu_text_clr);
 
 		command_y += inst->style.menu_command_h;
 	}
@@ -1838,7 +1839,6 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	size_t        i;
 	SDL_Renderer *r;
 	SDL_FRect     frect;
-	SDL_Rect      underline_r;
 
 	r = SDL_GetRenderer(inst->win);
 
@@ -1878,31 +1878,23 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		cascade_y = (inst->style.menubar_h -
 		             inst->menubar->cascade_h[i]) /
 		            2.0;
+
 		TTF_SetTextColor(inst->menubar->cascade[i],
 	                         inst->style.menubar_text_clr.r,
 	                         inst->style.menubar_text_clr.g,
 	                         inst->style.menubar_text_clr.b,
 	                         inst->style.menubar_text_clr.a);
-		TTF_DrawRendererText(inst->menubar->cascade[i],
-		                     cascade_x,
-		                     cascade_y);
+		frect.x = cascade_x;
+		frect.y = cascade_y;
+		frect.w = inst->menubar->cascade_w[i];
+		frect.h = inst->menubar->cascade_h[i];
 
-		if (inst->menubar->underline[i] < strlen(inst->menubar->cascade[i]->text)) {
-			SDL_SetRenderDrawColor(r,
-	                                       inst->style.menubar_text_clr.r,
-	                                       inst->style.menubar_text_clr.g,
-	                                       inst->style.menubar_text_clr.b,
-	                                       inst->style.menubar_text_clr.a);
-
-			underline_r = CTK_MeasureTTFText(inst->menubar->cascade[i],
-			                                 inst->menubar->underline[i],
-			                                 1);
-			SDL_RenderLine(r,
-			               cascade_x + underline_r.x,
-			               cascade_y + inst->menubar->cascade_h[i],
-			               cascade_x + underline_r.x + underline_r.w,
-			               cascade_y + inst->menubar->cascade_h[i]);
-		}
+		CTK_RenderText(r,
+		               inst->menubar->cascade[i],
+		               frect,
+		               CTK_TEXT_ALIGNMENT_LEFT,
+		               inst->menubar->underline[i],
+		               inst->style.menubar_text_clr);
 
 		cascade_x += inst->menubar->cascade_w[i];
 	}
@@ -2860,7 +2852,6 @@ CTK_RenderText(SDL_Renderer            *r,
                TTF_Text                *text,
                const SDL_FRect          rect,
                const CTK_TextAlignment  ta,
-               const size_t             offset_x,
                const size_t             underline,
                const SDL_Color          underline_clr)
 {
@@ -2868,6 +2859,11 @@ CTK_RenderText(SDL_Renderer            *r,
 	int      text_h;
 	SDL_Rect underline_r;
 	float    x, y;
+
+	if (NULL == text ||
+	    NULL == text->text) {
+		return false;
+	}
 
 	if (!TTF_GetTextSize(text, &text_w, &text_h))
 		return false;
@@ -2886,15 +2882,14 @@ CTK_RenderText(SDL_Renderer            *r,
 		break;
 	}
 
-	x -= offset_x;
+	x += rect.x;
 	y = (rect.h - text_h) / 2.0;
+	y += rect.y;
 
 	if (!TTF_DrawRendererText(text, x, y))
 		return false;
 
-	if (NULL != text &&
-	    NULL != text->text &&
-	    underline < strlen(text->text)) {
+	if (underline < strlen(text->text)) {
 		SDL_SetRenderDrawColor(r,
                                        underline_clr.r,
                                        underline_clr.g,

@@ -240,6 +240,15 @@ mnemonicMenubar(CTK_Instance *inst,
 }
 
 void
+mnemonicCEV(CTK_Instance *inst,
+            void         *data)
+{
+	CTK_WidgetId *w = data;
+
+	CTK_ToggleCheckbox(inst, *w);
+}
+
+void
 sclEdit(CTK_Instance               *inst,
         const CTK_WidgetId          widget,
         void                       *data)
@@ -341,6 +350,7 @@ main(int    argc,
 
 	lbl_focusable = CTK_AddLabel(inst);
 	CTK_SetWidgetText(inst, lbl_focusable, "Focusable");
+	CTK_SetWidgetUnderline(inst, lbl_focusable, 2);
 	inst->rect[lbl_focusable].x = inst->rect[ckb_focusable].x +
 	                              inst->rect[ckb_focusable].w + MARGIN;
 	inst->rect[lbl_focusable].y = inst->rect[ckb_focusable].y;
@@ -354,6 +364,7 @@ main(int    argc,
 
 	lbl_enabled = CTK_AddLabel(inst);
 	CTK_SetWidgetText(inst, lbl_enabled, "Enabled");
+	CTK_SetWidgetUnderline(inst, lbl_enabled, 0);
 	inst->rect[lbl_enabled].x = inst->rect[ckb_enabled].x +
 	                            inst->rect[ckb_enabled].w + MARGIN;
 	inst->rect[lbl_enabled].y = inst->rect[ckb_enabled].y;
@@ -367,6 +378,7 @@ main(int    argc,
 
 	lbl_visible = CTK_AddLabel(inst);
 	CTK_SetWidgetText(inst, lbl_visible, "Visible");
+	CTK_SetWidgetUnderline(inst, lbl_visible, 0);
 	inst->rect[lbl_visible].x = inst->rect[ckb_visible].x +
 	                            inst->rect[ckb_visible].w + MARGIN;
 	inst->rect[lbl_visible].y = inst->rect[ckb_visible].y;
@@ -441,6 +453,9 @@ main(int    argc,
 
 	CTK_Bind(inst, "Alt+F", mnemonicMenubar, &cascFile);
 	CTK_Bind(inst, "Alt+H", mnemonicMenubar, &cascHelp);
+	CTK_Bind(inst, "Alt+C", mnemonicCEV, &ckb_focusable);
+	CTK_Bind(inst, "Alt+E", mnemonicCEV, &ckb_enabled);
+	CTK_Bind(inst, "Alt+V", mnemonicCEV, &ckb_visible);
 
 	CTK_MainloopInstance(inst);
 

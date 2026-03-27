@@ -147,6 +147,7 @@ typedef struct CTK_Instance {
 	SDL_Texture       *texture[CTK_INSTANCE_MAX_WIDGETS];
 	bool               toggle[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_WidgetType     type[CTK_INSTANCE_MAX_WIDGETS];
+	size_t             underline[CTK_INSTANCE_MAX_WIDGETS];
 	unsigned short     value[CTK_INSTANCE_MAX_WIDGETS];
 	unsigned short     value_max[CTK_INSTANCE_MAX_WIDGETS];
 	CTK_WidgetStyle    wstyle[CTK_INSTANCE_MAX_WIDGETS];
@@ -535,10 +536,13 @@ CTK_MeasureTTFText(TTF_Text *text,
                    size_t    len);
 
 bool
-CTK_RenderText(TTF_Text                *text,
+CTK_RenderText(SDL_Renderer            *r,
+               TTF_Text                *text,
                const SDL_FRect          rect,
                const CTK_TextAlignment  ta,
-               const size_t             offset_x);
+               const size_t             offset_x,
+               const size_t             underline,
+               const SDL_Color          underline_clr);
 
 void
 CTK_SetFocusedWidget(CTK_Instance       *inst,
@@ -573,6 +577,11 @@ void
 CTK_SetWidgetToggle(CTK_Instance       *inst,
                     const CTK_WidgetId  widget,
                     const bool          toggle);
+
+void
+CTK_SetWidgetUnderline(CTK_Instance       *inst,
+                       const CTK_WidgetId  widget,
+                       const size_t        underline);
 
 void
 CTK_SetWidgetValue(CTK_Instance       *inst,
@@ -852,6 +861,7 @@ CTK_AddWidget(CTK_Instance *inst)
 	inst->rect[ret].y = 0;
 	inst->rect[ret].w = 0;
 	inst->rect[ret].h = 0;
+	inst->underline[ret] = -1;
 	inst->value[ret] = 0;
 	inst->value_max[ret] = 0;
 	inst->edit[ret] = NULL;
@@ -1045,7 +1055,13 @@ CTK_CreateButtonTexture(CTK_Instance       *inst,
 		                 inst->wstyle[btn].text_disabled_clr.a);
 	}
 
-	CTK_RenderText(inst->text[btn], rect, inst->wstyle[btn].text_align, 0);
+	CTK_RenderText(r,
+	               inst->text[btn],
+	               rect,
+	               inst->wstyle[btn].text_align,
+	               0,
+	               inst->underline[btn],
+	               inst->wstyle[btn].text_clr);
 
 	if (inst->border[btn]) {
 		rect.x = 0;
@@ -1190,10 +1206,13 @@ CTK_CreateEntryTexture(CTK_Instance       *inst,
 	rect.w = inst->rect[txt].w;
 	rect.h = inst->rect[txt].h;
 	TTF_SetTextColor(inst->text[txt], text_c.r, text_c.g, text_c.b, text_c.a);
-	CTK_RenderText(inst->text[txt],
+	CTK_RenderText(r,
+	               inst->text[txt],
 	               rect,
 	               inst->wstyle[txt].text_align,
-	               inst->scroll_x[txt]);
+	               inst->scroll_x[txt],
+	               -1, /* no underlines for entries */
+	               text_c);
 
 	if (inst->border[txt]) {
 		rect.x = 0;
@@ -2837,14 +2856,18 @@ CTK_MeasureTTFText(TTF_Text *text,
 }
 
 bool
-CTK_RenderText(TTF_Text                *text,
+CTK_RenderText(SDL_Renderer            *r,
+               TTF_Text                *text,
                const SDL_FRect          rect,
                const CTK_TextAlignment  ta,
-               const size_t             offset_x)
+               const size_t             offset_x,
+               const size_t             underline,
+               const SDL_Color          underline_clr)
 {
-	int text_w;
-	int text_h;
-	float x, y;
+	int      text_w;
+	int      text_h;
+	SDL_Rect underline_r;
+	float    x, y;
 
 	if (!TTF_GetTextSize(text, &text_w, &text_h))
 		return false;
@@ -2868,6 +2891,23 @@ CTK_RenderText(TTF_Text                *text,
 
 	if (!TTF_DrawRendererText(text, x, y))
 		return false;
+
+	if (NULL != text &&
+	    NULL != text->text &&
+	    underline < strlen(text->text)) {
+		SDL_SetRenderDrawColor(r,
+                                       underline_clr.r,
+                                       underline_clr.g,
+                                       underline_clr.b,
+                                       underline_clr.a);
+		underline_r = CTK_MeasureTTFText(text, underline, 1);
+
+		SDL_RenderLine(r,
+		               x + underline_r.x,
+		               y + text_h,
+		               x + underline_r.x + underline_r.w,
+		               y + text_h);
+	}
 
 	return true;
 }
@@ -3011,6 +3051,15 @@ CTK_SetWidgetToggle(CTK_Instance       *inst,
                     const bool          toggle)
 {
 	inst->toggle[widget] = toggle;
+	CTK_CreateWidgetTexture(inst, widget);
+}
+
+void
+CTK_SetWidgetUnderline(CTK_Instance       *inst,
+                       const CTK_WidgetId  widget,
+                       const size_t        underline)
+{
+	inst->underline[widget] = underline;
 	CTK_CreateWidgetTexture(inst, widget);
 }
 

@@ -50,7 +50,7 @@ menu .menubar.help -tearoff 0
 . configure -menu .menubar
 
 ttk::labelframe .frmTop -text "Settings (unfinished)"
-ttk::checkbutton .ckbFocusable -text "Focusable" -underline 0
+ttk::checkbutton .ckbFocusable -text "Focusable" -underline 2
 .ckbFocusable invoke
 .ckbFocusable configure -state disabled
 ttk::checkbutton .ckbEnabled -text "Enabled" -underline 0 \
@@ -71,7 +71,7 @@ ttk::radiobutton .rbnPepperoni -text "Pizza with extra pepperoni" \
 ttk::scale .scl -from 0 -to 10 -value 5
 ttk::progressbar .pgb -value 33
 
-bind all <Alt-f> {focus .ckbFocusable}
+bind all <Alt-c> {focus .ckbFocusable}
 bind all <Alt-e> {focus .ckbEnabled}
 bind all <Alt-v> {focus .ckbVisible}
 

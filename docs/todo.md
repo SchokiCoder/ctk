@@ -164,9 +164,15 @@ cascade is a lot easier.
 - [x] add function of mnemonics to menus
 They trigger on menus without the alt key, as long as they are focused/visible.
 
-- [ ] add data and visual of mnemonics to widgets
-- [ ] add data and visual of menu accelerators
+- [x] add data and visual of mnemonics to widgets
+Aka. add underlines again.
 
+- [ ] spread the holy `CTK_RenderText` across the world !!!
+(it draws underlines too for me now)
+
+- [ ] add menu accelerators
+
+- [ ] add error message to bind, if shortcut is already used
 - [ ] fix: can't unfocus a menu by clicking elsewhere?
 - [ ] fix: stop text input when a menu is focused
 
@@ -174,6 +180,7 @@ They trigger on menus without the alt key, as long as they are focused/visible.
 - [ ] add default right click menu for entries
 For cut, copy, paste, etc.
 
+- [ ] fix `CTK_ToggleCheckbox` not running the "trigger" callback
 - [ ] fix bg drawing not changing along window size
 - [ ] fix menubar width not changing along window size
 

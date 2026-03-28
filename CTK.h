@@ -1025,6 +1025,14 @@ CTK_Bind(CTK_Instance  *inst,
 		}
 	}
 
+	for (i = 0; i < inst->binds; i++) {
+		if (key == inst->bind_key[i] &&
+		    mod == inst->bind_mod[i]) {
+			SDL_SetError("Bind tried to reassign shortcut");
+			return false;
+		}
+	}
+
 	inst->bind_key[inst->binds] = key;
 	inst->bind_mod[inst->binds] = mod;
 	inst->bind_fn[inst->binds] = fn;

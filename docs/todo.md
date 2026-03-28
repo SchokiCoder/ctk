@@ -189,7 +189,7 @@ Thanks to a bit comparison algorith by Brian Kernighan,
 premature shortcut triggering didn't come back,
 as a regression of this new system.
 
-- [ ] add error message to bind, if shortcut is already used
+- [x] add error message to bind, if shortcut is already used
 - [ ] fix: can't unfocus a menu by clicking elsewhere?
 - [ ] fix: stop text input when a menu is focused
 

@@ -2002,16 +2002,26 @@ CTK_HandleDrag(CTK_Instance *inst,
 void
 CTK_HandleKeybinds(CTK_Instance *inst)
 {
-	size_t a, b;
-	bool match;
-	const bool *sdlkeys;
+	size_t      a, b;
+	bool        match;
+	size_t      pressedkeys = 0;
+	int         sdlkeys;
+	const bool *sdlkey;
 
-	sdlkeys = SDL_GetKeyboardState(NULL);
+	/* if someone at SDL decides that true is no longer 1, this breaks */
+	sdlkey = SDL_GetKeyboardState(&sdlkeys);
+	for (a = 0; a < (size_t) sdlkeys; a++) {
+		pressedkeys += sdlkey[a];
+	}
 
 	for (a = 0; a < inst->binds; a++) {
 		match = true;
+
+		if (pressedkeys != inst->bind_keys[a]) {
+			continue;
+		}
 		for (b = 0; b < inst->bind_keys[a]; b++) {
-			if (!sdlkeys[inst->bind_key[a][b]]) {
+			if (!sdlkey[inst->bind_key[a][b]]) {
 				match = false;
 				break;
 			}

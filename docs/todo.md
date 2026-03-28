@@ -180,8 +180,7 @@ because x is now properly used from the given rect.
 
 - [x] add menu accelerators
 
-- [ ] fix: don't prematurely match keybinds if keys are left
-see example: ctrl+s ctrl+shift+s
+- [x] fix prematurely matching keybinds even if there are more pressed keys
 - [ ] add error message to bind, if shortcut is already used
 - [ ] fix: can't unfocus a menu by clicking elsewhere?
 - [ ] fix: stop text input when a menu is focused

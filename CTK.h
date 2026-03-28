@@ -37,10 +37,6 @@
 /* Configuration defines
  */
 
-#ifndef CTK_BIND_MAXKEYS
-#define CTK_BIND_MAXKEYS 8
-#endif
-
 #ifndef CTK_INSTANCE_MAX_WIDGETS
 #define CTK_INSTANCE_MAX_WIDGETS 64
 #endif
@@ -114,8 +110,8 @@ typedef struct CTK_Instance {
 	size_t        binds;
 	void        (*bind_fn[CTK_MAX_BINDS])(struct CTK_Instance*, void*);
 	void         *bind_fn_data[CTK_MAX_BINDS];
-	size_t        bind_keys[CTK_MAX_BINDS];
-	SDL_Scancode  bind_key[CTK_MAX_BINDS][CTK_BIND_MAXKEYS];
+	SDL_Keycode   bind_key[CTK_MAX_BINDS];
+	SDL_Keymod    bind_mod[CTK_MAX_BINDS];
 
 	/* instance events */
 	void (*draw)(struct CTK_Instance*, void*);
@@ -437,7 +433,8 @@ CTK_HandleDrag(CTK_Instance *inst,
                const float   x);
 
 void
-CTK_HandleKeybinds(CTK_Instance *inst);
+CTK_HandleKeybinds(CTK_Instance            *inst,
+                   const SDL_KeyboardEvent  e);
 
 void
 CTK_HandleKeyDown(CTK_Instance            *inst,
@@ -467,12 +464,15 @@ CTK_WidgetId
 CTK_GetFocusedWidget(const CTK_Instance *inst);
 
 /* @name: Name of the key.
+ * @key: Resulting key is stored there. May be SDLK_UNKNOWN.
+ * @mod: Resulting mod is stored there. May be SDL_KMOD_NONE.
  *
- * This is needed since the builtin SDL equivalent is not portable.
- * Returns valid SDL scancode or SDL_SCANCODE_UNKNOWN otherwise.
+ * If both results are unknown/none the key is not valid.
  */
-SDL_Scancode
-CTK_GetScancodeFromName(const char *name);
+void
+CTK_GetKeyOrModFromName(const char  *name,
+                        SDL_Keycode *key,
+                        SDL_Keymod  *mod);
 
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
@@ -979,11 +979,13 @@ CTK_Bind(CTK_Instance  *inst,
 {
 	size_t       begin = 0;
 	size_t       i;
-	size_t       keys = 0;
-	SDL_Scancode key[CTK_BIND_MAXKEYS];
+	SDL_Keycode  key = SDLK_UNKNOWN;
+	SDL_Keymod   mod = SDL_KMOD_NONE;
 	const size_t strsize = 32;
 	char         str[strsize];
 	char         temp;
+	SDL_Keycode  temp_key;
+	SDL_Keymod   temp_mod;
 
 	if (strlen(keystr) > strsize) {
 		SDL_SetError("Bind-string is too long");
@@ -995,29 +997,36 @@ CTK_Bind(CTK_Instance  *inst,
 	for (i = 0; i < strlen(str); i++) {
 		if (str[i + 1] == '\0' ||
 		    str[i + 1] == '+') {
-			if (keys >= CTK_BIND_MAXKEYS) {
-				SDL_SetError("Bind tried to set too many keys");
-				return false;
-			}
-
 			temp = str[i + 1];
 			str[i + 1] = '\0';
 
-			key[keys] = CTK_GetScancodeFromName(&str[begin]);
-			if (SDL_SCANCODE_UNKNOWN == key[keys]) {
+			CTK_GetKeyOrModFromName(&str[begin],
+			                        &temp_key,
+			                        &temp_mod);
+
+			if (SDLK_UNKNOWN == temp_key &&
+			    SDL_KMOD_NONE == temp_mod) {
 				SDL_SetError("Bind tried to set invalid keys");
 				return false;
 			}
-			keys++;
+			if (SDLK_UNKNOWN != temp_key) {
+				if (SDLK_UNKNOWN != key) {
+					SDL_SetError("Bind tried to set multiple keys");
+					return false;
+				}
+				key = temp_key;
+			}
+			if (SDL_KMOD_NONE != temp_mod) {
+				mod |= temp_mod;
+			}
 
 			str[i + 1] = temp;
 			begin = i + 2;
 		}
 	}
 
-	inst->bind_keys[inst->binds] = keys;
-	for (i = 0; i < keys; i++)
-		inst->bind_key[inst->binds][i] = key[i];
+	inst->bind_key[inst->binds] = key;
+	inst->bind_mod[inst->binds] = mod;
 	inst->bind_fn[inst->binds] = fn;
 	inst->bind_fn_data[inst->binds] = fn_data;
 	inst->binds++;
@@ -2000,38 +2009,37 @@ CTK_HandleDrag(CTK_Instance *inst,
 }
 
 void
-CTK_HandleKeybinds(CTK_Instance *inst)
+CTK_HandleKeybinds(CTK_Instance            *inst,
+                   const SDL_KeyboardEvent  e)
 {
-	size_t      a, b;
-	bool        match;
-	size_t      pressedkeys = 0;
-	int         sdlkeys;
-	const bool *sdlkey;
+	SDL_Keymod comp;
+	size_t     comp_match;
+	size_t     i;
+	size_t     bindmatch = -1;
+	size_t     bindmatch_comp_match = 0;
 
-	/* if someone at SDL decides that true is no longer 1, this breaks */
-	sdlkey = SDL_GetKeyboardState(&sdlkeys);
-	for (a = 0; a < (size_t) sdlkeys; a++) {
-		pressedkeys += sdlkey[a];
-	}
+	for (i = 0; i < inst->binds; i++) {
+		if (inst->bind_key[i] == e.key &&
+		    inst->bind_mod[i] & e.mod) {
+			comp = inst->bind_mod[i] & e.mod;
+			comp_match = 0;
+			while (comp) { /* cheers, Brian Kernighan */
+				comp &= (comp -1);
+				comp_match++;
+			}
 
-	for (a = 0; a < inst->binds; a++) {
-		match = true;
-
-		if (pressedkeys != inst->bind_keys[a]) {
-			continue;
-		}
-		for (b = 0; b < inst->bind_keys[a]; b++) {
-			if (!sdlkey[inst->bind_key[a][b]]) {
-				match = false;
-				break;
+			if (bindmatch == (size_t) -1) {
+				bindmatch = i;
+				bindmatch_comp_match = comp_match;
+			} else if (comp_match > bindmatch_comp_match) {
+				bindmatch = i;
+				bindmatch_comp_match = comp_match;
 			}
 		}
-
-		if (match) {
-			inst->bind_fn[a](inst, inst->bind_fn_data[a]);
-			break;
-		}
 	}
+
+	if ((size_t) -1 != bindmatch)
+		inst->bind_fn[bindmatch](inst, inst->bind_fn_data[bindmatch]);
 }
 
 void
@@ -2629,100 +2637,105 @@ CTK_GetFocusedWidget(const CTK_Instance *inst)
 	return inst->focusable_w[inst->focused_w];
 }
 
-SDL_Scancode
-CTK_GetScancodeFromName(const char *name)
+void
+CTK_GetKeyOrModFromName(const char  *name,
+                        SDL_Keycode *key,
+                        SDL_Keymod  *mod)
 {
-	if (strcmp(name, "1") == 0) {
-		return SDL_SCANCODE_1;
-	} else if (strcmp(name, "2") == 0) {
-		return SDL_SCANCODE_2;
-	} else if (strcmp(name, "3") == 0) {
-		return SDL_SCANCODE_3;
-	} else if (strcmp(name, "4") == 0) {
-		return SDL_SCANCODE_4;
-	} else if (strcmp(name, "5") == 0) {
-		return SDL_SCANCODE_5;
-	} else if (strcmp(name, "6") == 0) {
-		return SDL_SCANCODE_6;
-	} else if (strcmp(name, "7") == 0) {
-		return SDL_SCANCODE_7;
-	} else if (strcmp(name, "8") == 0) {
-		return SDL_SCANCODE_8;
-	} else if (strcmp(name, "9") == 0) {
-		return SDL_SCANCODE_9;
-	} else if (strcmp(name, "0") == 0) {
-		return SDL_SCANCODE_0;
-	} else if (strcmp(name, "A") == 0) {
-		return SDL_SCANCODE_A;
-	} else if (strcmp(name, "B") == 0) {
-		return SDL_SCANCODE_B;
-	} else if (strcmp(name, "C") == 0) {
-		return SDL_SCANCODE_C;
-	} else if (strcmp(name, "D") == 0) {
-		return SDL_SCANCODE_D;
-	} else if (strcmp(name, "E") == 0) {
-		return SDL_SCANCODE_E;
-	} else if (strcmp(name, "F") == 0) {
-		return SDL_SCANCODE_F;
-	} else if (strcmp(name, "G") == 0) {
-		return SDL_SCANCODE_G;
-	} else if (strcmp(name, "H") == 0) {
-		return SDL_SCANCODE_H;
-	} else if (strcmp(name, "I") == 0) {
-		return SDL_SCANCODE_I;
-	} else if (strcmp(name, "J") == 0) {
-		return SDL_SCANCODE_J;
-	} else if (strcmp(name, "K") == 0) {
-		return SDL_SCANCODE_K;
-	} else if (strcmp(name, "L") == 0) {
-		return SDL_SCANCODE_L;
-	} else if (strcmp(name, "M") == 0) {
-		return SDL_SCANCODE_M;
-	} else if (strcmp(name, "N") == 0) {
-		return SDL_SCANCODE_N;
-	} else if (strcmp(name, "O") == 0) {
-		return SDL_SCANCODE_O;
-	} else if (strcmp(name, "P") == 0) {
-		return SDL_SCANCODE_P;
-	} else if (strcmp(name, "Q") == 0) {
-		return SDL_SCANCODE_Q;
-	} else if (strcmp(name, "R") == 0) {
-		return SDL_SCANCODE_R;
-	} else if (strcmp(name, "S") == 0) {
-		return SDL_SCANCODE_S;
-	} else if (strcmp(name, "T") == 0) {
-		return SDL_SCANCODE_T;
-	} else if (strcmp(name, "U") == 0) {
-		return SDL_SCANCODE_U;
-	} else if (strcmp(name, "V") == 0) {
-		return SDL_SCANCODE_V;
-	} else if (strcmp(name, "W") == 0) {
-		return SDL_SCANCODE_W;
-	} else if (strcmp(name, "X") == 0) {
-		return SDL_SCANCODE_X;
-	} else if (strcmp(name, "Y") == 0) {
-		return SDL_SCANCODE_Y;
-	} else if (strcmp(name, "Z") == 0) {
-		return SDL_SCANCODE_Z;
-	} else if (strcmp(name, "Control") == 0) {
-		return SDL_SCANCODE_LCTRL;
-	} else if (strcmp(name, "Shift") == 0) {
-		return SDL_SCANCODE_LSHIFT;
-	} else if (strcmp(name, "Capslock") == 0) {
-		return SDL_SCANCODE_CAPSLOCK;
-	} else if (strcmp(name, "Tab") == 0) {
-		return SDL_SCANCODE_TAB;
-	} else if (strcmp(name, "Meta") == 0) {
-		return SDL_SCANCODE_LGUI;
-	} else if (strcmp(name, "Alt") == 0) {
-		return SDL_SCANCODE_LALT;
-	} else if (strcmp(name, "Space") == 0) {
-		return SDL_SCANCODE_SPACE;
-	} else if (strcmp(name, "AltGr") == 0) {
-		return SDL_SCANCODE_RALT;
-	}
+	*key = SDLK_UNKNOWN;
+	*mod = SDL_KMOD_NONE;
 
-	return SDL_SCANCODE_UNKNOWN;
+	if (strcmp(name, "1") == 0) {
+		*key = SDLK_1;
+	} else if (strcmp(name, "2") == 0) {
+		*key = SDLK_2;
+	} else if (strcmp(name, "3") == 0) {
+		*key = SDLK_3;
+	} else if (strcmp(name, "4") == 0) {
+		*key = SDLK_4;
+	} else if (strcmp(name, "5") == 0) {
+		*key = SDLK_5;
+	} else if (strcmp(name, "6") == 0) {
+		*key = SDLK_6;
+	} else if (strcmp(name, "7") == 0) {
+		*key = SDLK_7;
+	} else if (strcmp(name, "8") == 0) {
+		*key = SDLK_8;
+	} else if (strcmp(name, "9") == 0) {
+		*key = SDLK_9;
+	} else if (strcmp(name, "0") == 0) {
+		*key = SDLK_0;
+	} else if (strcmp(name, "A") == 0) {
+		*key = SDLK_A;
+	} else if (strcmp(name, "B") == 0) {
+		*key = SDLK_B;
+	} else if (strcmp(name, "C") == 0) {
+		*key = SDLK_C;
+	} else if (strcmp(name, "D") == 0) {
+		*key = SDLK_D;
+	} else if (strcmp(name, "E") == 0) {
+		*key = SDLK_E;
+	} else if (strcmp(name, "F") == 0) {
+		*key = SDLK_F;
+	} else if (strcmp(name, "G") == 0) {
+		*key = SDLK_G;
+	} else if (strcmp(name, "H") == 0) {
+		*key = SDLK_H;
+	} else if (strcmp(name, "I") == 0) {
+		*key = SDLK_I;
+	} else if (strcmp(name, "J") == 0) {
+		*key = SDLK_J;
+	} else if (strcmp(name, "K") == 0) {
+		*key = SDLK_K;
+	} else if (strcmp(name, "L") == 0) {
+		*key = SDLK_L;
+	} else if (strcmp(name, "M") == 0) {
+		*key = SDLK_M;
+	} else if (strcmp(name, "N") == 0) {
+		*key = SDLK_N;
+	} else if (strcmp(name, "O") == 0) {
+		*key = SDLK_O;
+	} else if (strcmp(name, "P") == 0) {
+		*key = SDLK_P;
+	} else if (strcmp(name, "Q") == 0) {
+		*key = SDLK_Q;
+	} else if (strcmp(name, "R") == 0) {
+		*key = SDLK_R;
+	} else if (strcmp(name, "S") == 0) {
+		*key = SDLK_S;
+	} else if (strcmp(name, "T") == 0) {
+		*key = SDLK_T;
+	} else if (strcmp(name, "U") == 0) {
+		*key = SDLK_U;
+	} else if (strcmp(name, "V") == 0) {
+		*key = SDLK_V;
+	} else if (strcmp(name, "W") == 0) {
+		*key = SDLK_W;
+	} else if (strcmp(name, "X") == 0) {
+		*key = SDLK_X;
+	} else if (strcmp(name, "Y") == 0) {
+		*key = SDLK_Y;
+	} else if (strcmp(name, "Z") == 0) {
+		*key = SDLK_Z;
+	} else if (strcmp(name, "Space") == 0) {
+		*key = SDLK_SPACE;
+	} else if (strcmp(name, "Tab") == 0) {
+		*key = SDLK_TAB;
+	} else if (strcmp(name, "Control") == 0 ||
+	           strcmp(name, "Ctrl") == 0) {
+		*mod = SDL_KMOD_CTRL;
+	} else if (strcmp(name, "Shift") == 0) {
+		*mod = SDL_KMOD_SHIFT;
+	} else if (strcmp(name, "Capslock") == 0 ||
+	           strcmp(name, "Caps") == 0) {
+		*mod = SDL_KMOD_CAPS;
+	} else if (strcmp(name, "Meta") == 0) {
+		*mod = SDL_KMOD_GUI;
+	} else if (strcmp(name, "Alt") == 0) {
+		*mod = SDL_KMOD_LALT;
+	} else if (strcmp(name, "AltGr") == 0) {
+		*mod = SDL_KMOD_RALT;
+	}
 }
 
 bool
@@ -3232,7 +3245,7 @@ CTK_TickInstance(CTK_Instance *inst)
 
 		case SDL_EVENT_KEY_DOWN:
 			CTK_HandleKeyDown(inst, e.key);
-			CTK_HandleKeybinds(inst);
+			CTK_HandleKeybinds(inst, e.key);
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:

@@ -181,6 +181,14 @@ because x is now properly used from the given rect.
 - [x] add menu accelerators
 
 - [x] fix prematurely matching keybinds even if there are more pressed keys
+
+- [x] replace keybind scancodes with keycodes and keymods
+This enables right modifier keys, eliminates worries about keyboard layouts.
+Here we also added some key aliases.
+Thanks to a bit comparison algorith by Brian Kernighan,
+premature shortcut triggering didn't come back,
+as a regression of this new system.
+
 - [ ] add error message to bind, if shortcut is already used
 - [ ] fix: can't unfocus a menu by clicking elsewhere?
 - [ ] fix: stop text input when a menu is focused

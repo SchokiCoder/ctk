@@ -336,14 +336,14 @@ main(int    argc,
 	                                    menuFileNew,
 	                                    NULL,
 	                                    0);
-	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdNew, "Control+N");
+	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdNew, "Ctrl+N");
 	menuFileCmdOpen = CTK_AddMenuCommand(inst,
 	                                     menuFile,
 	                                     "Open",
 	                                     menuFileOpen,
 	                                     NULL,
 	                                     0);
-	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdOpen, "Control+O");
+	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdOpen, "Ctrl+O");
 	CTK_AddMenuSeparator(menuFile);
 	menuFileCmdSave = CTK_AddMenuCommand(inst,
 	                                     menuFile,
@@ -351,14 +351,14 @@ main(int    argc,
 	                                     menuFileSave,
 	                                     NULL,
 	                                     0);
-	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdSave, "Control+S");
+	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdSave, "Ctrl+S");
 	menuFileCmdSaveAs = CTK_AddMenuCommand(inst,
 	                                       menuFile,
 	                                       "Save As",
 	                                       menuFileSaveAs,
 	                                       NULL,
 	                                       5);
-	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdSaveAs, "Control+Shift+S");
+	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdSaveAs, "Ctrl+Shift+S");
 	CTK_AddMenuSeparator(menuFile);
 	menuFileCmdQuit = CTK_AddMenuCommand(inst,
 	                                     menuFile,
@@ -366,7 +366,7 @@ main(int    argc,
 	                                     menuFileQuit,
 	                                     &inst->active,
 	                                     0);
-	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdQuit, "Control+Q");
+	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdQuit, "Ctrl+Q");
 	cascFile = CTK_AddMenubarCascade(inst, "File", menuFile, 0);
 
 	menuHelp = CTK_CreateMenu();

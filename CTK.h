@@ -2477,6 +2477,15 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		CTK_EntryMenuPaste(inst, NULL);
 		break;
+
+	case SDLK_X:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (!(SDL_KMOD_CTRL & e.mod))
+			break;
+
+		CTK_EntryMenuCut(inst, NULL);
+		break;
 	}
 }
 

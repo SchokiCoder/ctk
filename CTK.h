@@ -103,6 +103,7 @@ typedef struct CTK_Instance {
 	bool                redraw;
 	CTK_Style           style;
 	TTF_TextEngine     *tengine;
+	bool                txt_input_suspended;
 	struct CTK_Menu    *visible_menu;
 	SDL_Window         *win;
 
@@ -425,6 +426,10 @@ void
 CTK_DrawMenubar(CTK_Instance *inst);
 
 void
+CTK_FocusMenu(CTK_Instance *inst,
+              CTK_Menu     *menu);
+
+void
 CTK_FocusMenubar(CTK_Instance *inst,
                  const size_t  cascade);
 
@@ -635,6 +640,9 @@ CTK_ToggleCheckbox(CTK_Instance *inst,
 void
 CTK_ToggleRadiobutton(CTK_Instance *inst,
                       CTK_WidgetId  widget);
+
+void
+CTK_UnfocusMenu(CTK_Instance *inst);
 
 void
 CTK_UnfocusMenubar(CTK_Instance *inst);
@@ -1297,6 +1305,7 @@ CTK_CreateInstance(const char            *title,
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menubar = NULL;
 	inst->style = CTK_DEFAULT_THEME;
+	inst->txt_input_suspended = false;
 	inst->visible_menu = NULL;
 	inst->redraw = true;
 
@@ -1962,6 +1971,19 @@ CTK_DrawMenubar(CTK_Instance *inst)
 }
 
 void
+CTK_FocusMenu(CTK_Instance *inst,
+              CTK_Menu     *menu)
+{
+	if (SDL_TextInputActive(inst->win)) {
+		SDL_StopTextInput(inst->win);
+		inst->txt_input_suspended = true;
+	}
+
+	inst->visible_menu = menu;
+	inst->redraw = true;
+}
+
+void
 CTK_FocusMenubar(CTK_Instance *inst,
                  const size_t  cascade)
 {
@@ -1971,10 +1993,9 @@ CTK_FocusMenubar(CTK_Instance *inst,
 	}
 
 	inst->focused_casc = cascade;
-	inst->redraw = true;
 
 	if (cascade < inst->menubar->cascades) {
-		inst->visible_menu = inst->menubar->menu[cascade];
+		CTK_FocusMenu(inst, inst->menubar->menu[cascade]);
 	} else {
 		CTK_UnfocusMenubar(inst);
 	}
@@ -3333,11 +3354,22 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 }
 
 void
-CTK_UnfocusMenubar(CTK_Instance *inst)
+CTK_UnfocusMenu(CTK_Instance *inst)
 {
-	inst->focused_casc = -1;
+	if (inst->txt_input_suspended) {
+		SDL_StartTextInput(inst->win);
+		inst->txt_input_suspended = false;
+	}
+
 	inst->visible_menu = NULL;
 	inst->redraw = true;
+}
+
+void
+CTK_UnfocusMenubar(CTK_Instance *inst)
+{
+	CTK_UnfocusMenu(inst);
+	inst->focused_casc = -1;
 }
 
 void

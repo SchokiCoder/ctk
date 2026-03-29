@@ -2425,29 +2425,20 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		case CTK_WTYPE_LABEL:
 		case CTK_WTYPE_PROGRESSBAR:
 		case CTK_WTYPE_SCALE:
+			if (NULL != inst->trigger[fw]) {
+				inst->trigger[fw](inst,
+					          fw,
+					          inst->trigger_data[fw]);
+			}
 			break;
 
 		case CTK_WTYPE_CHECKBOX:
-			if (inst->toggle[fw] != true)
-				inst->toggle[fw] = true;
-			else
-				inst->toggle[fw] = false;
-			CTK_CreateWidgetTexture(inst, fw);
-
-			if (NULL != inst->edit[fw]) {
-				inst->edit[fw](inst, fw, inst->edit_data[fw]);
-			}
+			CTK_ToggleCheckbox(inst, fw);
 			break;
 
 		case CTK_WTYPE_RADIOBUTTON:
 			CTK_ToggleRadiobutton(inst, fw);
 			break;
-		}
-
-		if (NULL != inst->trigger[fw]) {
-			inst->trigger[fw](inst,
-				          fw,
-				          inst->trigger_data[fw]);
 		}
 		break;
 
@@ -2592,18 +2583,15 @@ CTK_HandleLMBUp(CTK_Instance               *inst,
 		case CTK_WTYPE_LABEL:
 		case CTK_WTYPE_PROGRESSBAR:
 		case CTK_WTYPE_SCALE:
+			if (NULL != inst->trigger[w]) {
+				inst->trigger[w](inst,
+					         w,
+					         inst->trigger_data[w]);
+			}
 			break;
 
 		case CTK_WTYPE_CHECKBOX:
-			if (inst->toggle[w] != true)
-				inst->toggle[w] = true;
-			else
-				inst->toggle[w] = false;
-			CTK_CreateWidgetTexture(inst, w);
-
-			if (NULL != inst->edit[w]) {
-				inst->edit[w](inst, w, inst->edit_data[w]);
-			}
+			CTK_ToggleCheckbox(inst, w);
 			break;
 
 		case CTK_WTYPE_RADIOBUTTON:
@@ -2616,11 +2604,6 @@ CTK_HandleLMBUp(CTK_Instance               *inst,
 			                       e,
 			                       w,
 			                       inst->mouse_release_data[w]);
-		}
-		if (NULL != inst->trigger[w]) {
-			inst->trigger[w](inst,
-			                 w,
-			                 inst->trigger_data[w]);
 		}
 	}
 }
@@ -3494,6 +3477,13 @@ CTK_ToggleCheckbox(CTK_Instance *inst,
 		inst->toggle[widget] = true;
 
 	CTK_CreateWidgetTexture(inst, widget);
+
+	if (NULL != inst->edit[widget]) {
+		inst->edit[widget](inst, widget, inst->edit_data[widget]);
+	}
+	if (NULL != inst->trigger[widget]) {
+		inst->trigger[widget](inst, widget, inst->trigger_data[widget]);
+	}
 }
 
 void
@@ -3516,6 +3506,9 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 
 	if (NULL != inst->edit[widget]) {
 		inst->edit[widget](inst, widget, inst->edit_data[widget]);
+	}
+	if (NULL != inst->trigger[widget]) {
+		inst->trigger[widget](inst, widget, inst->trigger_data[widget]);
 	}
 }
 

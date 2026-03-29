@@ -91,22 +91,32 @@ the real data text into three ttf texts
 
 # 0.5.0 The CSS-like Update
 
-data:
-```
-menubar cascade padding_x: 4
-menu label to accelerator distance: 12
-```
+- [ ] run radiobutton "edit" callback when it gets deselected by a group member
+- [ ] fix bg drawing not changing along window size
+- [ ] fix menubar width not changing along window size
 
 - [ ] unify widget spacing with margin, border, padding, content for style struct
 For example replace style's fill properties with padding.
 Right now the only widgets with something like a margin are checkbox and radiobutton.
 It's hardwired and can't be brought to others with changine the theme.
 See <https://productiveshop.com/wp-content/uploads/2024/03/Visual-representation-of-margin-and-padding-in-CSS-Box-Model-1024x401.webp>
+data:
+```
+menubar cascade padding_x: 4
+menu label to accelerator distance: 12
+```
 
 - [ ] add border styles from CSS
 also move it to the widget style
 
 - [ ] add button click border change
+
+- [ ] track issue: delete key crash
+`TTF_DeleteTextString` is broken on latest stable release,
+which is SDL_TTF v3.2.2.
+The following pull:
+<https://github.com/libsdl-org/SDL_ttf/pull/600>
+was merged after that release and there has been no release since.
 
 - [ ] set version number to 0.5.0
 
@@ -201,17 +211,15 @@ So you can right click down, hold, go to your command and release to use it.
 
 - [x] add entry text cut via ctrl + x
 
-- [ ] fix delete key on entry when cursor == 0
-- [ ] fix `CTK_ToggleCheckbox` not running the "trigger" callback
-- [ ] fix bg drawing not changing along window size
-- [ ] fix menubar width not changing along window size
+- [x] fix checkboxes and radiobuttons "trigger" and "edit" callback use
+`CTK_ToggleCheckbox` was internally not utilized,
+`CTK_ToggleRadiobutton` only ran the "edit" callback,
+and `CTK_ToggleCheckbox` didn't run any callbacks,
+which caused inconsistent behavior.
+This fixes using the top control checkboxes in the example via mnemonics.
 
-- [ ] track issue: delete key crash
-`TTF_DeleteTextString` is broken on latest stable release,
-which is SDL_TTF v3.2.2.
-The following pull:
-<https://github.com/libsdl-org/SDL_ttf/pull/600>
-was merged after that release and there has been no release since.
+- [ ] fix entry not running edit callback
+- [ ] fix scale not running edit callback
 
 - [ ] set version number to 0.4.0
 

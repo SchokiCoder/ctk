@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SILENCE_CALLBACKS
+//#define SILENCE_CALLBACKS
 
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
 
@@ -124,38 +124,28 @@ ckbVisibleTrigger(CTK_Instance               *inst,
 }
 
 void
-draw(CTK_Instance *inst,
-     void         *data)
+genericPrintCallback(CTK_Instance *inst,
+                     void         *data)
 {
 	(void) inst;
 	(void) data;
 
 #ifndef SILENCE_CALLBACKS
-	printf("draw\n");
+	printf("%s\n", (char*) data);
 #endif
 }
 
 void
-enter(CTK_Instance *inst,
-      void         *data)
+genericPrintCallbackWidget(CTK_Instance       *inst,
+                           const CTK_WidgetId  w,
+                           void               *data)
 {
 	(void) inst;
+	(void) w;
 	(void) data;
 
 #ifndef SILENCE_CALLBACKS
-	printf("enter\n");
-#endif
-}
-
-void
-leave(CTK_Instance *inst,
-      void         *data)
-{
-	(void) inst;
-	(void) data;
-
-#ifndef SILENCE_CALLBACKS
-	printf("leave\n");
+	printf("%s\n", (char*) data);
 #endif
 }
 
@@ -323,9 +313,12 @@ main(int    argc,
 		return 0;
 	}
 
-	inst->draw = draw;
-	inst->enter = enter;
-	inst->leave = leave;
+	inst->draw = genericPrintCallback;
+	inst->draw_data = "window draw";
+	inst->enter = genericPrintCallback;
+	inst->enter_data = "window enter";
+	inst->leave = genericPrintCallback;
+	inst->leave_data = "window leave";
 
 	inst->menubar = CTK_CreateMenubar();
 
@@ -424,6 +417,8 @@ main(int    argc,
 	                            inst->rect[lbl_visible].h + (MARGIN * 4);
 	inst->mouse_motion[btn_counter] = btnCounterMouseMotion;
 	inst->mouse_press[btn_counter] = btnCounterMousePress;
+	inst->edit[btn_counter] = genericPrintCallbackWidget;
+	inst->edit_data[btn_counter] = "count edit";
 	inst->trigger[btn_counter] = btnCounterTrigger;
 	inst->trigger_data[btn_counter] = &lbl_counter;
 
@@ -432,39 +427,61 @@ main(int    argc,
 	inst->rect[lbl_counter].x = inst->rect[btn_counter].x +
 	                            inst->rect[btn_counter].w + MARGIN;
 	inst->rect[lbl_counter].y = inst->rect[btn_counter].y;
+	inst->trigger[lbl_counter] = genericPrintCallbackWidget;
+	inst->trigger_data[lbl_counter] = "lbl_counter trigger";
 
 	txt = CTK_AddEntry(inst);
 	CTK_SetWidgetText(inst, txt, "12345");
 	inst->rect[txt].x = MARGIN;
 	inst->rect[txt].y = inst->rect[lbl_counter].y +
 	                    inst->rect[lbl_counter].h + MARGIN;
+	inst->edit[txt] = genericPrintCallbackWidget;
+	inst->edit_data[txt] = "txt edit";
+	inst->trigger[txt] = genericPrintCallbackWidget;
+	inst->trigger_data[txt] = "txt trigger";
 
 	ckb = CTK_AddCheckbox(inst);
 	inst->rect[ckb].x = MARGIN;
 	inst->rect[ckb].y = inst->rect[txt].y +
 	                    inst->rect[txt].h + MARGIN;
+	inst->edit[ckb] = genericPrintCallbackWidget;
+	inst->edit_data[ckb] = "ckb edit";
+	inst->trigger[ckb] = genericPrintCallbackWidget;
+	inst->trigger_data[ckb] = "ckb trigger";
 
 	rbn_cheese = CTK_AddRadiobutton(inst);
 	inst->rect[rbn_cheese].x = MARGIN;
 	inst->rect[rbn_cheese].y = inst->rect[ckb].y +
 	                           inst->rect[ckb].h + MARGIN;
+	inst->edit[rbn_cheese] = genericPrintCallbackWidget;
+	inst->edit_data[rbn_cheese] = "rbn_cheese edit";
+	inst->trigger[rbn_cheese] = genericPrintCallbackWidget;
+	inst->trigger_data[rbn_cheese] = "rbn_cheese trigger";
 
 	lbl_cheese = CTK_AddLabel(inst);
 	CTK_SetWidgetText(inst, lbl_cheese, "Pizza with extra cheese");
 	inst->rect[lbl_cheese].x = inst->rect[rbn_cheese].x +
 	                           inst->rect[rbn_cheese].w + MARGIN;
 	inst->rect[lbl_cheese].y = inst->rect[rbn_cheese].y;
+	inst->trigger[lbl_cheese] = genericPrintCallbackWidget;
+	inst->trigger_data[lbl_cheese] = "lbl_cheese trigger";
 
 	rbn_pepperoni = CTK_AddRadiobutton(inst);
 	inst->rect[rbn_pepperoni].x = MARGIN;
 	inst->rect[rbn_pepperoni].y = inst->rect[rbn_cheese].y +
 	                              inst->rect[rbn_cheese].h + MARGIN;
+	inst->edit[rbn_pepperoni] = genericPrintCallbackWidget;
+	inst->edit_data[rbn_pepperoni] = "rbn_pepperoni edit";
+	inst->trigger[rbn_pepperoni] = genericPrintCallbackWidget;
+	inst->trigger_data[rbn_pepperoni] = "rbn_pepperoni trigger";
 
 	lbl_pepperoni = CTK_AddLabel(inst);
 	CTK_SetWidgetText(inst, lbl_pepperoni, "Pizza with pepperoni");
 	inst->rect[lbl_pepperoni].x = inst->rect[rbn_pepperoni].x +
 	                              inst->rect[rbn_pepperoni].w + MARGIN;
 	inst->rect[lbl_pepperoni].y = inst->rect[rbn_pepperoni].y;
+	inst->trigger[lbl_pepperoni] = genericPrintCallbackWidget;
+	inst->trigger_data[lbl_pepperoni] = "lbl_pepperoni trigger";
 
 	scl = CTK_AddScale(inst);
 	inst->value_max[scl] = 9;
@@ -475,12 +492,16 @@ main(int    argc,
 	inst->mouse_wheel[scl] = sclMouseWheel;
 	inst->edit[scl] = sclEdit;
 	inst->edit_data[scl] = &pgb;
+	inst->trigger[scl] = genericPrintCallbackWidget;
+	inst->trigger_data[scl] = "scl trigger";
 
 	pgb = CTK_AddProgressbar(inst);
 	inst->value_max[pgb] = inst->value_max[scl];
 	CTK_SetWidgetValue(inst, pgb, inst->value[scl]);
 	inst->rect[pgb].x = inst->rect[scl].x + inst->rect[scl].w + MARGIN;
 	inst->rect[pgb].y = inst->rect[scl].y;
+	inst->trigger[pgb] = genericPrintCallbackWidget;
+	inst->trigger_data[pgb] = "pgb trigger";
 
 	CTK_SetFocusedWidget(inst, txt);
 

@@ -193,9 +193,13 @@ as a regression of this new system.
 - [x] fix menu not unfocusing by clicking elsewhere
 - [x] fix text input not stopping when a menu is focused
 
-- [ ] add right click menu for each widget
-- [ ] add default right click menu for entries
-For cut, copy, paste, etc.
+- [x] add right click menu for entries
+For cut, copy, and paste.
+This also introduces a differentiation between mouse buttons.
+The menu opens at RMB down, while getting triggered by any button up.
+So you can right click down, hold, go to your command and release to use it.
+
+- [ ] add ctrl+x cut for entries
 
 - [ ] fix delete key on entry when cursor == 0
 - [ ] fix `CTK_ToggleCheckbox` not running the "trigger" callback

@@ -93,6 +93,9 @@ typedef struct CTK_Instance {
 	bool                active;
 	SDL_Texture        *content;
 	bool                drag;
+	struct CTK_Menu    *entry_menu;
+	size_t              entry_menu_cut;
+	size_t              entry_menu_copy;
 	size_t              focused_casc;
 	size_t              focused_w;
 	size_t              hovered_casc;
@@ -426,6 +429,18 @@ void
 CTK_DrawMenubar(CTK_Instance *inst);
 
 void
+CTK_EntryMenuCut(CTK_Instance *inst,
+                 void         *dummy);
+
+void
+CTK_EntryMenuCopy(CTK_Instance *inst,
+                  void         *dummy);
+
+void
+CTK_EntryMenuPaste(CTK_Instance *inst,
+                   void         *dummy);
+
+void
 CTK_FocusMenu(CTK_Instance *inst,
               CTK_Menu     *menu);
 
@@ -446,12 +461,12 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e);
 
 void
-CTK_HandleMouseButtonDown(CTK_Instance               *inst,
-                          const SDL_MouseButtonEvent  e);
+CTK_HandleLMBDown(CTK_Instance               *inst,
+                  const SDL_MouseButtonEvent  e);
 
 void
-CTK_HandleMouseButtonUp(CTK_Instance               *inst,
-                        const SDL_MouseButtonEvent  e);
+CTK_HandleLMBUp(CTK_Instance               *inst,
+                const SDL_MouseButtonEvent  e);
 
 void
 CTK_HandleMouseMotion(CTK_Instance               *inst,
@@ -460,6 +475,14 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 void
 CTK_HandleMouseWheel(CTK_Instance              *inst,
                      const SDL_MouseWheelEvent  e);
+
+void
+CTK_HandleRMBDown(CTK_Instance               *inst,
+                  const SDL_MouseButtonEvent  e);
+
+void
+CTK_HandleRMBUp(CTK_Instance               *inst,
+                const SDL_MouseButtonEvent  e);
 
 void
 CTK_HandleTextInput(CTK_Instance             *inst,
@@ -1338,7 +1361,7 @@ CTK_CreateInstance(const char            *title,
 
 	inst->tengine = TTF_CreateRendererTextEngine(r);
 	if (NULL == inst->tengine) {
-		SDL_SetError("Instance could no create a text engine");
+		SDL_SetError("Instance could not create a text engine");
 		return NULL;
 	}
 
@@ -1354,6 +1377,26 @@ CTK_CreateInstance(const char            *title,
 		SDL_SetError("Instance could not create a texture");
 		return NULL;
 	}
+
+	inst->entry_menu = CTK_CreateMenu();
+	inst->entry_menu_cut = CTK_AddMenuCommand(inst,
+	                                          inst->entry_menu,
+	                                          "Cut",
+	                                          CTK_EntryMenuCut,
+	                                          NULL,
+	                                          -1);
+	inst->entry_menu_copy = CTK_AddMenuCommand(inst,
+	                                           inst->entry_menu,
+	                                           "Copy",
+	                                           CTK_EntryMenuCopy,
+	                                           NULL,
+	                                           -1);
+	CTK_AddMenuCommand(inst,
+	                   inst->entry_menu,
+	                   "Paste",
+	                   CTK_EntryMenuPaste,
+	                   NULL,
+	                   -1);
 
 	return inst;
 }
@@ -1642,6 +1685,10 @@ void
 CTK_DestroyInstance(CTK_Instance *inst)
 {
 	size_t i;
+
+	if (NULL != inst->entry_menu) {
+		CTK_DestroyMenu(inst->entry_menu);
+	}
 
 	if (NULL != inst->menubar) {
 		CTK_DestroyMenubar(inst->menubar);
@@ -1971,6 +2018,112 @@ CTK_DrawMenubar(CTK_Instance *inst)
 }
 
 void
+CTK_EntryMenuCut(CTK_Instance *inst,
+                 void         *dummy)
+{
+	size_t a, b;
+	int c_shift = 0;
+	CTK_WidgetId fw;
+	char temp;
+
+	(void) dummy;
+
+	fw = CTK_GetFocusedWidget(inst);
+
+	if (CTK_WTYPE_ENTRY != inst->type[fw] ||
+	    inst->cursor[fw] == inst->selection[fw])
+		return;
+
+	if (inst->cursor[fw] < inst->selection[fw]) {
+		a = inst->cursor[fw];
+		b = inst->selection[fw];
+	} else {
+		a = inst->selection[fw];
+		b = inst->cursor[fw];
+		c_shift -= inst->cursor[fw] - inst->selection[fw];
+	}
+
+	temp = inst->text[fw]->text[b];
+	inst->text[fw]->text[b] = '\0';
+	SDL_SetClipboardText(&inst->text[fw]->text[a]);
+	inst->text[fw]->text[b] = temp;
+
+	TTF_DeleteTextString(inst->text[fw], a, b - a);
+	CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+}
+
+void
+CTK_EntryMenuCopy(CTK_Instance *inst,
+                  void         *dummy)
+{
+	size_t a, b;
+	CTK_WidgetId fw;
+	char temp;
+
+	(void) dummy;
+
+	fw = CTK_GetFocusedWidget(inst);
+
+	if (CTK_WTYPE_ENTRY != inst->type[fw] ||
+	    inst->cursor[fw] == inst->selection[fw])
+		return;
+
+	if (inst->cursor[fw] > inst->selection[fw]) {
+		a = inst->selection[fw];
+		b = inst->cursor[fw];
+	} else {
+		a = inst->cursor[fw];
+		b = inst->selection[fw];
+	}
+
+	temp = inst->text[fw]->text[b];
+	inst->text[fw]->text[b] = '\0';
+	SDL_SetClipboardText(&inst->text[fw]->text[a]);
+	inst->text[fw]->text[b] = temp;
+}
+
+void
+CTK_EntryMenuPaste(CTK_Instance *inst,
+                   void         *dummy)
+{
+	char *buf;
+	int c_shift = 0;
+	CTK_WidgetId fw;
+
+	(void) dummy;
+
+	fw = CTK_GetFocusedWidget(inst);
+
+	if (CTK_WTYPE_ENTRY != inst->type[fw] ||
+	    !SDL_HasClipboardText())
+		return;
+
+	buf = SDL_GetClipboardText();
+
+	if (inst->cursor[fw] < inst->selection[fw]) {
+		TTF_DeleteTextString(inst->text[fw],
+		                     inst->cursor[fw],
+		                     inst->selection[fw] -
+		                     inst->cursor[fw]);
+	} else if (inst->cursor[fw] > inst->selection[fw]) {
+		TTF_DeleteTextString(inst->text[fw],
+		                     inst->selection[fw],
+		                     inst->cursor[fw] -
+		                     inst->selection[fw]);
+		c_shift -= inst->cursor[fw] - inst->selection[fw];
+	}
+
+	TTF_InsertTextString(inst->text[fw],
+	                     inst->cursor[fw] + c_shift,
+	                     buf,
+	                     0);
+	c_shift += strlen(buf);
+	CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+
+	SDL_free(buf);
+}
+
+void
 CTK_FocusMenu(CTK_Instance *inst,
               CTK_Menu     *menu)
 {
@@ -2075,12 +2228,9 @@ void
 CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
-	char         *buf;
 	int           c_shift = 0;
-	size_t        end;
 	size_t        i;
 	CTK_WidgetId  fw;
-	size_t        start;
 	char          temp;
 
 	if (NULL != inst->visible_menu &&
@@ -2135,23 +2285,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	case SDLK_C:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (CTK_WTYPE_ENTRY != inst->type[fw] ||
-		    !(SDL_KMOD_CTRL & e.mod) ||
-		    inst->cursor[fw] == inst->selection[fw])
+		if (!(SDL_KMOD_CTRL & e.mod))
 			break;
 
-		if (inst->cursor[fw] > inst->selection[fw]) {
-			start = inst->selection[fw];
-			end = inst->cursor[fw];
-		} else {
-			start = inst->cursor[fw];
-			end = inst->selection[fw];
-		}
-
-		temp = inst->text[fw]->text[end];
-		inst->text[fw]->text[end] = '\0';
-		SDL_SetClipboardText(&inst->text[fw]->text[start]);
-		inst->text[fw]->text[end] = temp;
+		CTK_EntryMenuCopy(inst, NULL);
 		break;
 
 	case SDLK_DELETE:
@@ -2335,41 +2472,17 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	case SDLK_V:
 		fw = CTK_GetFocusedWidget(inst);
 
-		if (CTK_WTYPE_ENTRY != inst->type[fw] ||
-		    !(SDL_KMOD_CTRL & e.mod) ||
-		    !SDL_HasClipboardText())
+		if (!(SDL_KMOD_CTRL & e.mod))
 			break;
 
-		buf = SDL_GetClipboardText();
-
-		if (inst->cursor[fw] < inst->selection[fw]) {
-			TTF_DeleteTextString(inst->text[fw],
-			                     inst->cursor[fw],
-			                     inst->selection[fw] -
-			                     inst->cursor[fw]);
-		} else if (inst->cursor[fw] > inst->selection[fw]) {
-			TTF_DeleteTextString(inst->text[fw],
-			                     inst->selection[fw],
-			                     inst->cursor[fw] -
-			                     inst->selection[fw]);
-			c_shift -= inst->cursor[fw] - inst->selection[fw];
-		}
-
-		TTF_InsertTextString(inst->text[fw],
-		                     inst->cursor[fw] + c_shift,
-		                     buf,
-		                     0);
-		c_shift += strlen(buf);
-		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
-
-		SDL_free(buf);
+		CTK_EntryMenuPaste(inst, NULL);
 		break;
 	}
 }
 
 void
-CTK_HandleMouseButtonDown(CTK_Instance               *inst,
-                          const SDL_MouseButtonEvent  e)
+CTK_HandleLMBDown(CTK_Instance               *inst,
+                  const SDL_MouseButtonEvent  e)
 {
 	size_t       i;
 	CTK_Menubar *mb;
@@ -2431,8 +2544,8 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 }
 
 void
-CTK_HandleMouseButtonUp(CTK_Instance               *inst,
-                        const SDL_MouseButtonEvent  e)
+CTK_HandleLMBUp(CTK_Instance               *inst,
+                const SDL_MouseButtonEvent  e)
 {
 	size_t       i;
 	SDL_FPoint   p;
@@ -2631,6 +2744,42 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 			                     inst->mouse_wheel_data[w]);
 		}
 	}
+}
+
+void
+CTK_HandleRMBDown(CTK_Instance               *inst,
+                  const SDL_MouseButtonEvent  e)
+{
+	bool all_cmds = false;
+	size_t i;
+	SDL_FPoint p;
+
+	for (i = 0; i < inst->widgets; i++) {
+		p.x = e.x;
+		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
+
+		if (CTK_WTYPE_ENTRY == inst->type[i] &&
+		    SDL_PointInRectFloat(&p, &inst->rect[i])) {
+			inst->entry_menu->rect.x = e.x + 1;
+			inst->entry_menu->rect.y = e.y + 1;
+
+			if (inst->cursor[i] != inst->selection[i]) {
+				all_cmds = true;
+			}
+			inst->entry_menu->enabled[inst->entry_menu_cut] = all_cmds;
+			inst->entry_menu->enabled[inst->entry_menu_copy] = all_cmds;
+
+			CTK_FocusMenu(inst, inst->entry_menu);
+			break;
+		}
+	}
+}
+
+void
+CTK_HandleRMBUp(CTK_Instance               *inst,
+                const SDL_MouseButtonEvent  e)
+{
+	CTK_HandleLMBUp(inst, e);
 }
 
 void
@@ -3257,11 +3406,19 @@ CTK_TickInstance(CTK_Instance *inst)
 	while (SDL_PollEvent(&e)) {
 		switch (e.type) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-			CTK_HandleMouseButtonDown(inst, e.button);
+			if (SDL_BUTTON_LEFT == e.button.button) {
+				CTK_HandleLMBDown(inst, e.button);
+			} else if (SDL_BUTTON_RIGHT == e.button.button) {
+				CTK_HandleRMBDown(inst, e.button);
+			}
 			break;
 
 		case SDL_EVENT_MOUSE_BUTTON_UP:
-			CTK_HandleMouseButtonUp(inst, e.button);
+			if (SDL_BUTTON_LEFT == e.button.button) {
+				CTK_HandleLMBUp(inst, e.button);
+			} else if (SDL_BUTTON_RIGHT == e.button.button) {
+				CTK_HandleRMBUp(inst, e.button);
+			}
 			break;
 
 		case SDL_EVENT_MOUSE_MOTION:

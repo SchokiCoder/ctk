@@ -153,10 +153,6 @@ typedef struct CTK_Instance {
 	CTK_WidgetStyle    wstyle[CTK_INSTANCE_MAX_WIDGETS];
 
 	/* widget events */
-	void (*edit[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
-	                                       const CTK_WidgetId,
-	                                       void*);
-	void *edit_data[CTK_INSTANCE_MAX_WIDGETS];
 	void (*mouse_motion[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
 	                                               const SDL_MouseMotionEvent,
 	                                               const CTK_WidgetId,
@@ -177,6 +173,12 @@ typedef struct CTK_Instance {
 	                                              const CTK_WidgetId,
 	                                              void*);
 	void *mouse_wheel_data[CTK_INSTANCE_MAX_WIDGETS];
+
+	/* virtual widget events */
+	void (*edit[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
+	                                       const CTK_WidgetId,
+	                                       void*);
+	void *edit_data[CTK_INSTANCE_MAX_WIDGETS];
 	void (*trigger[CTK_INSTANCE_MAX_WIDGETS])(struct CTK_Instance*,
 	                                          const CTK_WidgetId,
 	                                          void*);
@@ -2385,10 +2387,6 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			}
 
 			CTK_SetWidgetValue(inst, fw, inst->value[fw] - 1);
-
-			if (NULL != inst->edit[fw]) {
-				inst->edit[fw](inst, fw, inst->edit_data[fw]);
-			}
 			break;
 
 		default:
@@ -2420,10 +2418,6 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 			}
 
 			CTK_SetWidgetValue(inst, fw, inst->value[fw] + 1);
-
-			if (NULL != inst->edit[fw]) {
-				inst->edit[fw](inst, fw, inst->edit_data[fw]);
-			}
 			break;
 
 		default:
@@ -2738,10 +2732,6 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 				}
 			} else {
 				CTK_SetWidgetValue(inst, w, inst->value[w] + 1);
-			}
-
-			if (NULL != inst->edit[w]) {
-				inst->edit[w](inst, w, inst->edit_data[w]);
 			}
 		}
 
@@ -3333,6 +3323,10 @@ CTK_SetWidgetValue(CTK_Instance       *inst,
 		inst->value[widget] = value;
 
 	CTK_CreateWidgetTexture(inst, widget);
+
+	if (NULL != inst->edit[widget]) {
+		inst->edit[widget](inst, widget, inst->edit_data[widget]);
+	}
 }
 
 void

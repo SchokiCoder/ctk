@@ -219,7 +219,11 @@ which caused inconsistent behavior.
 This fixes using the top control checkboxes in the example via mnemonics.
 
 - [x] fix entry not running edit callback
-- [ ] fix scale not running edit callback
+- [x] fix progressbar not running edit callback
+Again we have a convenient function,
+`CTK_SetWidgetValue` that just hasn't been written to go the whole mile.
+We change that because there is no reason to be afraid of hardwiring these two
+together.
 
 - [ ] set version number to 0.4.0
 

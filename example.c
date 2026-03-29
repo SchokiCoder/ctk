@@ -500,6 +500,8 @@ main(int    argc,
 	CTK_SetWidgetValue(inst, pgb, inst->value[scl]);
 	inst->rect[pgb].x = inst->rect[scl].x + inst->rect[scl].w + MARGIN;
 	inst->rect[pgb].y = inst->rect[scl].y;
+	inst->edit[pgb] = genericPrintCallbackWidget;
+	inst->edit_data[pgb] = "pgb edit";
 	inst->trigger[pgb] = genericPrintCallbackWidget;
 	inst->trigger_data[pgb] = "pgb trigger";
 

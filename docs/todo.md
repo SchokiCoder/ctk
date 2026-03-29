@@ -120,6 +120,8 @@ was merged after that release and there has been no release since.
 
 - [ ] set version number to 0.5.0
 
+-----
+
 # 0.4.0 The Handy Update
 
 - [x] add a instance texture for the widgets
@@ -225,9 +227,7 @@ Again we have a convenient function,
 We change that because there is no reason to be afraid of hardwiring these two
 together.
 
-- [ ] set version number to 0.4.0
-
------
+- [x] set version number to 0.4.0
 
 # 0.3.0
 

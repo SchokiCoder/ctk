@@ -190,7 +190,9 @@ premature shortcut triggering didn't come back,
 as a regression of this new system.
 
 - [x] add error message to bind, if shortcut is already used
-- [ ] fix: can't unfocus a menu by clicking elsewhere?
+
+- [x] fix menu not unfocusing by clicking elsewhere
+
 - [ ] fix: stop text input when a menu is focused
 
 - [ ] add right click menu for each widget

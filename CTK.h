@@ -180,7 +180,7 @@ typedef struct CTK_Instance {
 } CTK_Instance;
 
 typedef struct CTK_Menu {
-	SDL_Rect   rect;
+	SDL_FRect  rect;
 	size_t     commands;
 	TTF_Text  *accelerator[CTK_MENU_MAX_ITEMS];
 	TTF_Text  *label[CTK_MENU_MAX_ITEMS];
@@ -2360,6 +2360,11 @@ CTK_HandleMouseButtonDown(CTK_Instance               *inst,
 	mb = inst->menubar;
 
 	if (NULL != inst->visible_menu) {
+		p.x = e.x;
+		p.y = e.y;
+		if (!SDL_PointInRectFloat(&p, &inst->visible_menu->rect)) {
+			CTK_UnfocusMenubar(inst);
+		}
 		return;
 	}
 
@@ -2409,8 +2414,7 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
                         const SDL_MouseButtonEvent  e)
 {
 	size_t       i;
-	SDL_FPoint   fp;
-	SDL_Point    p;
+	SDL_FPoint   p;
 	CTK_WidgetId w;
 
 	inst->drag = false;
@@ -2419,7 +2423,7 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 		CTK_UpdateMenuSize(inst, inst->visible_menu);
 		p.x = e.x;
 		p.y = e.y;
-		if (SDL_PointInRect(&p, &inst->visible_menu->rect)) {
+		if (SDL_PointInRectFloat(&p, &inst->visible_menu->rect)) {
 			i = (p.y - inst->visible_menu->rect.y - 1) / inst->style.menu_command_h;
 			if (NULL != inst->visible_menu->command[i] &&
 			    inst->visible_menu->enabled[i]) {
@@ -2432,10 +2436,10 @@ CTK_HandleMouseButtonUp(CTK_Instance               *inst,
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
-		fp.x = e.x;
-		fp.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
+		p.x = e.x;
+		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
 
-		if (!SDL_PointInRectFloat(&fp, &inst->rect[w]))
+		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
 
 		switch (inst->type[w]) {
@@ -2483,13 +2487,12 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
 	size_t       i;
-	SDL_FPoint   fp;
+	SDL_FPoint   p;
 	CTK_Menubar *mb;
 	size_t       new_focused_casc = inst->focused_casc;
 	size_t       new_hovered_casc = -1;
 	size_t       new_hovered_cmd = -1;
 	CTK_WidgetId old_hov_w;
-	SDL_Point    p;
 	CTK_WidgetId w;
 	int          x;
 
@@ -2526,7 +2529,7 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 
 		p.x = e.x;
 		p.y = e.y;
-		if (SDL_PointInRect(&p, &inst->visible_menu->rect)) {
+		if (SDL_PointInRectFloat(&p, &inst->visible_menu->rect)) {
 			new_hovered_cmd = (p.y - inst->visible_menu->rect.y - 1) /
 			                  inst->style.menu_command_h;
 		}
@@ -2540,10 +2543,10 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	if (NULL == inst->visible_menu) {
 		for (i = 0; i < inst->enabled_ws; i++) {
 			w = inst->enabled_w[i];
-			fp.x = e.x;
-			fp.y = e.y - (mb ? inst->style.menubar_h : 0);
+			p.x = e.x;
+			p.y = e.y - (mb ? inst->style.menubar_h : 0);
 
-			if (!SDL_PointInRectFloat(&fp, &inst->rect[w]))
+			if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 				continue;
 
 			inst->hovered_w = w;

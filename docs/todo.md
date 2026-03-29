@@ -218,7 +218,7 @@ and `CTK_ToggleCheckbox` didn't run any callbacks,
 which caused inconsistent behavior.
 This fixes using the top control checkboxes in the example via mnemonics.
 
-- [ ] fix entry not running edit callback
+- [x] fix entry not running edit callback
 - [ ] fix scale not running edit callback
 
 - [ ] set version number to 0.4.0

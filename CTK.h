@@ -2050,6 +2050,10 @@ CTK_EntryMenuCut(CTK_Instance *inst,
 
 	TTF_DeleteTextString(inst->text[fw], a, b - a);
 	CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+
+	if (NULL != inst->edit[fw]) {
+		inst->edit[fw](inst, fw, inst->edit_data[fw]);
+	}
 }
 
 void
@@ -2119,6 +2123,10 @@ CTK_EntryMenuPaste(CTK_Instance *inst,
 	                     0);
 	c_shift += strlen(buf);
 	CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+
+	if (NULL != inst->edit[fw]) {
+		inst->edit[fw](inst, fw, inst->edit_data[fw]);
+	}
 
 	SDL_free(buf);
 }
@@ -2280,6 +2288,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 
 		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+
+		if (NULL != inst->edit[fw]) {
+			inst->edit[fw](inst, fw, inst->edit_data[fw]);
+		}
 		break;
 
 	case SDLK_C:
@@ -2313,6 +2325,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 
 		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+
+		if (NULL != inst->edit[fw]) {
+			inst->edit[fw](inst, fw, inst->edit_data[fw]);
+		}
 		break;
 
 	case SDLK_END:
@@ -2800,8 +2816,11 @@ CTK_HandleTextInput(CTK_Instance             *inst,
 	                     inst->cursor[fw] + c_shift,
 	                     e.text, 0);
 	c_shift += strlen(e.text);
-
 	CTK_ShiftWidgetTextCursor(inst, fw, c_shift, true);
+
+	if (NULL != inst->edit[fw]) {
+		inst->edit[fw](inst, fw, inst->edit_data[fw]);
+	}
 }
 
 CTK_WidgetId

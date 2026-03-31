@@ -1749,14 +1749,17 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	r = SDL_GetRenderer(inst->win);
 
-	/* content: bg */
-	SDL_SetRenderTarget(r, inst->content);
-
+	/* bg */
 	SDL_SetRenderDrawColor(r,
 	                       inst->style.bg_clr.r,
 	                       inst->style.bg_clr.g,
 	                       inst->style.bg_clr.b,
 	                       inst->style.bg_clr.a);
+	SDL_RenderClear(r);
+
+	/* content: clear */
+	SDL_SetRenderTarget(r, inst->content);
+	SDL_SetRenderDrawColor(r, 0, 0, 0, 0);
 	SDL_RenderClear(r);
 
 	/* content: widgets */

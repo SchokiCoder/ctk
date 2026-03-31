@@ -3509,9 +3509,14 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 		return;
 
 	for (i = 0; i < inst->widgets; i++) {
-		if (inst->group[i] == inst->group[widget]) {
+		if (inst->group[i] == inst->group[widget] &&
+		    i != (size_t) widget) {
 			inst->toggle[i] = false;
 			CTK_CreateWidgetTexture(inst, i);
+
+			if (NULL != inst->edit[i]) {
+				inst->edit[i](inst, i, inst->edit_data[i]);
+			}
 		}
 	}
 	inst->toggle[widget] = true;

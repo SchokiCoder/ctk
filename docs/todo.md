@@ -82,6 +82,9 @@ because it will depend on the mouse position and doesn't use the cursor at all
 # 0.6.0
 
 - [ ] add combobox
+Use a CTK_Menu as its drop down?
+In that case, the next point is uh gonna fall flat :)
+
 - [ ] actually, we can have fg_selected for entries. why?
 we need multiple `TTF_Text`s anyway, because combobox will need it for sure
 It will just be slightly less efficient data wise because we need to copy
@@ -91,9 +94,13 @@ the real data text into three ttf texts
 
 # 0.5.0 The CSS-like Update
 
-- [ ] run radiobutton "edit" callback when it gets deselected by a group member
+- [x] add "edit" callback use when radiobutton gets deselected by a group member
 - [ ] fix bg drawing not changing along window size
 - [ ] fix menubar width not changing along window size
+
+- [ ] WidgetId is an int while elsewhere size_t's are used as indexes
+WidgetId -> size_t or
+size_t -> int
 
 - [ ] unify widget spacing with margin, border, padding, content for style struct
 For example replace style's fill properties with padding.

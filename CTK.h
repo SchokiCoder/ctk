@@ -72,7 +72,7 @@
 /* Types
  */
 
-typedef int CTK_WidgetId;
+typedef size_t CTK_WidgetId;
 
 typedef enum CTK_WidgetType {
 	CTK_WTYPE_UNKNOWN,
@@ -2705,10 +2705,10 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	if (old_hov_w == inst->hovered_w)
 		return;
 
-	if (-1 != inst->hovered_w)
+	if (inst->hovered_w < inst->widgets)
 		CTK_CreateWidgetTexture(inst, inst->hovered_w);
 
-	if (-1 != old_hov_w)
+	if (old_hov_w  < inst->widgets)
 		CTK_CreateWidgetTexture(inst, old_hov_w);
 }
 
@@ -3515,7 +3515,7 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 
 	for (i = 0; i < inst->widgets; i++) {
 		if (inst->group[i] == inst->group[widget] &&
-		    i != (size_t) widget) {
+		    i != widget) {
 			inst->toggle[i] = false;
 			CTK_CreateWidgetTexture(inst, i);
 

@@ -24,7 +24,7 @@ btnCounterMouseMotion(CTK_Instance         *inst,
 	(void) data;
 
 #ifndef SILENCE_CALLBACKS
-	printf("%i might count\n", widget);
+	printf("%lu might count\n", widget);
 #else
 	(void) widget;
 #endif
@@ -41,7 +41,7 @@ btnCounterMousePress(CTK_Instance               *inst,
 	(void) data;
 
 #ifndef SILENCE_CALLBACKS
-	printf("%i is about to count\n", widget);
+	printf("%lu is about to count\n", widget);
 #else
 	(void) widget;
 #endif

@@ -97,10 +97,10 @@ the real data text into three ttf texts
 - [x] add "edit" callback use when radiobutton gets deselected by a group member
 - [x] fix bg drawing not changing along window size
 - [x] fix menubar width not changing along window size
+- [x] turn `CTK_WidgetId` into a size_t for index type consistency
 
-- [ ] WidgetId is an int while elsewhere size_t's are used as indexes
-WidgetId -> size_t or
-size_t -> int
+- [ ] fix example Focus checkbox
+if used via keybind the focus stays behind on unfocusable widgets
 
 - [ ] unify widget spacing with margin, border, padding, content for style struct
 For example replace style's fill properties with padding.

@@ -1948,12 +1948,14 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	size_t        i;
 	SDL_Renderer *r;
 	SDL_FRect     frect;
+	int           w;
 
 	r = SDL_GetRenderer(inst->win);
+	SDL_GetRenderOutputSize(r, &w, NULL);
 
 	frect.x = 0;
 	frect.y = 0;
-	frect.w = inst->content->w;
+	frect.w = w;
 	frect.h = inst->style.menubar_h;
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_bg_clr.r,
@@ -2010,7 +2012,7 @@ CTK_DrawMenubar(CTK_Instance *inst)
 
 	frect.x = 0;
 	frect.y = 0;
-	frect.w = inst->content->w;
+	frect.w = w;
 	frect.h = inst->style.menubar_h;
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_border_clr.r,

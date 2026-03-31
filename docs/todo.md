@@ -96,7 +96,7 @@ the real data text into three ttf texts
 
 - [x] add "edit" callback use when radiobutton gets deselected by a group member
 - [x] fix bg drawing not changing along window size
-- [ ] fix menubar width not changing along window size
+- [x] fix menubar width not changing along window size
 
 - [ ] WidgetId is an int while elsewhere size_t's are used as indexes
 WidgetId -> size_t or

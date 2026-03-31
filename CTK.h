@@ -507,17 +507,17 @@ CTK_GetKeyOrModFromName(const char  *name,
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       int                *cacheId);
+                       size_t             *cacheId);
 
 bool
 CTK_GetWidgetFocusableId(const CTK_Instance *inst,
                          const CTK_WidgetId  widget,
-                         int                *cacheId);
+                         size_t             *cacheId);
 
 bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       int                *cacheId);
+                       size_t             *cacheId);
 
 /* @appname: Name of application, duh.
  * @appversion: Eg. "1.2.5".
@@ -2928,7 +2928,7 @@ CTK_GetKeyOrModFromName(const char  *name,
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       int                *cacheId)
+                       size_t             *cacheId)
 {
 	size_t i;
 
@@ -2945,7 +2945,7 @@ CTK_GetWidgetEnabledId(const CTK_Instance *inst,
 bool
 CTK_GetWidgetFocusableId(const CTK_Instance *inst,
                          const CTK_WidgetId  widget,
-                         int                *cacheId)
+                         size_t             *cacheId)
 {
 	size_t i;
 
@@ -2962,7 +2962,7 @@ CTK_GetWidgetFocusableId(const CTK_Instance *inst,
 bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       int                *cacheId)
+                       size_t             *cacheId)
 {
 	size_t i;
 
@@ -3022,7 +3022,7 @@ bool
 CTK_IsWidgetEnabled(const CTK_Instance *inst,
                     const CTK_WidgetId  widget)
 {
-	int dummy;
+	size_t dummy;
 
 	return CTK_GetWidgetEnabledId(inst, widget, &dummy);
 }
@@ -3031,7 +3031,7 @@ bool
 CTK_IsWidgetFocusable(const CTK_Instance *inst,
                       const CTK_WidgetId  widget)
 {
-	int dummy;
+	size_t dummy;
 
 	return CTK_GetWidgetFocusableId(inst, widget, &dummy);
 }
@@ -3040,7 +3040,7 @@ bool
 CTK_IsWidgetVisible(const CTK_Instance *inst,
                     const CTK_WidgetId  widget)
 {
-	int dummy;
+	size_t dummy;
 
 	return CTK_GetWidgetVisibleId(inst, widget, &dummy);
 }
@@ -3195,7 +3195,7 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
 {
 	size_t i;
 	bool is_enabled;
-	int enabledId;
+	size_t enabledId;
 
 	is_enabled = CTK_GetWidgetEnabledId(inst, widget, &enabledId);
 
@@ -3227,7 +3227,7 @@ CTK_SetWidgetFocusable(CTK_Instance       *inst,
 {
 	size_t i;
 	bool is_focusable;
-	int focusableId;
+	size_t focusableId;
 
 	is_focusable = CTK_GetWidgetFocusableId(inst, widget, &focusableId);
 
@@ -3341,7 +3341,7 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 {
 	size_t i;
 	bool is_visible;
-	int visibleId;
+	size_t visibleId;
 
 	is_visible = CTK_GetWidgetVisibleId(inst, widget, &visibleId);
 

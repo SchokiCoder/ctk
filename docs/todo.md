@@ -98,9 +98,11 @@ the real data text into three ttf texts
 - [x] fix bg drawing not changing along window size
 - [x] fix menubar width not changing along window size
 - [x] turn `CTK_WidgetId` into a size_t for index type consistency
+- [x] turn cacheIds into size_t for index type consistency
 
 - [ ] fix example Focus checkbox
 if used via keybind the focus stays behind on unfocusable widgets
+And no, these are not regressions from the Id conversion commits -.-
 
 - [ ] unify widget spacing with margin, border, padding, content for style struct
 For example replace style's fill properties with padding.

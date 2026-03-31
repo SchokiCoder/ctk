@@ -3242,6 +3242,13 @@ CTK_SetWidgetFocusable(CTK_Instance       *inst,
 		CTK_SetWidgetVisible(inst, widget, true);
 		CTK_SetWidgetEnabled(inst, widget, true);
 	} else {
+		if (widget == inst->focusable_w[inst->focused_w]) {
+			inst->focused_w++;
+			if (inst->focused_w >= inst->focusable_ws) {
+				inst->focused_w = 0;
+			}
+		}
+
 		for (i = focusableId; i < inst->focusable_ws - 1; i++) {
 			inst->focusable_w[i] = inst->focusable_w[i + 1];
 		}

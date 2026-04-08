@@ -92,7 +92,7 @@ the real data text into three ttf texts
 
 - [ ] set version number to 0.6.0
 
-# 0.5.0 The CSS-like Update
+# 0.5.0 The Borderline Update
 
 - [x] add "edit" callback use when radiobutton gets deselected by a group member
 - [x] fix bg drawing not changing along window size
@@ -106,21 +106,54 @@ if the focusable checkbox was used via keybind.
 And no, these are not regressions from the Id conversion commits -.-
 It was bugged before.
 
-- [ ] unify widget spacing with margin, border, padding, content for style struct
-For example replace style's fill properties with padding.
+- [x] add menubar cascade padding
+This removes menubar's fixed height setting.
+
+- [ ] cascade hover has no border in Tcl btw
+
+- [ ] add menu command padding
+- [ ] add menu accelerator padding
+
+- [ ] rework widget spacing with margin, border, padding, content sizes
+x, y are now at upper left of the border.
+w, h doesn't exist, must me calculated from margin, border, padding, content.
+
 Right now the only widgets with something like a margin are checkbox and radiobutton.
-It's hardwired and can't be brought to others with changine the theme.
+It's hardwired and can't be brought to others with change in the theme.
 See <https://productiveshop.com/wp-content/uploads/2024/03/Visual-representation-of-margin-and-padding-in-CSS-Box-Model-1024x401.webp>
-data:
+
+It could be:
 ```
-menubar cascade padding_x: 4
-menu label to accelerator distance: 12
+	size_t            content_width;
+	size_t            content_height;
+	size_t            padding_left;
+	size_t            padding_top;
+	size_t            padding_right;
+	size_t            padding_bottom;
+	size_t            border_left;
+	size_t            border_top;
+	size_t            border_right;
+	size_t            border_bottom;
+	size_t            margin_left;
+	size_t            margin_top;
+	size_t            margin_right;
+	size_t            margin_bottom;
 ```
 
-- [ ] add border styles from CSS
-also move it to the widget style
+What about checkboxes?
+Margin is just an invisble space that works as distance to other widgets.
+That wouldn't trigger hover effects.
 
-- [ ] add button click border change
+What is a "content" size in a button?
+TTF_Text rendering doesn't care about available space,
+and fontsize changes its size, soo... ???
+
+- [ ] add border style system in the widget style sruct with style "none"
+- [ ] add border style "solid"
+- [ ] add border style "inset"
+- [ ] add border style "outset"
+
+- [ ] add button click border style change
 
 - [ ] track issue: delete key crash
 `TTF_DeleteTextString` is broken on latest stable release,

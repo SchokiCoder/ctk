@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define CTK_EXAMPLE_NAME "C/Tk Example"
+
 //#define SILENCE_CALLBACKS
 
 CTK_WidgetId ckb_focusable, ckb_enabled, ckb_visible;
@@ -207,7 +209,15 @@ menuHelpAbout(CTK_Instance *inst,
 	(void) inst;
 	(void) data;
 
-	printf("Menu \"Help\" Command \"About\"\n");
+	printf("The source code of \"%s\" v%s is available, "
+	       "licensed under the %s at:\n"
+	       "%s\n"
+	       "\n"
+	       "If you did not receive a copy of the license, see below:\n"
+	       "%s\n\n",
+	       CTK_EXAMPLE_NAME, CTK_VERSION, "MPL-2.0",
+	       "https://github.com/schokicoder/ctk",
+	       "https://mozilla.org/MPL/2.0");
 }
 
 void
@@ -306,7 +316,7 @@ main(int    argc,
 		return 0;
 	}
 
-	inst = CTK_CreateInstance("C/Tk v" CTK_VERSION " - Example", 640, 480, 0);
+	inst = CTK_CreateInstance(CTK_EXAMPLE_NAME " v" CTK_VERSION, 640, 480, 0);
 	if (NULL == inst) {
 		fprintf(stderr, "Could not create CTK Instance\n");
 		fprintf(stderr, "%s\n", SDL_GetError());

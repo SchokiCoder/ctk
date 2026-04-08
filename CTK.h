@@ -202,6 +202,7 @@ typedef struct CTK_Menubar {
 	TTF_Text        *cascade[CTK_MENUBAR_MAX_CASCADES];
 	int              cascade_w[CTK_MENUBAR_MAX_CASCADES];
 	int              cascade_h[CTK_MENUBAR_MAX_CASCADES];
+	size_t           h;
 	struct CTK_Menu *menu[CTK_MENUBAR_MAX_CASCADES];
 	size_t           underline[CTK_MENUBAR_MAX_CASCADES];
 } CTK_Menubar;
@@ -768,6 +769,7 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
                       const size_t  underline)
 {
 	size_t c, i;
+	int h;
 	CTK_Menubar *mb;
 
 	mb = inst->menubar;
@@ -785,9 +787,17 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 	mb->cascades++;
 
 	menu->rect.x = 0;
-	for (i = 0; i < c; i++)
-		menu->rect.x += mb->cascade_w[i];
-	menu->rect.y = inst->style.menubar_h;
+	for (i = 0; i < c; i++) {
+		menu->rect.x += inst->style.menubar_cascade_padding_left +
+		                mb->cascade_w[i] +
+		                inst->style.menubar_cascade_padding_right;
+	}
+
+	TTF_GetTextSize(mb->cascade[c], NULL, &h);
+	mb->h = inst->style.menubar_cascade_padding_top +
+	        h +
+	        inst->style.menubar_cascade_padding_bottom;
+	menu->rect.y = mb->h;
 
 	return c;
 }
@@ -1798,7 +1808,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 	/* content */
 	frect.x = 0;
-	frect.y = (NULL == inst->menubar ? 0 : inst->style.menubar_h);
+	frect.y = (NULL == inst->menubar ? 0 : inst->menubar->h);
 	frect.w = inst->content->w;
 	frect.h = inst->content->h;
 	SDL_RenderTexture(r, inst->content, NULL, &frect);
@@ -1944,7 +1954,6 @@ void
 CTK_DrawMenubar(CTK_Instance *inst)
 {
 	float         cascade_x;
-	float         cascade_y;
 	size_t        i;
 	SDL_Renderer *r;
 	SDL_FRect     frect;
@@ -1956,7 +1965,7 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	frect.x = 0;
 	frect.y = 0;
 	frect.w = w;
-	frect.h = inst->style.menubar_h;
+	frect.h = inst->menubar->h;
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_bg_clr.r,
 		               inst->style.menubar_bg_clr.g,
@@ -1969,8 +1978,10 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		if (inst->hovered_casc == i) {
 			frect.x = cascade_x;
 			frect.y = 0;
-			frect.w = inst->menubar->cascade_w[i];
-			frect.h = inst->style.menubar_h;
+			frect.w = inst->style.menubar_cascade_padding_left +
+			          inst->menubar->cascade_w[i] +
+			          inst->style.menubar_cascade_padding_right;
+			frect.h = inst->menubar->h;
 			SDL_SetRenderDrawColor(r,
 					       inst->style.menubar_bg_hovered_clr.r,
 					       inst->style.menubar_bg_hovered_clr.g,
@@ -1986,17 +1997,13 @@ CTK_DrawMenubar(CTK_Instance *inst)
 			SDL_RenderRect(r, &frect);
 		}
 
-		cascade_y = (inst->style.menubar_h -
-		             inst->menubar->cascade_h[i]) /
-		            2.0;
-
 		TTF_SetTextColor(inst->menubar->cascade[i],
 	                         inst->style.menubar_text_clr.r,
 	                         inst->style.menubar_text_clr.g,
 	                         inst->style.menubar_text_clr.b,
 	                         inst->style.menubar_text_clr.a);
-		frect.x = cascade_x;
-		frect.y = cascade_y;
+		frect.x = cascade_x + inst->style.menubar_cascade_padding_left;
+		frect.y = inst->style.menubar_cascade_padding_top;
 		frect.w = inst->menubar->cascade_w[i];
 		frect.h = inst->menubar->cascade_h[i];
 
@@ -2007,13 +2014,15 @@ CTK_DrawMenubar(CTK_Instance *inst)
 		               inst->menubar->underline[i],
 		               inst->style.menubar_text_clr);
 
-		cascade_x += inst->menubar->cascade_w[i];
+		cascade_x += inst->menubar->cascade_w[i] +
+		             inst->style.menubar_cascade_padding_right +
+		             inst->style.menubar_cascade_padding_left;
 	}
 
 	frect.x = 0;
 	frect.y = 0;
 	frect.w = w;
-	frect.h = inst->style.menubar_h;
+	frect.h = inst->menubar->h;
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_border_clr.r,
 		               inst->style.menubar_border_clr.g,
@@ -2518,7 +2527,7 @@ CTK_HandleLMBDown(CTK_Instance               *inst,
 	}
 
 	if (NULL != mb &&
-	    e.y < inst->style.menubar_h) {
+	    e.y < inst->menubar->h) {
 		new_focused_casc = -1;
 		x = 0;
 		for (i = 0; i < mb->cascades; i++) {
@@ -2534,7 +2543,7 @@ CTK_HandleLMBDown(CTK_Instance               *inst,
 	CTK_FocusMenubar(inst, new_focused_casc);
 
 	p.x = e.x;
-	p.y = e.y - (mb ? inst->style.menubar_h : 0);
+	p.y = e.y - (mb ? inst->menubar->h : 0);
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
@@ -2586,7 +2595,7 @@ CTK_HandleLMBUp(CTK_Instance               *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 		p.x = e.x;
-		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
+		p.y = e.y - (inst->menubar ? inst->menubar->h : 0);
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
@@ -2627,6 +2636,8 @@ void
 CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
+	int          casc_x;
+	int          casc_w;
 	size_t       i;
 	SDL_FPoint   p;
 	CTK_Menubar *mb;
@@ -2635,25 +2646,27 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	size_t       new_hovered_cmd = -1;
 	CTK_WidgetId old_hov_w;
 	CTK_WidgetId w;
-	int          x;
 
 	mb = inst->menubar;
 	old_hov_w = inst->hovered_w;
 	inst->hovered_w = -1;
 
 	if (NULL != mb &&
-	    e.y < inst->style.menubar_h) {
+	    e.y < inst->menubar->h) {
 		new_hovered_casc = -1;
 
-		x = 0;
+		casc_x = 0;
 		for (i = 0; i < mb->cascades; i++) {
-			if (e.x > x &&
-			    e.x < x + mb->cascade_w[i]) {
+			casc_w = inst->style.menubar_cascade_padding_left +
+			         mb->cascade_w[i] +
+			         inst->style.menubar_cascade_padding_right;
+			if (e.x >= casc_x &&
+			    e.x <= casc_x + casc_w ) {
 				new_focused_casc = i;
 				new_hovered_casc = i;
 				break;
 			}
-			x += mb->cascade_w[i];
+			casc_x += casc_w;
 		}
 	}
 
@@ -2685,7 +2698,7 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 		for (i = 0; i < inst->enabled_ws; i++) {
 			w = inst->enabled_w[i];
 			p.x = e.x;
-			p.y = e.y - (mb ? inst->style.menubar_h : 0);
+			p.y = e.y - (mb ? inst->menubar->h : 0);
 
 			if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 				continue;
@@ -2723,7 +2736,7 @@ CTK_HandleMouseWheel(CTK_Instance              *inst,
 	for (i = 0; i < inst->enabled_ws; i++) {
 		w = inst->enabled_w[i];
 		p.x = e.mouse_x;
-		p.y = e.mouse_y - (inst->menubar ? inst->style.menubar_h : 0);
+		p.y = e.mouse_y - (inst->menubar ? inst->menubar->h : 0);
 
 		if (!SDL_PointInRectFloat(&p, &inst->rect[w]))
 			continue;
@@ -2759,7 +2772,7 @@ CTK_HandleRMBDown(CTK_Instance               *inst,
 
 	for (i = 0; i < inst->widgets; i++) {
 		p.x = e.x;
-		p.y = e.y - (inst->menubar ? inst->style.menubar_h : 0);
+		p.y = e.y - (inst->menubar ? inst->menubar->h : 0);
 
 		if (CTK_WTYPE_ENTRY == inst->type[i] &&
 		    SDL_PointInRectFloat(&p, &inst->rect[i])) {

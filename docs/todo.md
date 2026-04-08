@@ -109,7 +109,15 @@ It was bugged before.
 - [x] add menubar cascade padding
 This removes menubar's fixed height setting.
 
-- [ ] cascade hover has no border in Tcl btw
+- [x] remove cascade hover border
+Because it seemingly doesn't exist in Tcl, also not in GTK or Qt.
+
+- [ ] changing the fontsize causes weird rendering artifacts only in widgets
+Is it because of the widget texture drawing?
+Does the texture get munted when it's finally drawn into the instance?
+
+- [ ] increase default fontsize by one
+Because it looks more in line with Tcl.
 
 - [ ] add menu command padding
 - [ ] add menu accelerator padding

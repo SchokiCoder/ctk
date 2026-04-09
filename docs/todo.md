@@ -112,14 +112,16 @@ This removes menubar's fixed height setting.
 - [x] remove cascade hover border
 Because it seemingly doesn't exist in Tcl, also not in GTK or Qt.
 
-- [ ] changing the fontsize causes weird rendering artifacts only in widgets
-Is it because of the widget texture drawing?
-Does the texture get munted when it's finally drawn into the instance?
+- [x] remove floats from text render target coords in `CTK_RenderText`
+This caused fontsizes other than 11 to cause blurry awfulness...
+I HATE FLOATS. WHY IS EVERY PIECE OF SDL RENDERING ASKING FOR FLOATS?
 
 - [ ] increase default fontsize by one
 Because it looks more in line with Tcl.
 
 - [ ] add menu command padding
+This removes command's fixed height setting.
+
 - [ ] add menu accelerator padding
 
 - [ ] rework widget spacing with margin, border, padding, content sizes

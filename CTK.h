@@ -3105,7 +3105,7 @@ CTK_RenderText(SDL_Renderer            *r,
 	int      text_w;
 	int      text_h;
 	SDL_Rect underline_r;
-	float    x, y;
+	int      x, y;
 
 	if (NULL == text ||
 	    NULL == text->text) {

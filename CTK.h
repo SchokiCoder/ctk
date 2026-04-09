@@ -1926,7 +1926,9 @@ CTK_DrawMenu(CTK_Instance *inst,
 		               inst->style.menu_text_clr);
 
 		frect.x += w + inst->style.menu_command_padding_right;
-		frect.w = menu->rect.w - frect.x;
+		frect.w = menu->rect.w -
+		          frect.x -
+		          inst->style.menu_accelerator_padding_right;
 		frect.h = h;
 
 		TTF_SetTextColor(menu->accelerator[i],
@@ -3609,13 +3611,20 @@ CTK_UpdateMenuSize(const CTK_Instance *inst,
 			continue;
 		}
 
-		TTF_GetTextSize(m->accelerator[i], &w1, &h1);
-		TTF_GetTextSize(m->label[i], &w2, &h2);
+		TTF_GetTextSize(m->label[i], &w1, &h1);
 		w = inst->style.menu_command_padding_left +
 		    w1 +
-		    inst->style.menu_command_padding_right +
-		    w2;
-		h = (h1 > h2 ? h1 : h2);
+		    inst->style.menu_command_padding_right;
+		h = h1;
+
+		if (m->accelerator[i]->text != NULL &&
+		    strlen(m->accelerator[i]->text) > 0) {
+			TTF_GetTextSize(m->accelerator[i], &w2, &h2);
+			w += inst->style.menu_accelerator_padding_left +
+			     w2 +
+			     inst->style.menu_accelerator_padding_right;
+			h = (h1 > h2 ? h1 : h2);
+		}
 
 		m->h[i] = inst->style.menu_command_padding_top +
 		          h +

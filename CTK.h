@@ -23,7 +23,7 @@
 /* Constant defines
  */
 
-#define CTK_DEFAULT_FONTSIZE         11
+#define CTK_DEFAULT_FONTSIZE         12
 #define CTK_DEFAULT_THEME            CTK_Theme_TclTk
 #define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
 #define CTK_DEFAULT_MAX_FRAMERATE    60

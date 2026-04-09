@@ -116,8 +116,10 @@ Because it seemingly doesn't exist in Tcl, also not in GTK or Qt.
 This caused fontsizes other than 11 to cause blurry awfulness...
 I HATE FLOATS. WHY IS EVERY PIECE OF SDL RENDERING ASKING FOR FLOATS?
 
-- [ ] increase default fontsize by one
+- [x] increase default fontsize by one
 Because it looks more in line with Tcl.
+Maybe that's just a font thing.
+Whatever. It'll be fine.
 
 - [ ] add menu command padding
 This removes command's fixed height setting.

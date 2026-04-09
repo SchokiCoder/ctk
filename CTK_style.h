@@ -104,7 +104,7 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menubar_cascade_padding_left = 4,
 	.menubar_cascade_padding_top = 10,
 	.menubar_cascade_padding_right = 4,
-	.menubar_cascade_padding_bottom = 11,
+	.menubar_cascade_padding_bottom = 9,
 
 	.bg_clr.r = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.bg_clr.g = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,

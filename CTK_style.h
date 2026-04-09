@@ -36,7 +36,10 @@ typedef struct CTK_WidgetStyle {
 
 typedef struct CTK_Style {
 	bool            menu_border;
-	size_t          menu_command_h;
+	size_t          menu_command_padding_left;
+	size_t          menu_command_padding_top;
+	size_t          menu_command_padding_right;
+	size_t          menu_command_padding_bottom;
 	size_t          menu_separator_h;
 	bool            menubar_border;
 	size_t          menubar_cascade_padding_left;
@@ -96,8 +99,13 @@ typedef struct CTK_Style {
 
 static const CTK_Style CTK_Theme_TclTk = {
 	.menu_border = true,
-	.menu_command_h = 23,
-	.menu_separator_h = 23,
+
+	.menu_command_padding_left = 4,
+	.menu_command_padding_top = 6,
+	.menu_command_padding_right = 4,
+	.menu_command_padding_bottom = 5,
+
+	.menu_separator_h = 19,
 
 	.menubar_border = true,
 

@@ -121,10 +121,17 @@ Because it looks more in line with Tcl.
 Maybe that's just a font thing.
 Whatever. It'll be fine.
 
-- [ ] add menu command padding
+- [x] add menu command padding
 This removes command's fixed height setting.
 
 - [ ] add menu accelerator padding
+
+- [ ] add offset of 1 to menu command drawing
+Hover bg, label, accelerator start at menu.rect.x + 1 and menu.rect.y + 1.
+w, h - 2.
+Needs to touch `CTK_UpdateMenuSize`?
+Needs to touch style padding values.
+This creates parity with Tcl.
 
 - [ ] rework widget spacing with margin, border, padding, content sizes
 x, y are now at upper left of the border.

@@ -347,7 +347,7 @@ main(int    argc,
 	                                     NULL,
 	                                     0);
 	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdOpen, "Ctrl+O");
-	CTK_AddMenuSeparator(menuFile);
+	CTK_AddMenuSeparator(inst, menuFile);
 	menuFileCmdSave = CTK_AddMenuCommand(inst,
 	                                     menuFile,
 	                                     "Save",
@@ -362,7 +362,7 @@ main(int    argc,
 	                                       NULL,
 	                                       5);
 	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdSaveAs, "Ctrl+Shift+S");
-	CTK_AddMenuSeparator(menuFile);
+	CTK_AddMenuSeparator(inst, menuFile);
 	menuFileCmdQuit = CTK_AddMenuCommand(inst,
 	                                     menuFile,
 	                                     "Quit",

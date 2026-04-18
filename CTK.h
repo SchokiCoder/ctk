@@ -2012,6 +2012,15 @@ CTK_DrawMenubar(CTK_Instance *inst)
 					       inst->style.menubar_bg_hovered_clr.b,
 					       inst->style.menubar_bg_hovered_clr.a);
 			SDL_RenderFillRect(r, &frect);
+
+			if (inst->style.menubar_cascade_border) {
+				SDL_SetRenderDrawColor(r,
+					               inst->style.menubar_border_clr.r,
+					               inst->style.menubar_border_clr.g,
+					               inst->style.menubar_border_clr.b,
+					               inst->style.menubar_border_clr.a);
+				SDL_RenderRect(r, &frect);
+			}
 		}
 
 		TTF_SetTextColor(inst->menubar->cascade[i],

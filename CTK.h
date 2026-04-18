@@ -800,7 +800,8 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 	TTF_GetTextSize(mb->cascade[c], NULL, &h);
 	mb->h = inst->style.menubar_cascade_padding_top +
 	        h +
-	        inst->style.menubar_cascade_padding_bottom;
+	        inst->style.menubar_cascade_padding_bottom + 
+	        2;
 	menu->rect.y = mb->h;
 
 	return c;
@@ -1980,21 +1981,22 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	frect.w = w;
 	frect.h = inst->menubar->h;
 	SDL_SetRenderDrawColor(r,
-		               inst->style.menubar_bg_clr.r,
-		               inst->style.menubar_bg_clr.g,
-		               inst->style.menubar_bg_clr.b,
-		               inst->style.menubar_bg_clr.a);
+	                       inst->style.menubar_bg_clr.r,
+	                       inst->style.menubar_bg_clr.g,
+	                       inst->style.menubar_bg_clr.b,
+	                       inst->style.menubar_bg_clr.a);
 	SDL_RenderFillRect(r, &frect);
 
-	cascade_x = 0;
+	cascade_x = 1;
 	for (i = 0; i < inst->menubar->cascades; i++) {
 		if (inst->hovered_casc == i) {
 			frect.x = cascade_x;
-			frect.y = 0;
+			frect.y = 1;
 			frect.w = inst->style.menubar_cascade_padding_left +
 			          inst->menubar->cascade_w[i] +
-			          inst->style.menubar_cascade_padding_right;
-			frect.h = inst->menubar->h;
+			          inst->style.menubar_cascade_padding_right +
+			          2;
+			frect.h = inst->menubar->h - 2;
 			SDL_SetRenderDrawColor(r,
 					       inst->style.menubar_bg_hovered_clr.r,
 					       inst->style.menubar_bg_hovered_clr.g,
@@ -2022,7 +2024,8 @@ CTK_DrawMenubar(CTK_Instance *inst)
 
 		cascade_x += inst->menubar->cascade_w[i] +
 		             inst->style.menubar_cascade_padding_right +
-		             inst->style.menubar_cascade_padding_left;
+		             inst->style.menubar_cascade_padding_left +
+		             2;
 	}
 
 	frect.x = 0;

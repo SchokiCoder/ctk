@@ -127,7 +127,7 @@ This removes command's fixed height setting.
 - [x] add menu accelerator padding
 
 - [x] add offset of 1 pixel to menu command drawing
-- [ ] add offset of 1 pixel to menubar cascade drawing
+- [x] add offset of 1 pixel to menubar cascade drawing
 
 - [ ] add border to focused menu command
 - [ ] add border to focused menubar cascade

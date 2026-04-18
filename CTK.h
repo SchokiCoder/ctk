@@ -1902,6 +1902,15 @@ CTK_DrawMenu(CTK_Instance *inst,
 			                       inst->style.menu_bg_hovered_clr.b,
 			                       inst->style.menu_bg_hovered_clr.a);
 			SDL_RenderFillRect(r, &frect);
+
+			if (inst->style.menu_command_border) {
+				SDL_SetRenderDrawColor(r,
+					               inst->style.menu_border_clr.r,
+					               inst->style.menu_border_clr.g,
+					               inst->style.menu_border_clr.b,
+					               inst->style.menu_border_clr.a);
+				SDL_RenderRect(r, &frect);
+			}
 		}
 
 		if (menu->enabled[i]) {

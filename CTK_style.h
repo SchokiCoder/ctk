@@ -36,6 +36,7 @@ typedef struct CTK_WidgetStyle {
 
 typedef struct CTK_Style {
 	bool            menu_border;
+	bool            menu_command_border;
 	size_t          menu_command_padding_left;
 	size_t          menu_command_padding_top;
 	size_t          menu_command_padding_right;
@@ -44,6 +45,7 @@ typedef struct CTK_Style {
 	size_t          menu_accelerator_padding_right;
 	size_t          menu_separator_h;
 	bool            menubar_border;
+	bool            menubar_cascade_border;
 	size_t          menubar_cascade_padding_left;
 	size_t          menubar_cascade_padding_top;
 	size_t          menubar_cascade_padding_right;
@@ -102,6 +104,8 @@ typedef struct CTK_Style {
 static const CTK_Style CTK_Theme_TclTk = {
 	.menu_border = true,
 
+	.menu_command_border = true,
+
 	.menu_command_padding_left = 4,
 	.menu_command_padding_top = 6,
 	.menu_command_padding_right = 4,
@@ -113,6 +117,8 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menu_separator_h = 19,
 
 	.menubar_border = true,
+
+	.menubar_cascade_border = true,
 
 	.menubar_cascade_padding_left = 4,
 	.menubar_cascade_padding_top = 10,

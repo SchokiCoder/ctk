@@ -129,7 +129,7 @@ This removes command's fixed height setting.
 - [x] add offset of 1 pixel to menu command drawing
 - [x] add offset of 1 pixel to menubar cascade drawing
 
-- [ ] add border to focused menu command
+- [x] add border to focused menu command
 - [ ] add border to focused menubar cascade
 
 - [ ] add ESC key unfocusing menu and menubar

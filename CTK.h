@@ -101,7 +101,6 @@ typedef struct CTK_Instance {
 	size_t              focused_casc;
 	size_t              focused_w;
 	size_t              hovered_casc;
-	size_t              hovered_cmd;
 	CTK_WidgetId        hovered_w;
 	Uint64              max_framerate;
 	struct CTK_Menubar *menubar;
@@ -188,7 +187,9 @@ typedef struct CTK_Instance {
 } CTK_Instance;
 
 typedef struct CTK_Menu {
+	size_t     focused_cmd;
 	SDL_FRect  rect;
+
 	size_t     commands;
 	TTF_Text  *accelerator[CTK_MENU_MAX_ITEMS];
 	void     (*command[CTK_MENU_MAX_ITEMS])(CTK_Instance*, void*);
@@ -201,11 +202,12 @@ typedef struct CTK_Menu {
 } CTK_Menu;
 
 typedef struct CTK_Menubar {
+	size_t           h;
+
 	size_t           cascades;
 	TTF_Text        *cascade[CTK_MENUBAR_MAX_CASCADES];
 	int              cascade_w[CTK_MENUBAR_MAX_CASCADES];
 	int              cascade_h[CTK_MENUBAR_MAX_CASCADES];
-	size_t           h;
 	struct CTK_Menu *menu[CTK_MENUBAR_MAX_CASCADES];
 	size_t           underline[CTK_MENUBAR_MAX_CASCADES];
 } CTK_Menubar;
@@ -1347,7 +1349,6 @@ CTK_CreateInstance(const char            *title,
 	inst->drag = false;
 	inst->focused_w = 0;
 	inst->hovered_casc = -1;
-	inst->hovered_cmd = -1;
 	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menubar = NULL;
@@ -1441,6 +1442,7 @@ CTK_CreateMenu()
 	CTK_Menu *ret;
 
 	ret = malloc(sizeof(CTK_Menu));
+	ret->focused_cmd = -1;
 	ret->rect.x = 0;
 	ret->rect.y = 0;
 	ret->rect.w = 0;
@@ -1890,8 +1892,8 @@ CTK_DrawMenu(CTK_Instance *inst,
 			continue;
 		}
 
-		if (inst->hovered_cmd == i &&
-		    menu->enabled[inst->hovered_cmd]) {
+		if (menu->focused_cmd == i &&
+		    menu->enabled[menu->focused_cmd]) {
 			frect.x = command_x;
 			frect.y = command_y;
 			frect.w = menu->rect.w - 2;
@@ -2183,6 +2185,7 @@ CTK_FocusMenu(CTK_Instance *inst,
 		inst->txt_input_suspended = true;
 	}
 
+	menu->focused_cmd = 0;
 	inst->visible_menu = menu;
 	inst->redraw = true;
 }
@@ -2282,6 +2285,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	int           c_shift = 0;
 	size_t        i;
 	CTK_WidgetId  fw;
+	CTK_Menu     *menu;
 	char          temp;
 
 	if (NULL != inst->visible_menu &&
@@ -2374,6 +2378,21 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 		break;
 
+	case SDLK_DOWN:
+		menu = inst->visible_menu;
+		if (NULL == menu) {
+			break;
+		}
+
+		for (i = 1; menu->focused_cmd + i < menu->commands; i++) {
+			if (!menu->is_separator[menu->focused_cmd + i]) {
+				menu->focused_cmd += i;
+				inst->redraw = true;
+				break;
+			}
+		}
+		break;
+
 	case SDLK_END:
 	case SDLK_PAGEDOWN:
 		fw = CTK_GetFocusedWidget(inst);
@@ -2436,6 +2455,21 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 
 		default:
 			break;
+		}
+		break;
+
+	case SDLK_UP:
+		menu = inst->visible_menu;
+		if (NULL == menu) {
+			break;
+		}
+
+		for (i = 1; menu->focused_cmd - i < menu->commands; i++) {
+			if (!menu->is_separator[menu->focused_cmd - i]) {
+				menu->focused_cmd -= i;
+				inst->redraw = true;
+				break;
+			}
 		}
 		break;
 
@@ -2678,16 +2712,18 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	int          casc_x;
 	int          casc_w;
 	size_t       command_y;
+	size_t       hovered_cmd = -1;
 	size_t       i;
 	SDL_FPoint   p;
 	CTK_Menubar *mb;
+	CTK_Menu    *menu;
 	size_t       new_focused_casc = inst->focused_casc;
 	size_t       new_hovered_casc = -1;
-	size_t       new_hovered_cmd = -1;
 	CTK_WidgetId old_hov_wid;
 	CTK_WidgetId wid;
 
 	mb = inst->menubar;
+	menu = inst->visible_menu;
 	old_hov_wid = inst->hovered_w;
 	inst->hovered_w = -1;
 
@@ -2720,27 +2756,26 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 
 	p.x = e.x;
 	p.y = e.y;
-	if (NULL != inst->visible_menu &&
-	    inst->visible_menu->commands > 0 &&
-	    SDL_PointInRectFloat(&p, &inst->visible_menu->rect)) {
-		command_y = inst->visible_menu->rect.y;
+	if (NULL != menu &&
+	    menu->commands > 0 &&
+	    SDL_PointInRectFloat(&p, &menu->rect)) {
+		command_y = menu->rect.y;
 
-		for (i = 0; i < inst->visible_menu->commands; i++) {
+		for (i = 0; i < menu->commands; i++) {
 			if (p.y >= command_y &&
-			    p.y <= command_y + inst->visible_menu->h[i]) {
-				new_hovered_cmd = i;
+			    p.y <= command_y + menu->h[i]) {
+				hovered_cmd = i;
 				break;
 			}
-			command_y += inst->visible_menu->h[i];
+			command_y += menu->h[i];
 		}
-	}
 
-	if (new_hovered_cmd != inst->hovered_cmd) {
-		inst->hovered_cmd = new_hovered_cmd;
-		inst->redraw = true;
-	}
+		if (hovered_cmd != menu->focused_cmd &&
+		    !menu->is_separator[hovered_cmd]) {
+			menu->focused_cmd = hovered_cmd;
+			inst->redraw = true;
+		}
 
-	if (NULL == inst->visible_menu) {
 		for (i = 0; i < inst->enabled_ws; i++) {
 			wid = inst->enabled_w[i];
 			p.x = e.x;
@@ -2753,9 +2788,9 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 
 			if (inst->mouse_motion[wid]) {
 				inst->mouse_motion[wid](inst,
-					                e,
-					                wid,
-					                inst->mouse_motion_data);
+						        e,
+						        wid,
+						        inst->mouse_motion_data);
 			}
 			break;
 		}

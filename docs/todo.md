@@ -133,7 +133,7 @@ This removes command's fixed height setting.
 - [x] add border to focused menubar cascade
 
 - [x] add ESC key unfocusing menu and menubar
-- [ ] add arrow key navigation to menu
+- [x] add arrow key navigation to menu
 - [ ] add arrow key navigation to menubar
 - [ ] add enter key triggering focused menu command
 - [ ] add "right click key" recognition?

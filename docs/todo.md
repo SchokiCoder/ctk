@@ -132,11 +132,13 @@ This removes command's fixed height setting.
 - [x] add border to focused menu command
 - [x] add border to focused menubar cascade
 
-- [ ] add ESC key unfocusing menu and menubar
+- [x] add ESC key unfocusing menu and menubar
 - [ ] add arrow key navigation to menu
 - [ ] add arrow key navigation to menubar
 - [ ] add enter key triggering focused menu command
 - [ ] add "right click key" recognition?
+
+- [ ] crash when key down while entry context menu open
 
 - [ ] rework widget spacing with margin, border, padding, content sizes
 x, y are now at upper left of the border.

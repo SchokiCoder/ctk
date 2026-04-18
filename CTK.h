@@ -2390,6 +2390,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		CTK_ShiftWidgetTextCursor(inst, fw, c_shift, false);
 		break;
 
+	case SDLK_ESCAPE:
+		CTK_UnfocusMenubar(inst);
+		break;
+
 	case SDLK_HOME:
 	case SDLK_PAGEUP:
 		fw = CTK_GetFocusedWidget(inst);

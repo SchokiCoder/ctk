@@ -126,14 +126,17 @@ This removes command's fixed height setting.
 
 - [x] add menu accelerator padding
 
-- [ ] add offset of 1 to menu command drawing
-Hover bg, label, accelerator start at menu.rect.x + 1 and menu.rect.y + 1.
-w, h - 2.
-Needs to touch `CTK_UpdateMenuSize`?
-Needs to touch style padding values.
-This creates parity with Tcl.
+- [x] add offset of 1 pixel to menu command drawing
+- [ ] add offset of 1 pixel to menubar cascade drawing
 
-- [ ] btw cascades have a border when hovered, so do menu commands... dumbass
+- [ ] add border to focused menu command
+- [ ] add border to focused menubar cascade
+
+- [ ] add ESC key unfocusing menu and menubar
+- [ ] add arrow key navigation to menu
+- [ ] add arrow key navigation to menubar
+- [ ] add enter key triggering focused menu command
+- [ ] add "right click key" recognition?
 
 - [ ] rework widget spacing with margin, border, padding, content sizes
 x, y are now at upper left of the border.

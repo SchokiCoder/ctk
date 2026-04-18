@@ -209,13 +209,15 @@ menuHelpAbout(CTK_Instance *inst,
 	(void) inst;
 	(void) data;
 
-	printf("The source code of \"%s\" v%s is available, "
+	printf("The source code of \"%s\" v%i.%i.%i is available, "
 	       "licensed under the %s at:\n"
 	       "%s\n"
 	       "\n"
 	       "If you did not receive a copy of the license, see below:\n"
 	       "%s\n\n",
-	       CTK_EXAMPLE_NAME, CTK_VERSION, "MPL-2.0",
+	       CTK_EXAMPLE_NAME,
+	       CTK_MAJOR_VERSION, CTK_MINOR_VERSION, CTK_PATCH_VERSION,
+	       "MPL-2.0",
 	       "https://github.com/schokicoder/ctk",
 	       "https://mozilla.org/MPL/2.0");
 }
@@ -281,9 +283,13 @@ int
 main(int    argc,
      char **argv)
 {
+	const int BUFLEN = 64;
 	const int MARGIN = 5;
 
 	CTK_Instance *inst;
+	char title[BUFLEN];
+	char version[BUFLEN];
+
 	size_t cascFile;
 	size_t cascHelp;
 	CTK_Menu *menuFile;
@@ -308,15 +314,18 @@ main(int    argc,
 
 	srand(time(NULL));
 
+	snprintf(version, BUFLEN, "%i.%i.%i",
+	         CTK_MAJOR_VERSION, CTK_MINOR_VERSION, CTK_PATCH_VERSION);
 	if (!CTK_Init("CTK Example",
-	              CTK_VERSION,
+	              version,
 	              "io.github.SchokiCoder.CTK") != 0) {
 		fprintf(stderr, "Could not init CTK\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
 		return 0;
 	}
 
-	inst = CTK_CreateInstance(CTK_EXAMPLE_NAME " v" CTK_VERSION, 640, 480, 0);
+	snprintf(title, BUFLEN, CTK_EXAMPLE_NAME " v%s", version);
+	inst = CTK_CreateInstance(title, 640, 480, 0);
 	if (NULL == inst) {
 		fprintf(stderr, "Could not create CTK Instance\n");
 		fprintf(stderr, "%s\n", SDL_GetError());

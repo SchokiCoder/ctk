@@ -1870,13 +1870,13 @@ CTK_DrawMenu(CTK_Instance *inst,
 			       inst->style.menu_bg_clr.a);
 	SDL_RenderFillRect(r, &frect);
 
-	command_x = frect.x;
-	command_y = menu->rect.y;
+	command_x = frect.x + 1;
+	command_y = menu->rect.y + 1;
 	for (i = 0; i < menu->commands; i++) {
 		if (menu->is_separator[i]) {
-			frect.x = menu->rect.x + 2;
+			frect.x = command_x + 1;
 			frect.y = command_y + (inst->style.menu_separator_h / 2);
-			frect.w = menu->rect.w - 4;
+			frect.w = menu->rect.w - 2 - 2;
 			frect.h = 2;
 			SDL_SetRenderDrawColor(r,
 	                                       inst->style.menu_border_clr.r,
@@ -1893,7 +1893,7 @@ CTK_DrawMenu(CTK_Instance *inst,
 		    menu->enabled[inst->hovered_cmd]) {
 			frect.x = command_x;
 			frect.y = command_y;
-			frect.w = menu->rect.w;
+			frect.w = menu->rect.w - 2;
 			frect.h = menu->h[i];
 			SDL_SetRenderDrawColor(r,
 			                       inst->style.menu_bg_hovered_clr.r,
@@ -3636,6 +3636,9 @@ CTK_UpdateMenuSize(const CTK_Instance *inst,
 			m->rect.w = w;
 		}
 	}
+
+	m->rect.w += 2;
+	m->rect.h += 2;
 }
 
 void

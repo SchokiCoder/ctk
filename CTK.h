@@ -32,7 +32,9 @@
 
 #define CTK_TEXTUREACCESS SDL_TEXTUREACCESS_TARGET
 
-#define CTK_VERSION "0.4.0"
+#define CTK_MAJOR_VERSION 0
+#define CTK_MINOR_VERSION 4
+#define CTK_PATCH_VERSION 0
 
 /* Configuration defines
  */

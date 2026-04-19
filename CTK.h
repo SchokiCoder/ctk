@@ -2444,9 +2444,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	case SDLK_LEFT:
 		if (inst->menubar->focused_casc < inst->menubar->cascades) {
 			if (inst->menubar->focused_casc > 0) {
-				inst->menubar->focused_casc--;
-				menu = inst->menubar->menu[inst->menubar->focused_casc];
-				CTK_FocusMenu(inst, menu);
+				CTK_FocusMenubar(inst, inst->menubar->focused_casc - 1);
 			}
 			break;
 		}
@@ -2497,9 +2495,7 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	case SDLK_RIGHT:
 		if (inst->menubar->focused_casc < inst->menubar->cascades) {
 			if (inst->menubar->focused_casc + 1 < inst->menubar->cascades) {
-				inst->menubar->focused_casc++;
-				menu = inst->menubar->menu[inst->menubar->focused_casc];
-				CTK_FocusMenu(inst, menu);
+				CTK_FocusMenubar(inst, inst->menubar->focused_casc + 1);
 			}
 			break;
 		}
@@ -2535,6 +2531,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		break;
 
 	case SDLK_SPACE:
+		if (NULL != inst->visible_menu) {
+			break;
+		}
+
 		fw = CTK_GetFocusedWidget(inst);
 
 		switch (inst->type[fw]) {
@@ -2562,6 +2562,10 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		break;
 
 	case SDLK_TAB:
+		if (NULL != inst->visible_menu) {
+			break;
+		}
+
 		if (SDL_KMOD_SHIFT & e.mod) {
 			if (inst->focused_w > 0) {
 				inst->focused_w--;

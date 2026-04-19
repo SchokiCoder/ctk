@@ -144,7 +144,7 @@ since a visible menus is always focused over everything else.
 - [x] fix some space and tab keys ignoring menu focus
 Also add minor code improvement for menubar arrow nav.
 
-- [ ] fix menubar menu positions (regression from offset change)
+- [x] fix menubar menu positions, a regression from offset change
 - [ ] add enter key triggering focused menu command
 - [ ] fix menu arrow nav not handling disabled commands; may also a problem with mouse motion
 - [ ] add "right click key" recognition?

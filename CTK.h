@@ -796,15 +796,24 @@ CTK_AddMenubarCascade(CTK_Instance *inst,
 	for (i = 0; i < c; i++) {
 		menu->rect.x += inst->style.menubar_cascade_padding_left +
 		                mb->cascade_w[i] +
-		                inst->style.menubar_cascade_padding_right;
+		                inst->style.menubar_cascade_padding_right +
+		                2;
+	}
+	if (c > 0) {
+		menu->rect.x++;
 	}
 
 	TTF_GetTextSize(mb->cascade[c], NULL, &h);
-	mb->h = inst->style.menubar_cascade_padding_top +
-	        h +
-	        inst->style.menubar_cascade_padding_bottom + 
-	        2;
-	menu->rect.y = mb->h;
+	h = inst->style.menubar_cascade_padding_top +
+	    h +
+	    inst->style.menubar_cascade_padding_bottom;
+
+	if ((size_t) h > mb->h) {
+		mb->h = h;
+		for (i = 0; i < mb->cascades; i++) {
+			mb->menu[i]->rect.y = mb->h;
+		}
+	}
 
 	return c;
 }
@@ -1458,6 +1467,7 @@ CTK_CreateMenubar()
 
 	ret = malloc(sizeof(CTK_Menubar));
 	ret->focused_casc = -1;
+	ret->h = 0;
 	ret->hovered_casc = -1;
 	ret->cascades = 0;
 

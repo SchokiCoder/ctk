@@ -2304,6 +2304,7 @@ void
 CTK_HandleKeyDown(CTK_Instance            *inst,
                   const SDL_KeyboardEvent  e)
 {
+	bool          all_cmds = false;
 	int           c_shift = 0;
 	size_t        i;
 	CTK_WidgetId  fw;
@@ -2334,6 +2335,28 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 	}
 
 	switch (e.key) {
+	case SDLK_APPLICATION:
+	case SDLK_MENU:
+		fw = CTK_GetFocusedWidget(inst);
+
+		if (CTK_WTYPE_ENTRY != inst->type[fw])
+			break;
+
+		inst->entry_menu->rect.x = inst->rect[fw].x;
+		inst->entry_menu->rect.y = inst->rect[fw].y + inst->rect[fw].h;
+		if (NULL != inst->menubar) {
+			inst->entry_menu->rect.y += inst->menubar->h;
+		}
+
+		if (inst->cursor[fw] != inst->selection[fw]) {
+			all_cmds = true;
+		}
+		inst->entry_menu->enabled[inst->entry_menu_cut] = all_cmds;
+		inst->entry_menu->enabled[inst->entry_menu_copy] = all_cmds;
+
+		CTK_FocusMenu(inst, inst->entry_menu);
+		break;
+
 	case SDLK_BACKSPACE:
 		fw = CTK_GetFocusedWidget(inst);
 

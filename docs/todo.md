@@ -147,7 +147,7 @@ Also add minor code improvement for menubar arrow nav.
 - [x] fix menubar menu positions, a regression from offset change
 - [x] add enter key triggering focused menu command
 - [x] fix menu arrow nav and mouse motion ignoring disabled commands
-- [ ] add "right click key" recognition?
+- [x] add application key recognition for entries
 
 - [ ] crash when key down while entry context menu open
 

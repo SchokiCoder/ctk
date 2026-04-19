@@ -2407,7 +2407,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 
 		for (i = 1; menu->focused_cmd + i < menu->commands; i++) {
-			if (!menu->is_separator[menu->focused_cmd + i]) {
+			if (!menu->is_separator[menu->focused_cmd + i] &&
+			    menu->enabled[menu->focused_cmd + i]) {
 				menu->focused_cmd += i;
 				inst->redraw = true;
 				break;
@@ -2494,7 +2495,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 
 		for (i = 1; menu->focused_cmd - i < menu->commands; i++) {
-			if (!menu->is_separator[menu->focused_cmd - i]) {
+			if (!menu->is_separator[menu->focused_cmd - i] &&
+			    menu->enabled[menu->focused_cmd - i]) {
 				menu->focused_cmd -= i;
 				inst->redraw = true;
 				break;
@@ -2833,7 +2835,8 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 		}
 
 		if (hovered_cmd != menu->focused_cmd &&
-		    !menu->is_separator[hovered_cmd]) {
+		    !menu->is_separator[hovered_cmd] &&
+		    menu->enabled[hovered_cmd]) {
 			menu->focused_cmd = hovered_cmd;
 			inst->redraw = true;
 		}

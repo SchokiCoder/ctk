@@ -2502,6 +2502,21 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		}
 		break;
 
+	case SDLK_RETURN:
+	case SDLK_KP_ENTER:
+		if (NULL == inst->visible_menu) {
+			break;
+		}
+
+		i = inst->visible_menu->focused_cmd;
+		if (NULL != inst->visible_menu->command[i] &&
+		    inst->visible_menu->enabled[i]) {
+			inst->visible_menu->command[i](inst,
+			                               inst->visible_menu->command_data[i]);
+			CTK_UnfocusMenubar(inst);
+		}
+		break;
+
 	case SDLK_RIGHT:
 		if (inst->menubar->focused_casc < inst->menubar->cascades) {
 			if (inst->menubar->focused_casc + 1 < inst->menubar->cascades) {

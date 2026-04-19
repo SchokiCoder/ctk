@@ -134,8 +134,16 @@ This removes command's fixed height setting.
 
 - [x] add ESC key unfocusing menu and menubar
 - [x] add arrow key navigation to menu
-- [ ] add arrow key navigation to menubar
+- [x] add arrow key navigation to menubar
+Also add different drawing for focused/hovered cascades,
+as these states can be independent here, for the sake of Tcl parity...
+kind of. Tcl is actually quite wonky with all that.
+I decided to allow an unfocused hover state for menubars, but not for menus,
+since a visible menus is always focused over everything else.
+
+- [ ] fix menubar menu positions (regression from offset change)
 - [ ] add enter key triggering focused menu command
+- [ ] fix menu arrow nav not handling disabled commands; may also a problem with mouse motion
 - [ ] add "right click key" recognition?
 
 - [ ] crash when key down while entry context menu open

@@ -36,7 +36,9 @@ typedef struct CTK_WidgetStyle {
 
 typedef struct CTK_Style {
 	bool            menu_border;
-	bool            menu_command_border;
+	bool            menu_command_border_focused;
+	bool            menubar_border;
+	bool            menubar_cascade_border_focused;
 	size_t          menu_command_padding_left;
 	size_t          menu_command_padding_top;
 	size_t          menu_command_padding_right;
@@ -44,8 +46,6 @@ typedef struct CTK_Style {
 	size_t          menu_accelerator_padding_left;
 	size_t          menu_accelerator_padding_right;
 	size_t          menu_separator_h;
-	bool            menubar_border;
-	bool            menubar_cascade_border;
 	size_t          menubar_cascade_padding_left;
 	size_t          menubar_cascade_padding_top;
 	size_t          menubar_cascade_padding_right;
@@ -53,12 +53,12 @@ typedef struct CTK_Style {
 	SDL_Color       bg_clr;
 	SDL_Color       focus_clr;
 	SDL_Color       menu_bg_clr;
-	SDL_Color       menu_bg_hovered_clr;
+	SDL_Color       menu_command_bg_focused_clr;
 	SDL_Color       menu_border_clr;
 	SDL_Color       menu_text_clr;
 	SDL_Color       menu_text_disabled_clr;
 	SDL_Color       menubar_bg_clr;
-	SDL_Color       menubar_bg_hovered_clr;
+	SDL_Color       menubar_cascade_bg_hovered_clr;
 	SDL_Color       menubar_border_clr;
 	SDL_Color       menubar_text_clr;
 	CTK_WidgetStyle button;
@@ -103,8 +103,10 @@ typedef struct CTK_Style {
 
 static const CTK_Style CTK_Theme_TclTk = {
 	.menu_border = true,
+	.menu_command_border_focused = true,
 
-	.menu_command_border = true,
+	.menubar_border = true,
+	.menubar_cascade_border_focused = true,
 
 	.menu_command_padding_left = 4,
 	.menu_command_padding_top = 6,
@@ -115,10 +117,6 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menu_accelerator_padding_right = 4,
 
 	.menu_separator_h = 19,
-
-	.menubar_border = true,
-
-	.menubar_cascade_border = true,
 
 	.menubar_cascade_padding_left = 4,
 	.menubar_cascade_padding_top = 10,
@@ -140,10 +138,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menu_bg_clr.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.menu_bg_clr.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
 
-	.menu_bg_hovered_clr.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.menu_bg_hovered_clr.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.menu_bg_hovered_clr.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.menu_bg_hovered_clr.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+	.menu_command_bg_focused_clr.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menu_command_bg_focused_clr.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menu_command_bg_focused_clr.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menu_command_bg_focused_clr.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
 	.menu_border_clr.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
 	.menu_border_clr.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
@@ -165,10 +163,10 @@ static const CTK_Style CTK_Theme_TclTk = {
 	.menubar_bg_clr.b = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_GRAY,
 	.menubar_bg_clr.a = CTK_THEME_TCLTK_WIDGET_NORMAL_BG_A,
 
-	.menubar_bg_hovered_clr.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.menubar_bg_hovered_clr.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.menubar_bg_hovered_clr.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
-	.menubar_bg_hovered_clr.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
+	.menubar_cascade_bg_hovered_clr.r = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menubar_cascade_bg_hovered_clr.g = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menubar_cascade_bg_hovered_clr.b = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_GRAY,
+	.menubar_cascade_bg_hovered_clr.a = CTK_THEME_TCLTK_WIDGET_HOVERED_BG_A,
 
 	.menubar_border_clr.r = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,
 	.menubar_border_clr.g = CTK_THEME_TCLTK_WIDGET_BORDER_GRAY,

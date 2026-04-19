@@ -98,9 +98,7 @@ typedef struct CTK_Instance {
 	struct CTK_Menu    *entry_menu;
 	size_t              entry_menu_cut;
 	size_t              entry_menu_copy;
-	size_t              focused_casc;
 	size_t              focused_w;
-	size_t              hovered_casc;
 	CTK_WidgetId        hovered_w;
 	Uint64              max_framerate;
 	struct CTK_Menubar *menubar;
@@ -202,7 +200,9 @@ typedef struct CTK_Menu {
 } CTK_Menu;
 
 typedef struct CTK_Menubar {
+	size_t           focused_casc;
 	size_t           h;
+	size_t           hovered_casc;
 
 	size_t           cascades;
 	TTF_Text        *cascade[CTK_MENUBAR_MAX_CASCADES];
@@ -1348,7 +1348,6 @@ CTK_CreateInstance(const char            *title,
 	inst->active = true;
 	inst->drag = false;
 	inst->focused_w = 0;
-	inst->hovered_casc = -1;
 	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menubar = NULL;
@@ -1458,6 +1457,8 @@ CTK_CreateMenubar()
 	CTK_Menubar *ret;
 
 	ret = malloc(sizeof(CTK_Menubar));
+	ret->focused_casc = -1;
+	ret->hovered_casc = -1;
 	ret->cascades = 0;
 
 	return ret;
@@ -1899,13 +1900,13 @@ CTK_DrawMenu(CTK_Instance *inst,
 			frect.w = menu->rect.w - 2;
 			frect.h = menu->h[i];
 			SDL_SetRenderDrawColor(r,
-			                       inst->style.menu_bg_hovered_clr.r,
-			                       inst->style.menu_bg_hovered_clr.g,
-			                       inst->style.menu_bg_hovered_clr.b,
-			                       inst->style.menu_bg_hovered_clr.a);
+			                       inst->style.menu_command_bg_focused_clr.r,
+			                       inst->style.menu_command_bg_focused_clr.g,
+			                       inst->style.menu_command_bg_focused_clr.b,
+			                       inst->style.menu_command_bg_focused_clr.a);
 			SDL_RenderFillRect(r, &frect);
 
-			if (inst->style.menu_command_border) {
+			if (inst->style.menu_command_border_focused) {
 				SDL_SetRenderDrawColor(r,
 					               inst->style.menu_border_clr.r,
 					               inst->style.menu_border_clr.g,
@@ -1979,18 +1980,20 @@ void
 CTK_DrawMenubar(CTK_Instance *inst)
 {
 	float         cascade_x;
-	size_t        i;
-	SDL_Renderer *r;
 	SDL_FRect     frect;
+	size_t        i;
+	CTK_Menubar  *mb;
+	SDL_Renderer *r;
 	int           w;
 
+	mb = inst->menubar;
 	r = SDL_GetRenderer(inst->win);
 	SDL_GetRenderOutputSize(r, &w, NULL);
 
 	frect.x = 0;
 	frect.y = 0;
 	frect.w = w;
-	frect.h = inst->menubar->h;
+	frect.h = mb->h;
 	SDL_SetRenderDrawColor(r,
 	                       inst->style.menubar_bg_clr.r,
 	                       inst->style.menubar_bg_clr.g,
@@ -1999,50 +2002,59 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	SDL_RenderFillRect(r, &frect);
 
 	cascade_x = 1;
-	for (i = 0; i < inst->menubar->cascades; i++) {
-		if (inst->hovered_casc == i) {
+	for (i = 0; i < mb->cascades; i++) {
+		if (i == mb->hovered_casc ||
+		    i == mb->focused_casc) {
 			frect.x = cascade_x;
 			frect.y = 1;
 			frect.w = inst->style.menubar_cascade_padding_left +
-			          inst->menubar->cascade_w[i] +
+			          mb->cascade_w[i] +
 			          inst->style.menubar_cascade_padding_right +
 			          2;
-			frect.h = inst->menubar->h - 2;
+			frect.h = mb->h - 2;
 			SDL_SetRenderDrawColor(r,
-					       inst->style.menubar_bg_hovered_clr.r,
-					       inst->style.menubar_bg_hovered_clr.g,
-					       inst->style.menubar_bg_hovered_clr.b,
-					       inst->style.menubar_bg_hovered_clr.a);
+					       inst->style.menubar_cascade_bg_hovered_clr.r,
+					       inst->style.menubar_cascade_bg_hovered_clr.g,
+					       inst->style.menubar_cascade_bg_hovered_clr.b,
+					       inst->style.menubar_cascade_bg_hovered_clr.a);
 			SDL_RenderFillRect(r, &frect);
-
-			if (inst->style.menubar_cascade_border) {
-				SDL_SetRenderDrawColor(r,
-					               inst->style.menubar_border_clr.r,
-					               inst->style.menubar_border_clr.g,
-					               inst->style.menubar_border_clr.b,
-					               inst->style.menubar_border_clr.a);
-				SDL_RenderRect(r, &frect);
-			}
 		}
 
-		TTF_SetTextColor(inst->menubar->cascade[i],
+		if (i == mb->focused_casc &&
+		    inst->style.menubar_cascade_border_focused) {
+			frect.x = cascade_x;
+			frect.y = 1;
+			frect.w = inst->style.menubar_cascade_padding_left +
+			          mb->cascade_w[i] +
+			          inst->style.menubar_cascade_padding_right +
+			          2;
+			frect.h = mb->h - 2;
+			SDL_SetRenderDrawColor(r,
+				               inst->style.menubar_border_clr.r,
+				               inst->style.menubar_border_clr.g,
+				               inst->style.menubar_border_clr.b,
+				               inst->style.menubar_border_clr.a);
+			SDL_RenderRect(r, &frect);
+		}
+
+		TTF_SetTextColor(mb->cascade[i],
 	                         inst->style.menubar_text_clr.r,
 	                         inst->style.menubar_text_clr.g,
 	                         inst->style.menubar_text_clr.b,
 	                         inst->style.menubar_text_clr.a);
 		frect.x = cascade_x + inst->style.menubar_cascade_padding_left;
 		frect.y = inst->style.menubar_cascade_padding_top;
-		frect.w = inst->menubar->cascade_w[i];
-		frect.h = inst->menubar->cascade_h[i];
+		frect.w = mb->cascade_w[i];
+		frect.h = mb->cascade_h[i];
 
 		CTK_RenderText(r,
-		               inst->menubar->cascade[i],
+		               mb->cascade[i],
 		               frect,
 		               CTK_TEXT_ALIGNMENT_LEFT,
-		               inst->menubar->underline[i],
+		               mb->underline[i],
 		               inst->style.menubar_text_clr);
 
-		cascade_x += inst->menubar->cascade_w[i] +
+		cascade_x += mb->cascade_w[i] +
 		             inst->style.menubar_cascade_padding_right +
 		             inst->style.menubar_cascade_padding_left +
 		             2;
@@ -2051,7 +2063,7 @@ CTK_DrawMenubar(CTK_Instance *inst)
 	frect.x = 0;
 	frect.y = 0;
 	frect.w = w;
-	frect.h = inst->menubar->h;
+	frect.h = mb->h;
 	SDL_SetRenderDrawColor(r,
 		               inst->style.menubar_border_clr.r,
 		               inst->style.menubar_border_clr.g,
@@ -2195,11 +2207,11 @@ CTK_FocusMenubar(CTK_Instance *inst,
                  const size_t  cascade)
 {
 	if (cascade >= CTK_MENUBAR_MAX_CASCADES ||
-	    cascade == inst->focused_casc) {
+	    cascade == inst->menubar->focused_casc) {
 		return;
 	}
 
-	inst->focused_casc = cascade;
+	inst->menubar->focused_casc = cascade;
 
 	if (cascade < inst->menubar->cascades) {
 		CTK_FocusMenu(inst, inst->menubar->menu[cascade]);
@@ -2430,6 +2442,15 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		break;
 
 	case SDLK_LEFT:
+		if (inst->menubar->focused_casc < inst->menubar->cascades) {
+			if (inst->menubar->focused_casc > 0) {
+				inst->menubar->focused_casc--;
+				menu = inst->menubar->menu[inst->menubar->focused_casc];
+				CTK_FocusMenu(inst, menu);
+			}
+			break;
+		}
+
 		fw = CTK_GetFocusedWidget(inst);
 
 		switch (inst->type[fw]) {
@@ -2474,6 +2495,15 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		break;
 
 	case SDLK_RIGHT:
+		if (inst->menubar->focused_casc < inst->menubar->cascades) {
+			if (inst->menubar->focused_casc + 1 < inst->menubar->cascades) {
+				inst->menubar->focused_casc++;
+				menu = inst->menubar->menu[inst->menubar->focused_casc];
+				CTK_FocusMenu(inst, menu);
+			}
+			break;
+		}
+
 		fw = CTK_GetFocusedWidget(inst);
 
 		switch (inst->type[fw]) {
@@ -2712,17 +2742,20 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 	int          casc_x;
 	int          casc_w;
 	size_t       command_y;
-	size_t       hovered_cmd = -1;
+	size_t       hovered_cmd;
 	size_t       i;
 	SDL_FPoint   p;
 	CTK_Menubar *mb;
 	CTK_Menu    *menu;
-	size_t       new_focused_casc = inst->focused_casc;
-	size_t       new_hovered_casc = -1;
+	size_t       new_focused_casc;
+	size_t       new_hovered_casc;
 	CTK_WidgetId old_hov_wid;
 	CTK_WidgetId wid;
 
+	hovered_cmd = -1;
 	mb = inst->menubar;
+	new_focused_casc = mb->focused_casc;
+	new_hovered_casc = -1;
 	menu = inst->visible_menu;
 	old_hov_wid = inst->hovered_w;
 	inst->hovered_w = -1;
@@ -2746,11 +2779,11 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 		}
 	}
 
-	if (inst->focused_casc < CTK_MENUBAR_MAX_CASCADES)
+	if (mb->focused_casc < CTK_MENUBAR_MAX_CASCADES)
 		CTK_FocusMenubar(inst, new_focused_casc);
 
-	if (new_hovered_casc != inst->hovered_casc) {
-		inst->hovered_casc = new_hovered_casc;
+	if (new_hovered_casc != mb->hovered_casc) {
+		mb->hovered_casc = new_hovered_casc;
 		inst->redraw = true;
 	}
 
@@ -3652,7 +3685,7 @@ void
 CTK_UnfocusMenubar(CTK_Instance *inst)
 {
 	CTK_UnfocusMenu(inst);
-	inst->focused_casc = -1;
+	inst->menubar->focused_casc = -1;
 }
 
 void

@@ -149,6 +149,23 @@ Also add minor code improvement for menubar arrow nav.
 - [x] fix menu arrow nav and mouse motion ignoring disabled commands
 - [x] add application key recognition for entries
 
+- [x] ~~rework data structures~~
+Menus and Menubar didn't follow the data-oriented table model.
+Their content did, but they themselves didn't.
+~~I created structures of arrays for every table.~~  
+No, this creates a gigantic unreadable mess.
+A `inst->visible_menu->fn[i]` became
+`inst->menus.cmds[inst->visible_menu].fn[i]`.
+I do feel unhappy with the current state of affairs still.
+
+- [x] fix `CTK_ApplyTheme` incorrectly using `CTK_ApplyThemeToWidget`
+- [ ] fix Menu underline array sized by max cascades.
+
+- [ ] consider a code format more like Go's
+no more spaces for aligning, instead just using a tab
+
+- [ ] str-n functions like `strncpy` considered harmful
+
 - [ ] crash when key down while entry context menu open
 
 - [ ] rework widget spacing with margin, border, padding, content sizes

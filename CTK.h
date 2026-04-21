@@ -987,7 +987,7 @@ CTK_ApplyTheme(CTK_Instance    *inst,
 	inst->style = theme;
 
 	for (i = 0; i < inst->widgets; i++)
-		CTK_ApplyThemeToWidget(inst, inst->style, i, resize);
+		CTK_ApplyThemeToWidget(inst, inst->style, resize, i);
 }
 
 void

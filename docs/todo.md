@@ -170,12 +170,13 @@ Sharing a Menu between two instances is probably not a good idea anyway,
 but between the Menubar and some right click event? Why not?
 So now Menus are added to the instance, and Menubars get a reference to it.
 
+- [x] use MenuIds rather than pointers
+This reinforces ownership clarity.
+
+- [ ] rename Menu command into fn?
+
 - [ ] move Menubar struct content into inst, eliminating the struct?
 Same reasons as above.
-
-- [ ] use MenuIds rather than pointers?
-eg. let `CTK_AddMenubar` return MenuId instead of pointer
-This reinforces ownership clarity
 
 - [ ] consider a code format more like Go's
 no more spaces for aligning, instead just using a tab

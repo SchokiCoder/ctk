@@ -292,8 +292,8 @@ main(int    argc,
 
 	size_t cascFile;
 	size_t cascHelp;
-	CTK_Menu *menuFile;
-	CTK_Menu *menuHelp;
+	CTK_MenuId menuFile;
+	CTK_MenuId menuHelp;
 	size_t menuFileCmdNew;
 	size_t menuFileCmdOpen;
 	size_t menuFileCmdSave;
@@ -384,7 +384,7 @@ main(int    argc,
 	menuHelp = CTK_AddMenu(inst);
 	CTK_AddMenuCommand(inst, menuHelp, "About", menuHelpAbout, NULL, 0);
 	CTK_AddMenuCommand(inst, menuHelp, "Disabled", menuHelpDisabled, NULL, 0);
-	menuHelp->enabled[1] = false;
+	inst->menu[menuHelp].enabled[1] = false;
 	cascHelp = CTK_AddMenubarCascade(inst, "Help", menuHelp, 0);
 
 	ckb_focusable = CTK_AddCheckbox(inst);

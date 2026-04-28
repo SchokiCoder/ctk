@@ -196,7 +196,7 @@ typedef struct CTK_Menu {
 	size_t     h[CTK_MENU_MAX_ITEMS];
 	bool       is_separator[CTK_MENU_MAX_ITEMS];
 	TTF_Text  *label[CTK_MENU_MAX_ITEMS];
-	size_t     underline[CTK_MENUBAR_MAX_CASCADES];
+	size_t     underline[CTK_MENU_MAX_ITEMS];
 } CTK_Menu;
 
 typedef struct CTK_Menubar {

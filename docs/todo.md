@@ -159,7 +159,7 @@ A `inst->visible_menu->fn[i]` became
 I do feel unhappy with the current state of affairs still.
 
 - [x] fix `CTK_ApplyTheme` incorrectly using `CTK_ApplyThemeToWidget`
-- [ ] fix Menu underline array sized by max cascades.
+- [x] fix Menu underline array sized by max cascades
 
 - [ ] consider a code format more like Go's
 no more spaces for aligning, instead just using a tab

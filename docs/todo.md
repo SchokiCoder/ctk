@@ -161,6 +161,22 @@ I do feel unhappy with the current state of affairs still.
 - [x] fix `CTK_ApplyTheme` incorrectly using `CTK_ApplyThemeToWidget`
 - [x] fix Menu underline array sized by max cascades
 
+- [x] change Menu ownership semantics
+Before a Menu could be created and it would be returned to you.
+Then you hand it to the Menubar and now it's not yours,
+since it will be freed for you by the Menubar.
+There is no reason to have it be like that.
+Sharing a Menu between two instances is probably not a good idea anyway,
+but between the Menubar and some right click event? Why not?
+So now Menus are added to the instance, and Menubars get a reference to it.
+
+- [ ] move Menubar struct content into inst, eliminating the struct?
+Same reasons as above.
+
+- [ ] use MenuIds rather than pointers?
+eg. let `CTK_AddMenubar` return MenuId instead of pointer
+This reinforces ownership clarity
+
 - [ ] consider a code format more like Go's
 no more spaces for aligning, instead just using a tab
 

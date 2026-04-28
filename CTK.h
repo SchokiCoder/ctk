@@ -39,6 +39,10 @@
 /* Configuration defines
  */
 
+#ifndef CTK_INSTANCE_MAX_MENUS
+#define CTK_INSTANCE_MAX_MENUS 16
+#endif
+
 #ifndef CTK_INSTANCE_MAX_WIDGETS
 #define CTK_INSTANCE_MAX_WIDGETS 64
 #endif
@@ -101,6 +105,8 @@ typedef struct CTK_Instance {
 	size_t              focused_w;
 	CTK_WidgetId        hovered_w;
 	Uint64              max_framerate;
+	size_t              menus;
+	struct CTK_Menu    *menu[CTK_INSTANCE_MAX_MENUS];
 	struct CTK_Menubar *menubar;
 	bool                redraw;
 	CTK_Style           style;
@@ -276,6 +282,12 @@ CTK_AddEntry(CTK_Instance *inst);
 CTK_WidgetId
 CTK_AddLabel(CTK_Instance *inst);
 
+CTK_Menu*
+CTK_AddMenu(CTK_Instance *inst);
+
+CTK_Menubar*
+CTK_AddMenubar(CTK_Instance *inst);
+
 /* @inst: Instance to add to.
  * @name: Displayed name of cascade.
  * @menu: Menu to attach to.
@@ -395,12 +407,6 @@ CTK_CreateInstance(const char            *title,
 void
 CTK_CreateLabelTexture(CTK_Instance       *inst,
                        const CTK_WidgetId  lbl);
-
-CTK_Menu*
-CTK_CreateMenu();
-
-CTK_Menubar*
-CTK_CreateMenubar();
 
 void
 CTK_CreateProgressbarTexture(CTK_Instance       *inst,
@@ -764,6 +770,54 @@ CTK_AddLabel(CTK_Instance *inst)
 	inst->type[ret] = CTK_WTYPE_LABEL;
 	CTK_ApplyThemeToWidget(inst, inst->style, true, ret);
 	CTK_SetWidgetVisible(inst, ret, true);
+
+	return ret;
+}
+
+CTK_Menu*
+CTK_AddMenu(CTK_Instance *inst)
+{
+	size_t    m;
+	CTK_Menu *ret;
+
+	m = inst->menus;
+
+	if (m >= CTK_INSTANCE_MAX_MENUS) {
+		SDL_SetError("Instance can not hold more menus");
+		return NULL;
+	}
+
+	ret = malloc(sizeof(CTK_Menu));
+	ret->focused_cmd = -1;
+	ret->rect.x = 0;
+	ret->rect.y = 0;
+	ret->rect.w = 0;
+	ret->rect.h = 0;
+	ret->commands = 0;
+
+	inst->menu[m] = ret;
+	inst->menus++;
+
+	return ret;
+}
+
+CTK_Menubar*
+CTK_AddMenubar(CTK_Instance *inst)
+{
+	CTK_Menubar *ret;
+
+	if (NULL != inst->menubar) {
+		SDL_SetError("Instance already has a menubar");
+		return NULL;
+	}
+
+	ret = malloc(sizeof(CTK_Menubar));
+	ret->focused_casc = -1;
+	ret->h = 0;
+	ret->hovered_casc = -1;
+	ret->cascades = 0;
+
+	inst->menubar = ret;
 
 	return ret;
 }
@@ -1359,6 +1413,7 @@ CTK_CreateInstance(const char            *title,
 	inst->focused_w = 0;
 	inst->hovered_w = -1;
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
+	inst->menus = 0;
 	inst->menubar = NULL;
 	inst->style = CTK_DEFAULT_THEME;
 	inst->txt_input_suspended = false;
@@ -1411,7 +1466,7 @@ CTK_CreateInstance(const char            *title,
 		return NULL;
 	}
 
-	inst->entry_menu = CTK_CreateMenu();
+	inst->entry_menu = CTK_AddMenu(inst);
 	inst->entry_menu_cut = CTK_AddMenuCommand(inst,
 	                                          inst->entry_menu,
 	                                          "Cut",
@@ -1442,36 +1497,6 @@ CTK_CreateLabelTexture(CTK_Instance       *inst,
 {
 	/* it's the same */
 	CTK_CreateButtonTexture(inst, lbl);
-}
-
-CTK_Menu*
-CTK_CreateMenu()
-{
-	CTK_Menu *ret;
-
-	ret = malloc(sizeof(CTK_Menu));
-	ret->focused_cmd = -1;
-	ret->rect.x = 0;
-	ret->rect.y = 0;
-	ret->rect.w = 0;
-	ret->rect.h = 0;
-	ret->commands = 0;
-
-	return ret;
-}
-
-CTK_Menubar*
-CTK_CreateMenubar()
-{
-	CTK_Menubar *ret;
-
-	ret = malloc(sizeof(CTK_Menubar));
-	ret->focused_casc = -1;
-	ret->h = 0;
-	ret->hovered_casc = -1;
-	ret->cascades = 0;
-
-	return ret;
 }
 
 /* This assumes RenderTarget to be set to its own texture.
@@ -1723,8 +1748,8 @@ CTK_DestroyInstance(CTK_Instance *inst)
 {
 	size_t i;
 
-	if (NULL != inst->entry_menu) {
-		CTK_DestroyMenu(inst->entry_menu);
+	for (i = 0; i < inst->menus; i++) {
+		CTK_DestroyMenu(inst->menu[i]);
 	}
 
 	if (NULL != inst->menubar) {
@@ -1761,7 +1786,6 @@ CTK_DestroyMenubar(CTK_Menubar *mb)
 	size_t i;
 
 	for (i = 0; i < mb->cascades; i++) {
-		CTK_DestroyMenu(mb->menu[i]);
 		TTF_DestroyText(mb->cascade[i]);
 	}
 

@@ -339,9 +339,9 @@ main(int    argc,
 	inst->leave = genericPrintCallback;
 	inst->leave_data = "window leave";
 
-	inst->menubar = CTK_CreateMenubar();
+	inst->menubar = CTK_AddMenubar(inst);
 
-	menuFile = CTK_CreateMenu();
+	menuFile = CTK_AddMenu(inst);
 	menuFileCmdNew = CTK_AddMenuCommand(inst,
 	                                    menuFile,
 	                                    "New",
@@ -381,7 +381,7 @@ main(int    argc,
 	CTK_SetMenuCommandAccelerator(inst, menuFile, menuFileCmdQuit, "Ctrl+Q");
 	cascFile = CTK_AddMenubarCascade(inst, "File", menuFile, 0);
 
-	menuHelp = CTK_CreateMenu();
+	menuHelp = CTK_AddMenu(inst);
 	CTK_AddMenuCommand(inst, menuHelp, "About", menuHelpAbout, NULL, 0);
 	CTK_AddMenuCommand(inst, menuHelp, "Disabled", menuHelpDisabled, NULL, 0);
 	menuHelp->enabled[1] = false;

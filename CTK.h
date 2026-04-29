@@ -79,6 +79,7 @@
  */
 
 typedef size_t CTK_MenuId;
+typedef size_t CTK_MenuCmdId;
 typedef size_t CTK_WidgetId;
 
 typedef enum CTK_WidgetType {
@@ -115,8 +116,8 @@ typedef struct CTK_Instance {
 	SDL_Texture        *content;
 	bool                drag;
 	CTK_MenuId          entry_menu;
-	size_t              entry_menu_cut;
-	size_t              entry_menu_copy;
+	CTK_MenuCmdId       entry_menu_cut;
+	CTK_MenuCmdId       entry_menu_copy;
 	size_t              focused_w;
 	CTK_WidgetId        hovered_w;
 	Uint64              max_framerate;
@@ -310,7 +311,7 @@ CTK_AddMenubarCascade(CTK_Instance     *inst,
  *
  * Returns command index on success or -1 on failure.
  */
-size_t
+CTK_MenuCmdId
 CTK_AddMenuCommand(CTK_Instance      *inst,
                    const CTK_MenuId   mid,
                    const char        *label,
@@ -608,10 +609,10 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
  * Returns true on success or false on failure.
  */
 bool
-CTK_SetMenuCommandAccelerator(CTK_Instance     *inst,
-                              const CTK_MenuId  mid,
-                              const size_t      cmd_id,
-                              const char       *keystr);
+CTK_SetMenuCommandAccelerator(CTK_Instance        *inst,
+                              const CTK_MenuId     mid,
+                              const CTK_MenuCmdId  cid,
+                              const char          *keystr);
 
 void
 CTK_SetWidgetEnabled(CTK_Instance       *inst,
@@ -777,7 +778,7 @@ CTK_AddLabel(CTK_Instance *inst)
 CTK_MenuId
 CTK_AddMenu(CTK_Instance *inst)
 {
-	size_t m;
+	CTK_MenuId m;
 
 	m = inst->menus;
 
@@ -870,7 +871,7 @@ CTK_AddMenubarCascade(CTK_Instance     *inst,
 	return c;
 }
 
-size_t
+CTK_MenuCmdId
 CTK_AddMenuCommand(CTK_Instance      *inst,
                    const CTK_MenuId   mid,
                    const char        *label,
@@ -878,7 +879,7 @@ CTK_AddMenuCommand(CTK_Instance      *inst,
                    void              *fn_data,
                    const size_t       underline)
 {
-	size_t id;
+	CTK_MenuCmdId id;
 	CTK_Menu *menu;
 
 	menu = &inst->menu[mid];
@@ -910,7 +911,7 @@ bool
 CTK_AddMenuSeparator(CTK_Instance     *inst,
                      const CTK_MenuId  mid)
 {
-	size_t id;
+	CTK_MenuCmdId id;
 	CTK_Menu *menu;
 
 	menu = &inst->menu[mid];
@@ -2828,18 +2829,18 @@ void
 CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
-	int          casc_x;
-	int          casc_w;
-	size_t       command_y;
-	size_t       hovered_cmd;
-	size_t       i;
-	SDL_FPoint   p;
-	CTK_Menubar *mb;
-	CTK_Menu    *menu;
-	size_t       new_focused_casc;
-	size_t       new_hovered_casc;
-	CTK_WidgetId old_hov_wid;
-	CTK_WidgetId wid;
+	int           casc_x;
+	int           casc_w;
+	size_t        command_y;
+	CTK_MenuCmdId hovered_cmd;
+	size_t        i;
+	SDL_FPoint    p;
+	CTK_Menubar  *mb;
+	CTK_Menu     *menu;
+	size_t        new_focused_casc;
+	size_t        new_hovered_casc;
+	CTK_WidgetId  old_hov_wid;
+	CTK_WidgetId  wid;
 
 	hovered_cmd = -1;
 	mb = inst->menubar;
@@ -3391,19 +3392,19 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 }
 
 bool
-CTK_SetMenuCommandAccelerator(CTK_Instance     *inst,
-                              const CTK_MenuId  mid,
-                              const size_t      cmd_id,
-                              const char       *keystr)
+CTK_SetMenuCommandAccelerator(CTK_Instance        *inst,
+                              const CTK_MenuId     mid,
+                              const CTK_MenuCmdId  cid,
+                              const char          *keystr)
 {
-	if (cmd_id >= inst->menu[mid].cmds ||
+	if (cid >= inst->menu[mid].cmds ||
 	    !CTK_Bind(inst,
 	             keystr,
-	             inst->menu[mid].fn[cmd_id],
-	             inst->menu[mid].fn_data[cmd_id]))
+	             inst->menu[mid].fn[cid],
+	             inst->menu[mid].fn_data[cid]))
 		return false;
 
-	TTF_AppendTextString(inst->menu[mid].accelerator[cmd_id], keystr, 0);
+	TTF_AppendTextString(inst->menu[mid].accelerator[cid], keystr, 0);
 
 	return true;
 }

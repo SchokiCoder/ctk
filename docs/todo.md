@@ -174,8 +174,9 @@ So now Menus are added to the instance, and Menubars get a reference to it.
 This reinforces ownership clarity.
 
 - [x] rename Menu member names for brevity and consistency
-- [ ] add MenuCmdId
+- [x] add MenuCmdId
 - [ ] add CacheId
+- [ ] add MenubarCascId
 
 - [ ] move Menubar struct content into inst, eliminating the struct?
 Same reasons as above.

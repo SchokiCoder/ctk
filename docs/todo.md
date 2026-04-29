@@ -173,7 +173,9 @@ So now Menus are added to the instance, and Menubars get a reference to it.
 - [x] use MenuIds rather than pointers
 This reinforces ownership clarity.
 
-- [ ] rename Menu command into fn?
+- [x] rename Menu member names for brevity and consistency
+- [ ] add MenuCmdId
+- [ ] add CacheId
 
 - [ ] move Menubar struct content into inst, eliminating the struct?
 Same reasons as above.

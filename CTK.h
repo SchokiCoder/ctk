@@ -79,6 +79,7 @@
  */
 
 typedef size_t CTK_CacheId;
+typedef size_t CTK_MenubarCascId;
 typedef size_t CTK_MenuId;
 typedef size_t CTK_MenuCmdId;
 typedef size_t CTK_WidgetId;
@@ -208,9 +209,9 @@ typedef struct CTK_Instance {
 } CTK_Instance;
 
 typedef struct CTK_Menubar {
-	size_t      focused_casc;
-	size_t      h;
-	size_t      hovered_casc;
+	CTK_MenubarCascId focused_casc;
+	size_t            h;
+	CTK_MenubarCascId hovered_casc;
 
 	size_t      cascades;
 	TTF_Text   *cascade[CTK_MENUBAR_MAX_CASCADES];
@@ -297,7 +298,7 @@ CTK_AddMenubar(CTK_Instance *inst);
  *
  * Returns cascade index on success or -1 on failure.
  */
-size_t
+CTK_MenubarCascId
 CTK_AddMenubarCascade(CTK_Instance     *inst,
                       const char       *name,
                       const CTK_MenuId  m,
@@ -462,8 +463,8 @@ CTK_FocusMenu(CTK_Instance     *inst,
               const CTK_MenuId  m);
 
 void
-CTK_FocusMenubar(CTK_Instance *inst,
-                 const size_t  cascade);
+CTK_FocusMenubar(CTK_Instance            *inst,
+                 const CTK_MenubarCascId  cascade);
 
 void
 CTK_HandleDrag(CTK_Instance *inst,
@@ -820,13 +821,14 @@ CTK_AddMenubar(CTK_Instance *inst)
 	return ret;
 }
 
-size_t
+CTK_MenubarCascId
 CTK_AddMenubarCascade(CTK_Instance     *inst,
                       const char       *name,
                       const CTK_MenuId  m,
                       const size_t      underline)
 {
-	size_t c, i;
+	CTK_MenubarCascId c;
+	size_t i;
 	int h;
 	CTK_Menubar *mb;
 	CTK_Menu    *menu;
@@ -2246,8 +2248,8 @@ CTK_FocusMenu(CTK_Instance     *inst,
 }
 
 void
-CTK_FocusMenubar(CTK_Instance *inst,
-                 const size_t  cascade)
+CTK_FocusMenubar(CTK_Instance            *inst,
+                 const CTK_MenubarCascId  cascade)
 {
 	if (cascade >= CTK_MENUBAR_MAX_CASCADES ||
 	    cascade == inst->menubar->focused_casc) {
@@ -2692,12 +2694,12 @@ void
 CTK_HandleLMBDown(CTK_Instance               *inst,
                   const SDL_MouseButtonEvent  e)
 {
-	size_t       i;
-	CTK_Menubar *mb;
-	size_t       new_focused_casc;
-	SDL_FPoint   p;
-	CTK_WidgetId w;
-	int          x;
+	size_t             i;
+	CTK_Menubar       *mb;
+	CTK_MenubarCascId  new_focused_casc;
+	SDL_FPoint         p;
+	CTK_WidgetId       w;
+	int                x;
 
 	mb = inst->menubar;
 
@@ -2830,18 +2832,18 @@ void
 CTK_HandleMouseMotion(CTK_Instance               *inst,
                       const SDL_MouseMotionEvent  e)
 {
-	int           casc_x;
-	int           casc_w;
-	size_t        command_y;
-	CTK_MenuCmdId hovered_cmd;
-	size_t        i;
-	SDL_FPoint    p;
-	CTK_Menubar  *mb;
-	CTK_Menu     *menu;
-	size_t        new_focused_casc;
-	size_t        new_hovered_casc;
-	CTK_WidgetId  old_hov_wid;
-	CTK_WidgetId  wid;
+	int                casc_x;
+	int                casc_w;
+	size_t             command_y;
+	CTK_MenuCmdId      hovered_cmd;
+	size_t             i;
+	SDL_FPoint         p;
+	CTK_Menubar       *mb;
+	CTK_Menu          *menu;
+	CTK_MenubarCascId  new_focused_casc;
+	CTK_MenubarCascId  new_hovered_casc;
+	CTK_WidgetId       old_hov_wid;
+	CTK_WidgetId       wid;
 
 	hovered_cmd = -1;
 	mb = inst->menubar;

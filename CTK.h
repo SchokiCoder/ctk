@@ -78,6 +78,7 @@
 /* Types
  */
 
+typedef size_t CTK_CacheId;
 typedef size_t CTK_MenuId;
 typedef size_t CTK_MenuCmdId;
 typedef size_t CTK_WidgetId;
@@ -97,7 +98,7 @@ struct CTK_Instance;
 struct CTK_Menubar;
 
 typedef struct CTK_Menu {
-	size_t     focused_cmd;
+	CTK_MenuId focused_cmd;
 	SDL_FRect  rect;
 
 	size_t     cmds;
@@ -118,7 +119,7 @@ typedef struct CTK_Instance {
 	CTK_MenuId          entry_menu;
 	CTK_MenuCmdId       entry_menu_cut;
 	CTK_MenuCmdId       entry_menu_copy;
-	size_t              focused_w;
+	CTK_CacheId         focused_w;
 	CTK_WidgetId        hovered_w;
 	Uint64              max_framerate;
 	size_t              menus;
@@ -299,7 +300,7 @@ CTK_AddMenubar(CTK_Instance *inst);
 size_t
 CTK_AddMenubarCascade(CTK_Instance     *inst,
                       const char       *name,
-                      const CTK_MenuId  mid,
+                      const CTK_MenuId  m,
                       const size_t      underline);
 
 /* @inst: Instance to add to.
@@ -313,7 +314,7 @@ CTK_AddMenubarCascade(CTK_Instance     *inst,
  */
 CTK_MenuCmdId
 CTK_AddMenuCommand(CTK_Instance      *inst,
-                   const CTK_MenuId   mid,
+                   const CTK_MenuId   m,
                    const char        *label,
                    void             (*fn)(CTK_Instance*, void*),
                    void              *fn_data,
@@ -321,7 +322,7 @@ CTK_AddMenuCommand(CTK_Instance      *inst,
 
 bool
 CTK_AddMenuSeparator(CTK_Instance     *inst,
-                     const CTK_MenuId  mid);
+                     const CTK_MenuId  m);
 
 /* @inst: Instance to add to.
  *
@@ -439,7 +440,7 @@ CTK_DrawInstance(CTK_Instance *inst);
 
 void
 CTK_DrawMenu(CTK_Instance     *inst,
-             const CTK_MenuId  mid);
+             const CTK_MenuId  m);
 
 void
 CTK_DrawMenubar(CTK_Instance *inst);
@@ -458,7 +459,7 @@ CTK_EntryMenuPaste(CTK_Instance *inst,
 
 void
 CTK_FocusMenu(CTK_Instance     *inst,
-              const CTK_MenuId  mid);
+              const CTK_MenuId  m);
 
 void
 CTK_FocusMenubar(CTK_Instance *inst,
@@ -521,17 +522,17 @@ CTK_GetKeyOrModFromName(const char  *name,
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       size_t             *cacheId);
+                       CTK_CacheId        *cache);
 
 bool
 CTK_GetWidgetFocusableId(const CTK_Instance *inst,
                          const CTK_WidgetId  widget,
-                         size_t             *cacheId);
+                         CTK_CacheId        *cache);
 
 bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       size_t             *cacheId);
+                       CTK_CacheId        *cache);
 
 /* @appname: Name of application, duh.
  * @appversion: Eg. "1.2.5".
@@ -610,7 +611,7 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
  */
 bool
 CTK_SetMenuCommandAccelerator(CTK_Instance        *inst,
-                              const CTK_MenuId     mid,
+                              const CTK_MenuId     m,
                               const CTK_MenuCmdId  cid,
                               const char          *keystr);
 
@@ -822,7 +823,7 @@ CTK_AddMenubar(CTK_Instance *inst)
 size_t
 CTK_AddMenubarCascade(CTK_Instance     *inst,
                       const char       *name,
-                      const CTK_MenuId  mid,
+                      const CTK_MenuId  m,
                       const size_t      underline)
 {
 	size_t c, i;
@@ -831,7 +832,7 @@ CTK_AddMenubarCascade(CTK_Instance     *inst,
 	CTK_Menu    *menu;
 
 	mb = inst->menubar;
-	menu = &inst->menu[mid];
+	menu = &inst->menu[m];
 	c = mb->cascades;
 
 	if (mb->cascades >= CTK_MENUBAR_MAX_CASCADES) {
@@ -841,7 +842,7 @@ CTK_AddMenubarCascade(CTK_Instance     *inst,
 
 	mb->cascade[c] = TTF_CreateText(inst->tengine, CTK_font, name, 0);
 	TTF_GetTextSize(mb->cascade[c], &mb->cascade_w[c], &mb->cascade_h[c]);
-	mb->menu[c] = mid;
+	mb->menu[c] = m;
 	mb->underline[c] = underline;
 	mb->cascades++;
 
@@ -873,7 +874,7 @@ CTK_AddMenubarCascade(CTK_Instance     *inst,
 
 CTK_MenuCmdId
 CTK_AddMenuCommand(CTK_Instance      *inst,
-                   const CTK_MenuId   mid,
+                   const CTK_MenuId   m,
                    const char        *label,
                    void             (*fn)(CTK_Instance*, void*),
                    void              *fn_data,
@@ -882,14 +883,14 @@ CTK_AddMenuCommand(CTK_Instance      *inst,
 	CTK_MenuCmdId id;
 	CTK_Menu *menu;
 
-	menu = &inst->menu[mid];
+	menu = &inst->menu[m];
 
 	if (menu->cmds >= CTK_MENU_MAX_CMDS) {
 		SDL_SetError("Menu can not hold more items");
 		return -1;
 	}
 
-	menu = &inst->menu[mid];
+	menu = &inst->menu[m];
 
 	id = menu->cmds;
 	menu->accelerator[id] = TTF_CreateText(inst->tengine, CTK_font, "", 0);
@@ -909,12 +910,12 @@ CTK_AddMenuCommand(CTK_Instance      *inst,
 
 bool
 CTK_AddMenuSeparator(CTK_Instance     *inst,
-                     const CTK_MenuId  mid)
+                     const CTK_MenuId  m)
 {
 	CTK_MenuCmdId id;
 	CTK_Menu *menu;
 
-	menu = &inst->menu[mid];
+	menu = &inst->menu[m];
 
 	if (menu->cmds >= CTK_MENU_MAX_CMDS) {
 		SDL_SetError("Menu can not hold more items");
@@ -1885,7 +1886,7 @@ CTK_DrawInstance(CTK_Instance *inst)
 
 void
 CTK_DrawMenu(CTK_Instance     *inst,
-             const CTK_MenuId  mid)
+             const CTK_MenuId  m)
 {
 	SDL_Color     command_c;
 	float         command_x;
@@ -1897,7 +1898,7 @@ CTK_DrawMenu(CTK_Instance     *inst,
 	SDL_Renderer *r;
 	int           w;
 
-	menu = &inst->menu[mid];
+	menu = &inst->menu[m];
 
 	if (menu->cmds <= 0) {
 		return;
@@ -2232,15 +2233,15 @@ CTK_EntryMenuPaste(CTK_Instance *inst,
 
 void
 CTK_FocusMenu(CTK_Instance     *inst,
-              const CTK_MenuId  mid)
+              const CTK_MenuId  m)
 {
 	if (SDL_TextInputActive(inst->win)) {
 		SDL_StopTextInput(inst->win);
 		inst->txt_input_suspended = true;
 	}
 
-	inst->menu[mid].focused_cmd = 0;
-	inst->visible_menu = mid;
+	inst->menu[m].focused_cmd = 0;
+	inst->visible_menu = m;
 	inst->redraw = true;
 }
 
@@ -3149,13 +3150,13 @@ CTK_GetKeyOrModFromName(const char  *name,
 bool
 CTK_GetWidgetEnabledId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       size_t             *cacheId)
+                       CTK_CacheId        *cache)
 {
 	size_t i;
 
 	for (i = 0; i < inst->enabled_ws; i++) {
 		if (widget == inst->enabled_w[i]) {
-			*cacheId = i;
+			*cache = i;
 			return true;
 		}
 	}
@@ -3166,13 +3167,13 @@ CTK_GetWidgetEnabledId(const CTK_Instance *inst,
 bool
 CTK_GetWidgetFocusableId(const CTK_Instance *inst,
                          const CTK_WidgetId  widget,
-                         size_t             *cacheId)
+                         CTK_CacheId        *cache)
 {
 	size_t i;
 
 	for (i = 0; i < inst->focusable_ws; i++) {
 		if (widget == inst->focusable_w[i]) {
-			*cacheId = i;
+			*cache = i;
 			return true;
 		}
 	}
@@ -3183,13 +3184,13 @@ CTK_GetWidgetFocusableId(const CTK_Instance *inst,
 bool
 CTK_GetWidgetVisibleId(const CTK_Instance *inst,
                        const CTK_WidgetId  widget,
-                       size_t             *cacheId)
+                       CTK_CacheId        *cache)
 {
 	size_t i;
 
 	for (i = 0; i < inst->visible_ws; i++) {
 		if (widget == inst->visible_w[i]) {
-			*cacheId = i;
+			*cache = i;
 			return true;
 		}
 	}
@@ -3243,7 +3244,7 @@ bool
 CTK_IsWidgetEnabled(const CTK_Instance *inst,
                     const CTK_WidgetId  widget)
 {
-	size_t dummy;
+	CTK_CacheId dummy;
 
 	return CTK_GetWidgetEnabledId(inst, widget, &dummy);
 }
@@ -3252,7 +3253,7 @@ bool
 CTK_IsWidgetFocusable(const CTK_Instance *inst,
                       const CTK_WidgetId  widget)
 {
-	size_t dummy;
+	CTK_CacheId dummy;
 
 	return CTK_GetWidgetFocusableId(inst, widget, &dummy);
 }
@@ -3261,7 +3262,7 @@ bool
 CTK_IsWidgetVisible(const CTK_Instance *inst,
                     const CTK_WidgetId  widget)
 {
-	size_t dummy;
+	CTK_CacheId dummy;
 
 	return CTK_GetWidgetVisibleId(inst, widget, &dummy);
 }
@@ -3393,18 +3394,18 @@ CTK_SetFocusedWidget(CTK_Instance       *inst,
 
 bool
 CTK_SetMenuCommandAccelerator(CTK_Instance        *inst,
-                              const CTK_MenuId     mid,
-                              const CTK_MenuCmdId  cid,
+                              const CTK_MenuId     m,
+                              const CTK_MenuCmdId  c,
                               const char          *keystr)
 {
-	if (cid >= inst->menu[mid].cmds ||
+	if (c >= inst->menu[m].cmds ||
 	    !CTK_Bind(inst,
 	             keystr,
-	             inst->menu[mid].fn[cid],
-	             inst->menu[mid].fn_data[cid]))
+	             inst->menu[m].fn[c],
+	             inst->menu[m].fn_data[c]))
 		return false;
 
-	TTF_AppendTextString(inst->menu[mid].accelerator[cid], keystr, 0);
+	TTF_AppendTextString(inst->menu[m].accelerator[c], keystr, 0);
 
 	return true;
 }
@@ -3416,7 +3417,7 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
 {
 	size_t i;
 	bool is_enabled;
-	size_t enabledId;
+	CTK_CacheId enabledId;
 
 	is_enabled = CTK_GetWidgetEnabledId(inst, widget, &enabledId);
 
@@ -3448,7 +3449,7 @@ CTK_SetWidgetFocusable(CTK_Instance       *inst,
 {
 	size_t i;
 	bool is_focusable;
-	size_t focusableId;
+	CTK_CacheId focusableId;
 
 	is_focusable = CTK_GetWidgetFocusableId(inst, widget, &focusableId);
 
@@ -3569,7 +3570,7 @@ CTK_SetWidgetVisible(CTK_Instance       *inst,
 {
 	size_t i;
 	bool is_visible;
-	size_t visibleId;
+	CTK_CacheId visibleId;
 
 	is_visible = CTK_GetWidgetVisibleId(inst, widget, &visibleId);
 

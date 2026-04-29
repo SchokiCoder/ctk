@@ -175,7 +175,7 @@ This reinforces ownership clarity.
 
 - [x] rename Menu member names for brevity and consistency
 - [x] add MenuCmdId
-- [ ] add CacheId
+- [x] add CacheId
 - [ ] add MenubarCascId
 
 - [ ] move Menubar struct content into inst, eliminating the struct?

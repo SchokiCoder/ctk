@@ -1165,6 +1165,7 @@ CTK_Bind(CTK_Instance  *inst,
 		return false;
 	}
 	strncpy(str, keystr, strsize);
+	str[strsize - 1] = '\0';
 
 	/* this only accepts "$KEY+$KEY", no spaces or nonsense */
 	for (i = 0; i < strlen(str); i++) {

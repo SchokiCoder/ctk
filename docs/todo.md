@@ -196,12 +196,19 @@ Sharing a Menubar between two instances is no longer (theoretically) possible,
 which probably was not a good use case anyway.
 I certainly didn't test for it.
 
+- [x] ensure NULL termination in `CTK_Bind` after `strncpy`
+
 - [ ] consider a code format more like Go's
 no more spaces for aligning, instead just using a tab
 
-- [ ] str-n functions like `strncpy` considered harmful
-
 - [ ] rework widget spacing with margin, border, padding, content sizes
+Style structs can be whatever actually, now that drawing is fully controlled by theme.
+All `CTK.h` needs is access to render/draw functions via pointers,
+and widget size for hit detection.
+Move style structs to theme and add interface for said needed things?
+
+OR
+
 x, y are now at upper left of the border.
 w, h doesn't exist, must me calculated from margin, border, padding, content.
 

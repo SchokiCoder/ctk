@@ -1730,7 +1730,8 @@ CTK_HandleKeyDown(CTK_Instance            *inst,
 		menu = &inst->menu[inst->visible_menu];
 		for (i = 0; i < menu->cmds; i++) {
 			if (!menu->enabled[i] ||
-			    menu->separates[i]) {
+			    menu->separates[i] ||
+			    menu->underline[i] >= strlen(menu->label[i]->text)) {
 				continue;
 			}
 

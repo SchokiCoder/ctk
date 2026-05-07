@@ -186,7 +186,10 @@ The general style struct has one for menus and menubar.
 This also merges the style header into the main header,
 thus we have a single header, except for the theme.
 
-- [ ] crash when key down while entry context menu open
+- [x] fix unguarded text acces via menu cmd underline
+Fixes crash when key down while entry context menu open.
+
+- [ ] fix entry context menu focused cmd when cut and copy disabled
 
 - [ ] move Menubar struct content into inst, eliminating the struct?
 Same reasons as above.

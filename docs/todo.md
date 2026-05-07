@@ -191,8 +191,10 @@ Fixes crash when key down while entry context menu open.
 
 - [x] fix menu's initial focused cmd being 1st even when 1st is disabled
 
-- [ ] move Menubar struct content into inst, eliminating the struct?
-Same reasons as above.
+- [x] make Menubar a fixed part of Instance, not a pointer
+Sharing a Menubar between two instances is no longer (theoretically) possible,
+which probably was not a good use case anyway.
+I certainly didn't test for it.
 
 - [ ] consider a code format more like Go's
 no more spaces for aligning, instead just using a tab

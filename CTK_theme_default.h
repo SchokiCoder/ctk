@@ -597,7 +597,7 @@ CTK_ThemeDefaultDrawMenubar(CTK_Instance *inst)
 	SDL_Renderer *r;
 	int           w;
 
-	mb = inst->menubar;
+	mb = &inst->menubar;
 	r = SDL_GetRenderer(inst->win);
 	SDL_GetRenderOutputSize(r, &w, NULL);
 

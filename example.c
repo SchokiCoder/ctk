@@ -340,7 +340,7 @@ main(int    argc,
 	inst->leave = genericPrintCallback;
 	inst->leave_data = "window leave";
 
-	inst->menubar = CTK_AddMenubar(inst);
+	CTK_AddMenubar(inst);
 
 	menuFile = CTK_AddMenu(inst);
 	menuFileCmdNew = CTK_AddMenuCommand(inst,

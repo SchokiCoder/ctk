@@ -11,8 +11,6 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <stdio.h>
 
-#include "CTK_style.h"
-
 /* Macros
  */
 
@@ -22,11 +20,6 @@
 
 /* Constant defines
  */
-
-#define CTK_DEFAULT_FONTSIZE         12
-#define CTK_DEFAULT_THEME            CTK_Theme_TclTk
-#define CTK_DEFAULT_WINDOW_FLAGS     (SDL_WINDOW_RESIZABLE)
-#define CTK_DEFAULT_MAX_FRAMERATE    60
 
 #define CTK_PIXELFORMAT SDL_PIXELFORMAT_RGBA8888
 
@@ -38,6 +31,18 @@
 
 /* Configuration defines
  */
+
+#ifndef CTK_DEFAULT_FONTSIZE
+#define CTK_DEFAULT_FONTSIZE 12
+#endif
+
+#ifndef CTK_DEFAULT_WINDOW_FLAGS
+#define CTK_DEFAULT_WINDOW_FLAGS (SDL_WINDOW_RESIZABLE)
+#endif
+
+#ifndef CTK_DEFAULT_MAX_FRAMERATE
+#define CTK_DEFAULT_MAX_FRAMERATE 60
+#endif
 
 #ifndef CTK_INSTANCE_MAX_MENUS
 #define CTK_INSTANCE_MAX_MENUS 32
@@ -84,6 +89,12 @@ typedef size_t CTK_MenuId;
 typedef size_t CTK_MenuCmdId;
 typedef size_t CTK_WidgetId;
 
+typedef enum CTK_TextAlignment {
+	CTK_TEXT_ALIGNMENT_LEFT,
+	CTK_TEXT_ALIGNMENT_CENTER,
+	CTK_TEXT_ALIGNMENT_RIGHT,
+} CTK_TextAlignment;
+
 typedef enum CTK_WidgetType {
 	CTK_WTYPE_UNKNOWN,
 	CTK_WTYPE_BUTTON,
@@ -97,6 +108,70 @@ typedef enum CTK_WidgetType {
 
 struct CTK_Instance;
 struct CTK_Menubar;
+
+typedef struct CTK_WidgetStyle {
+	size_t              w;
+	size_t              h;
+	size_t              body_w;
+	size_t              body_h;
+	size_t              fill_w;
+	size_t              fill_h;
+	CTK_TextAlignment   text_align;
+	SDL_Color           bg_clr;
+	SDL_Color           bg_hovered_clr;
+	SDL_Color           body_clr;
+	SDL_Color           body_disabled_clr;
+	SDL_Color           body_hovered_clr;
+	SDL_Color           border_clr;
+	SDL_Color           fg_clr;
+	SDL_Color           fg_disabled_clr;
+	SDL_Color           text_clr;
+	SDL_Color           text_bg_selected_clr;
+	SDL_Color           text_disabled_clr;
+
+	/* This assumes RenderTarget to be set to its own texture. */
+	void              (*render)(struct CTK_Instance*, const CTK_WidgetId);
+} CTK_WidgetStyle;
+
+typedef struct CTK_Style {
+	bool              menu_border;
+	bool              menu_command_border_focused;
+	bool              menubar_border;
+	bool              menubar_cascade_border_focused;
+	size_t            menu_command_padding_left;
+	size_t            menu_command_padding_top;
+	size_t            menu_command_padding_right;
+	size_t            menu_command_padding_bottom;
+	size_t            menu_accelerator_padding_left;
+	size_t            menu_accelerator_padding_right;
+	size_t            menu_separator_h;
+	size_t            menubar_cascade_padding_left;
+	size_t            menubar_cascade_padding_top;
+	size_t            menubar_cascade_padding_right;
+	size_t            menubar_cascade_padding_bottom;
+	SDL_Color         bg_clr;
+	SDL_Color         focus_clr;
+	SDL_Color         menu_bg_clr;
+	SDL_Color         menu_command_bg_focused_clr;
+	SDL_Color         menu_border_clr;
+	SDL_Color         menu_text_clr;
+	SDL_Color         menu_text_disabled_clr;
+	SDL_Color         menubar_bg_clr;
+	SDL_Color         menubar_cascade_bg_hovered_clr;
+	SDL_Color         menubar_border_clr;
+	SDL_Color         menubar_text_clr;
+	CTK_WidgetStyle   button;
+	CTK_WidgetStyle   checkbox;
+	CTK_WidgetStyle   entry;
+	CTK_WidgetStyle   label;
+	CTK_WidgetStyle   progressbar;
+	CTK_WidgetStyle   radiobutton;
+	CTK_WidgetStyle   scale;
+
+	/* These assume RenderTarget to be set to its inst's content texture. */
+	void            (*draw_menu)(struct CTK_Instance*, const CTK_MenuId);
+	void            (*draw_menubar)(struct CTK_Instance*);
+} CTK_Style;
 
 typedef struct CTK_Menu {
 	CTK_MenuId focused_cmd;
@@ -380,18 +455,6 @@ CTK_Bind(CTK_Instance  *inst,
 SDL_FColor
 CTK_ColorIntToFColor(const SDL_Color c);
 
-void
-CTK_CreateButtonTexture(CTK_Instance       *inst,
-                        const CTK_WidgetId  btn);
-
-void
-CTK_CreateCheckboxTexture(CTK_Instance       *inst,
-                          const CTK_WidgetId  ckb);
-
-void
-CTK_CreateEntryTexture(CTK_Instance       *inst,
-                       const CTK_WidgetId  txt);
-
 /* @inst: Instance to initialize.
  * @title: Used as window title.
  * @winw: Window width.
@@ -405,27 +468,8 @@ CTK_Instance*
 CTK_CreateInstance(const char            *title,
                    const int              winw,
                    const int              winh,
-                   const SDL_WindowFlags  flags);
-
-void
-CTK_CreateLabelTexture(CTK_Instance       *inst,
-                       const CTK_WidgetId  lbl);
-
-void
-CTK_CreateProgressbarTexture(CTK_Instance       *inst,
-                             const CTK_WidgetId  pgb);
-
-void
-CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
-                             const CTK_WidgetId  rbn);
-
-void
-CTK_CreateScaleTexture(CTK_Instance       *inst,
-                       const CTK_WidgetId  scl);
-
-void
-CTK_CreateWidgetTexture(CTK_Instance       *inst,
-                        const CTK_WidgetId  widget);
+                   const SDL_WindowFlags  flags,
+                   const CTK_Style        theme);
 
 void
 CTK_DestroyInstance(CTK_Instance *inst);
@@ -445,6 +489,10 @@ CTK_DrawMenu(CTK_Instance     *inst,
 
 void
 CTK_DrawMenubar(CTK_Instance *inst);
+
+void
+CTK_RenderWidget(CTK_Instance       *inst,
+                 const CTK_WidgetId  widget);
 
 void
 CTK_EntryMenuCut(CTK_Instance *inst,
@@ -1098,7 +1146,7 @@ CTK_ApplyThemeToWidget(CTK_Instance       *inst,
 		inst->rect[w].w = inst->wstyle[w].w;
 	}
 
-	CTK_CreateWidgetTexture(inst, w);
+	CTK_RenderWidget(inst, w);
 }
 
 bool
@@ -1185,228 +1233,12 @@ CTK_ColorIntToFColor(const SDL_Color c)
 	return ret;
 }
 
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateButtonTexture(CTK_Instance       *inst,
-                        const CTK_WidgetId  btn)
-{
-	SDL_Renderer *r = NULL;
-	SDL_FRect     rect;
-
-	r = SDL_GetRenderer(inst->win);
-
-	if (inst->hovered_w != btn) {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[btn].bg_clr.r,
-		                       inst->wstyle[btn].bg_clr.g,
-		                       inst->wstyle[btn].bg_clr.b,
-		                       inst->wstyle[btn].bg_clr.a);
-	} else {
-		SDL_SetRenderDrawColor(r,
-		                       inst->wstyle[btn].bg_hovered_clr.r,
-		                       inst->wstyle[btn].bg_hovered_clr.g,
-		                       inst->wstyle[btn].bg_hovered_clr.b,
-		                       inst->wstyle[btn].bg_hovered_clr.a);
-	}
-	SDL_RenderClear(r);
-
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = inst->rect[btn].w;
-	rect.h = inst->rect[btn].h;
-
-	if (CTK_IsWidgetEnabled(inst, btn)) {
-		TTF_SetTextColor(inst->text[btn],
-		                 inst->wstyle[btn].text_clr.r,
-		                 inst->wstyle[btn].text_clr.g,
-		                 inst->wstyle[btn].text_clr.b,
-		                 inst->wstyle[btn].text_clr.a);
-	} else {
-		TTF_SetTextColor(inst->text[btn],
-		                 inst->wstyle[btn].text_disabled_clr.r,
-		                 inst->wstyle[btn].text_disabled_clr.g,
-		                 inst->wstyle[btn].text_disabled_clr.b,
-		                 inst->wstyle[btn].text_disabled_clr.a);
-	}
-
-	CTK_RenderText(r,
-	               inst->text[btn],
-	               rect,
-	               inst->wstyle[btn].text_align,
-	               inst->underline[btn],
-	               inst->wstyle[btn].text_clr);
-
-	if (inst->border[btn]) {
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = inst->rect[btn].w;
-		rect.h = inst->rect[btn].h;
-
-		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[btn].border_clr.r,
-			               inst->wstyle[btn].border_clr.g,
-			               inst->wstyle[btn].border_clr.b,
-			               inst->wstyle[btn].border_clr.a);
-		SDL_RenderRect(r, &rect);
-	}
-}
-
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateCheckboxTexture(CTK_Instance       *inst,
-                          const CTK_WidgetId  ckb)
-{
-	SDL_Color     bg_c;
-	SDL_Color     body_c;
-	SDL_Color     fg_c;
-	SDL_Renderer *r = NULL;
-	SDL_FRect     rect;
-
-	r = SDL_GetRenderer(inst->win);
-
-	if (inst->hovered_w != ckb) {
-		bg_c = inst->wstyle[ckb].bg_clr;
-		body_c = inst->wstyle[ckb].body_clr;
-	} else {
-		bg_c = inst->wstyle[ckb].bg_hovered_clr;
-		body_c = inst->wstyle[ckb].body_hovered_clr;
-	}
-	fg_c = inst->wstyle[ckb].fg_clr;
-	if (!CTK_IsWidgetEnabled(inst, ckb)) {
-		body_c = inst->wstyle[ckb].body_disabled_clr;
-		fg_c = inst->wstyle[ckb].fg_disabled_clr;
-	}
-
-	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
-	SDL_RenderClear(r);
-
-	rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].body_w) / 2;
-	rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].body_h) / 2;
-	rect.w = inst->wstyle[ckb].body_w;
-	rect.h = inst->wstyle[ckb].body_h;
-	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
-	SDL_RenderFillRect(r, &rect);
-
-	if (inst->toggle[ckb]) {
-		rect.w = inst->wstyle[ckb].fill_w;
-		rect.h = inst->wstyle[ckb].fill_h;
-		rect.x += inst->wstyle[ckb].body_w - rect.w;
-		rect.y += inst->wstyle[ckb].body_h - rect.h;
-		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
-		SDL_RenderFillRect(r, &rect);
-	}
-
-	if (inst->border[ckb]) {
-		rect.x = (inst->rect[ckb].w - inst->wstyle[ckb].body_w) / 2;
-		rect.y = (inst->rect[ckb].h - inst->wstyle[ckb].body_h) / 2;
-		rect.w = inst->wstyle[ckb].body_w;
-		rect.h = inst->wstyle[ckb].body_h;
-
-		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[ckb].border_clr.r,
-			               inst->wstyle[ckb].border_clr.g,
-			               inst->wstyle[ckb].border_clr.b,
-			               inst->wstyle[ckb].border_clr.a);
-		SDL_RenderRect(r, &rect);
-	}
-}
-
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateEntryTexture(CTK_Instance       *inst,
-                       const CTK_WidgetId  txt)
-{
-	size_t        a, b;
-	SDL_Color     bg_c;
-	SDL_Color     body_c;
-	SDL_Rect      irect;
-	SDL_Renderer *r = NULL;
-	SDL_FRect     rect;
-	SDL_Color     text_c;
-
-	r = SDL_GetRenderer(inst->win);
-
-	if (inst->hovered_w != txt) {
-		bg_c = inst->wstyle[txt].bg_clr;
-		body_c = inst->wstyle[txt].body_clr;
-	} else {
-		bg_c = inst->wstyle[txt].bg_hovered_clr;
-		body_c = inst->wstyle[txt].body_hovered_clr;
-	}
-	text_c = inst->wstyle[txt].text_clr;
-	if (!CTK_IsWidgetEnabled(inst, txt)) {
-		body_c = inst->wstyle[txt].body_disabled_clr;
-		text_c = inst->wstyle[txt].text_disabled_clr;
-	}
-
-	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
-	SDL_RenderClear(r);
-
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = inst->rect[txt].w;
-	rect.h = inst->rect[txt].h;
-	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
-	SDL_RenderFillRect(r, &rect);
-
-	if (inst->cursor[txt] != inst->selection[txt]) {
-		if (inst->cursor[txt] > inst->selection[txt]) {
-			a = inst->selection[txt];
-			b = inst->cursor[txt];
-		} else {
-			a = inst->cursor[txt];
-			b = inst->selection[txt];
-		}
-
-		irect = CTK_MeasureTTFText(inst->text[txt], a, b - a);
-		rect.x = irect.x;
-		rect.y = (inst->rect[txt].h - irect.h) / 2.0;
-		rect.w = irect.w;
-		rect.h = irect.h;
-
-		SDL_SetRenderDrawColor(r,
-				       inst->wstyle[txt].text_bg_selected_clr.r,
-				       inst->wstyle[txt].text_bg_selected_clr.g,
-				       inst->wstyle[txt].text_bg_selected_clr.b,
-				       inst->wstyle[txt].text_bg_selected_clr.a);
-		SDL_RenderFillRect(r, &rect);
-	}
-
-	rect.x = 0 - inst->scroll_x[txt];
-	rect.y = 0;
-	rect.w = inst->rect[txt].w;
-	rect.h = inst->rect[txt].h;
-	TTF_SetTextColor(inst->text[txt], text_c.r, text_c.g, text_c.b, text_c.a);
-	CTK_RenderText(r,
-	               inst->text[txt],
-	               rect,
-	               inst->wstyle[txt].text_align,
-	               -1, /* no underlines for entries */
-	               text_c);
-
-	if (inst->border[txt]) {
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = inst->rect[txt].w;
-		rect.h = inst->rect[txt].h;
-
-		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[txt].border_clr.r,
-			               inst->wstyle[txt].border_clr.g,
-			               inst->wstyle[txt].border_clr.b,
-			               inst->wstyle[txt].border_clr.a);
-		SDL_RenderRect(r, &rect);
-	}
-}
-
 CTK_Instance*
 CTK_CreateInstance(const char            *title,
                    const int              winw,
                    const int              winh,
-                   const SDL_WindowFlags  flags)
+                   const SDL_WindowFlags  flags,
+                   const CTK_Style        theme)
 {
 	SDL_WindowFlags f;
 	CTK_Instance *inst;
@@ -1425,7 +1257,7 @@ CTK_CreateInstance(const char            *title,
 	inst->max_framerate = CTK_DEFAULT_MAX_FRAMERATE;
 	inst->menus = 0;
 	inst->menubar = NULL;
-	inst->style = CTK_DEFAULT_THEME;
+	inst->style = theme;
 	inst->txt_input_suspended = false;
 	inst->visible_menu = -1;
 	inst->redraw = true;
@@ -1497,260 +1329,6 @@ CTK_CreateInstance(const char            *title,
 	                   -1);
 
 	return inst;
-}
-
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateLabelTexture(CTK_Instance       *inst,
-                       const CTK_WidgetId  lbl)
-{
-	/* it's the same */
-	CTK_CreateButtonTexture(inst, lbl);
-}
-
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateProgressbarTexture(CTK_Instance       *inst,
-                             const CTK_WidgetId  pgb)
-{
-	SDL_Color     bg_c;
-	SDL_Color     fg_c;
-	SDL_Renderer *r = NULL;
-	SDL_FRect     rect;
-
-	r = SDL_GetRenderer(inst->win);
-
-	if (inst->hovered_w != pgb) {
-		bg_c = inst->wstyle[pgb].bg_clr;
-	} else {
-		bg_c = inst->wstyle[pgb].bg_hovered_clr;
-	}
-	fg_c = inst->wstyle[pgb].fg_clr;
-	if (!CTK_IsWidgetEnabled(inst, pgb)) {
-		fg_c = inst->wstyle[pgb].fg_disabled_clr;
-	}
-
-	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
-	SDL_RenderClear(r);
-
-	rect.x = 0;
-	rect.y = 0;
-	rect.w = inst->rect[pgb].w *
-	         ((float) inst->value[pgb] /
-	          (float) inst->value_max[pgb]);
-	rect.h = inst->rect[pgb].h;
-	SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
-	SDL_RenderFillRect(r, &rect);
-
-	if (inst->border[pgb]) {
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = inst->rect[pgb].w;
-		rect.h = inst->rect[pgb].h;
-
-		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[pgb].border_clr.r,
-			               inst->wstyle[pgb].border_clr.g,
-			               inst->wstyle[pgb].border_clr.b,
-			               inst->wstyle[pgb].border_clr.a);
-		SDL_RenderRect(r, &rect);
-	}
-}
-
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateRadiobuttonTexture(CTK_Instance       *inst,
-                             const CTK_WidgetId  rbn)
-{
-	SDL_Color     bg_c;
-	SDL_Color     body_c;
-	SDL_Color     fg_c;
-	SDL_FRect     rect;
-	SDL_Renderer *r = NULL;
-	SDL_Texture  *t;
-
-	r = SDL_GetRenderer(inst->win);
-
-	if (inst->hovered_w != rbn) {
-		bg_c = inst->wstyle[rbn].bg_clr;
-		body_c = inst->wstyle[rbn].body_clr;
-	} else {
-		bg_c = inst->wstyle[rbn].bg_hovered_clr;
-		body_c = inst->wstyle[rbn].body_hovered_clr;
-	}
-	fg_c = inst->wstyle[rbn].fg_clr;
-	if (!CTK_IsWidgetEnabled(inst, rbn)) {
-		body_c = inst->wstyle[rbn].body_disabled_clr;
-		fg_c = inst->wstyle[rbn].fg_disabled_clr;
-	}
-
-	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
-	SDL_RenderClear(r);
-
-	t = SDL_CreateTexture(r,
-	                      CTK_PIXELFORMAT,
-	                      CTK_TEXTUREACCESS,
-	                      inst->wstyle[rbn].body_w,
-	                      inst->wstyle[rbn].body_h);
-
-	SDL_SetRenderTarget(r, t);
-	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
-	SDL_RenderClear(r);
-
-	if (inst->toggle[rbn]) {
-		rect.w = inst->wstyle[rbn].fill_w;
-		rect.h = inst->wstyle[rbn].fill_h;
-		rect.x = (inst->wstyle[rbn].body_w - rect.w) / 2;
-		rect.y = (inst->wstyle[rbn].body_h - rect.h) / 2;
-		SDL_SetRenderDrawColor(r, fg_c.r, fg_c.g, fg_c.b, fg_c.a);
-		SDL_RenderFillRect(r, &rect);
-	}
-
-	if (inst->border[rbn]) {
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = inst->wstyle[rbn].body_w;
-		rect.h = inst->wstyle[rbn].body_h;
-
-		SDL_SetRenderDrawColor(r,
-			               inst->wstyle[rbn].border_clr.r,
-			               inst->wstyle[rbn].border_clr.g,
-			               inst->wstyle[rbn].border_clr.b,
-			               inst->wstyle[rbn].border_clr.a);
-		SDL_RenderRect(r, &rect);
-	}
-
-	SDL_SetRenderTarget(r, inst->texture[rbn]);
-	rect.x = (inst->rect[rbn].w - inst->wstyle[rbn].body_w) / 2;
-	rect.y = (inst->rect[rbn].h - inst->wstyle[rbn].body_h) / 2;
-	rect.w = inst->wstyle[rbn].body_w;
-	rect.h = inst->wstyle[rbn].body_h;
-	SDL_RenderTextureRotated(r,
-	                         t,
-	                         NULL,
-	                         &rect,
-	                         45.0,
-	                         NULL,
-	                         SDL_FLIP_NONE);
-
-	SDL_DestroyTexture(t);
-}
-
-/* This assumes RenderTarget to be set to its own texture.
- */
-void
-CTK_CreateScaleTexture(CTK_Instance       *inst,
-                       const CTK_WidgetId  scl)
-{
-	SDL_Color     bg_c;
-	SDL_Color     body_c;
-	SDL_Color     border_c;
-	SDL_Renderer *r = NULL;
-	SDL_FRect     rect;
-
-	r = SDL_GetRenderer(inst->win);
-
-	border_c = inst->wstyle[scl].border_clr;
-	if (inst->hovered_w != scl) {
-		bg_c = inst->wstyle[scl].bg_clr;
-		body_c = inst->wstyle[scl].body_clr;
-	} else {
-		bg_c = inst->wstyle[scl].bg_hovered_clr;
-		body_c = inst->wstyle[scl].body_hovered_clr;
-	}
-	if (!CTK_IsWidgetEnabled(inst, scl)) {
-		body_c = inst->wstyle[scl].body_disabled_clr;
-	}
-
-	SDL_SetRenderDrawColor(r, bg_c.r, bg_c.g, bg_c.b, bg_c.a);
-	SDL_RenderClear(r);
-
-	rect.w = inst->wstyle[scl].body_w / 2;
-	rect.h = inst->wstyle[scl].body_h;
-	rect.x = ((float) inst->value[scl] /
-	          (float) inst->value_max[scl]) *
-	         (inst->rect[scl].w - (rect.w * 2));
-	rect.y = 0;
-
-	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
-	SDL_RenderFillRect(r, &rect);
-	SDL_SetRenderDrawColor(r, border_c.r, border_c.g, border_c.b, border_c.a);
-	SDL_RenderRect(r, &rect);
-
-	rect.x += rect.w;
-
-	SDL_SetRenderDrawColor(r, body_c.r, body_c.g, body_c.b, body_c.a);
-	SDL_RenderFillRect(r, &rect);
-	SDL_SetRenderDrawColor(r, border_c.r, border_c.g, border_c.b, border_c.a);
-	SDL_RenderRect(r, &rect);
-
-	if (inst->border[scl]) {
-		rect.x = 0;
-		rect.y = 0;
-		rect.w = inst->rect[scl].w;
-		rect.h = inst->rect[scl].h;
-
-		SDL_SetRenderDrawColor(r,
-		                       border_c.r, border_c.g, border_c.b,
-		                       border_c.a);
-		SDL_RenderRect(r, &rect);
-	}
-}
-
-void
-CTK_CreateWidgetTexture(CTK_Instance       *inst,
-                        const CTK_WidgetId  widget)
-{
-	SDL_Renderer *r = NULL;
-
-	r = SDL_GetRenderer(inst->win);
-	SDL_DestroyTexture(inst->texture[widget]);
-	inst->texture[widget] = SDL_CreateTexture(r,
-	                                          CTK_PIXELFORMAT,
-	                                          CTK_TEXTUREACCESS,
-	                                          inst->rect[widget].w,
-	                                          inst->rect[widget].h);
-
-	SDL_SetRenderTarget(r, inst->texture[widget]);
-
-	switch (inst->type[widget]) {
-	case CTK_WTYPE_UNKNOWN:
-		break;
-
-	case CTK_WTYPE_BUTTON:
-		CTK_CreateButtonTexture(inst, widget);
-		break;
-
-	case CTK_WTYPE_CHECKBOX:
-		CTK_CreateCheckboxTexture(inst, widget);
-		break;
-
-	case CTK_WTYPE_ENTRY:
-		CTK_CreateEntryTexture(inst, widget);
-		break;
-
-	case CTK_WTYPE_LABEL:
-		CTK_CreateLabelTexture(inst, widget);
-		break;
-
-	case CTK_WTYPE_PROGRESSBAR:
-		CTK_CreateProgressbarTexture(inst, widget);
-		break;
-
-	case CTK_WTYPE_RADIOBUTTON:
-		CTK_CreateRadiobuttonTexture(inst, widget);
-		break;
-
-	case CTK_WTYPE_SCALE:
-		CTK_CreateScaleTexture(inst, widget);
-		break;
-	}
-
-	inst->redraw = true;
-	SDL_SetRenderTarget(r, NULL);
 }
 
 void
@@ -1890,233 +1468,33 @@ void
 CTK_DrawMenu(CTK_Instance     *inst,
              const CTK_MenuId  m)
 {
-	SDL_Color     command_c;
-	float         command_x;
-	float         command_y;
-	SDL_FRect     frect;
-	int           h;
-	size_t        i;
-	CTK_Menu     *menu;
-	SDL_Renderer *r;
-	int           w;
-
-	menu = &inst->menu[m];
-
-	if (menu->cmds <= 0) {
-		return;
-	}
-
-	r = SDL_GetRenderer(inst->win);
-
-	frect.x = menu->rect.x;
-	frect.y = menu->rect.y;
-	frect.w = menu->rect.w;
-	frect.h = menu->rect.h;
-	SDL_SetRenderDrawColor(r,
-			       inst->style.menu_bg_clr.r,
-			       inst->style.menu_bg_clr.g,
-			       inst->style.menu_bg_clr.b,
-			       inst->style.menu_bg_clr.a);
-	SDL_RenderFillRect(r, &frect);
-
-	command_x = frect.x + 1;
-	command_y = menu->rect.y + 1;
-	for (i = 0; i < menu->cmds; i++) {
-		if (menu->separates[i]) {
-			frect.x = command_x + 1;
-			frect.y = command_y + (inst->style.menu_separator_h / 2);
-			frect.w = menu->rect.w - 2 - 2;
-			frect.h = 2;
-			SDL_SetRenderDrawColor(r,
-	                                       inst->style.menu_border_clr.r,
-	                                       inst->style.menu_border_clr.g,
-	                                       inst->style.menu_border_clr.b,
-	                                       inst->style.menu_border_clr.a);
-			SDL_RenderRect(r, &frect);
-
-			command_y += inst->style.menu_separator_h;
-			continue;
-		}
-
-		if (menu->focused_cmd == i &&
-		    menu->enabled[menu->focused_cmd]) {
-			frect.x = command_x;
-			frect.y = command_y;
-			frect.w = menu->rect.w - 2;
-			frect.h = menu->h[i];
-			SDL_SetRenderDrawColor(r,
-			                       inst->style.menu_command_bg_focused_clr.r,
-			                       inst->style.menu_command_bg_focused_clr.g,
-			                       inst->style.menu_command_bg_focused_clr.b,
-			                       inst->style.menu_command_bg_focused_clr.a);
-			SDL_RenderFillRect(r, &frect);
-
-			if (inst->style.menu_command_border_focused) {
-				SDL_SetRenderDrawColor(r,
-					               inst->style.menu_border_clr.r,
-					               inst->style.menu_border_clr.g,
-					               inst->style.menu_border_clr.b,
-					               inst->style.menu_border_clr.a);
-				SDL_RenderRect(r, &frect);
-			}
-		}
-
-		if (menu->enabled[i]) {
-			command_c = inst->style.menu_text_clr;
-		} else {
-			command_c = inst->style.menu_text_disabled_clr;
-		}
-
-		TTF_GetTextSize(menu->label[i], &w, &h);
-		frect.x = command_x + inst->style.menu_command_padding_left;
-		frect.y = command_y + inst->style.menu_command_padding_top;
-		frect.w = w;
-		frect.h = h;
-
-		TTF_SetTextColor(menu->label[i],
-		                 command_c.r,
-				 command_c.g,
-				 command_c.b,
-				 command_c.a);
-		CTK_RenderText(r,
-		               menu->label[i],
-		               frect,
-		               CTK_TEXT_ALIGNMENT_LEFT,
-		               menu->underline[i],
-		               inst->style.menu_text_clr);
-
-		frect.x += w + inst->style.menu_command_padding_right;
-		frect.w = menu->rect.w -
-		          frect.x -
-		          inst->style.menu_accelerator_padding_right;
-		frect.h = h;
-
-		TTF_SetTextColor(menu->accelerator[i],
-		                 command_c.r,
-				 command_c.g,
-				 command_c.b,
-				 command_c.a);
-		CTK_RenderText(r,
-		               menu->accelerator[i],
-		               frect,
-		               CTK_TEXT_ALIGNMENT_RIGHT,
-		               -1,
-		               inst->style.menu_text_clr);
-
-		command_y += menu->h[i];
-	}
-
-	if (inst->style.menu_border) {
-		frect.x = menu->rect.x;
-		frect.y = menu->rect.y;
-		frect.w = menu->rect.w;
-		frect.h = menu->rect.h;
-
-		SDL_SetRenderDrawColor(r,
-	                               inst->style.menu_border_clr.r,
-	                               inst->style.menu_border_clr.g,
-	                               inst->style.menu_border_clr.b,
-	                               inst->style.menu_border_clr.a);
-		SDL_RenderRect(r, &frect);
-	}
+	inst->style.draw_menu(inst, m);
 }
 
 void
 CTK_DrawMenubar(CTK_Instance *inst)
 {
-	float         cascade_x;
-	SDL_FRect     frect;
-	size_t        i;
-	CTK_Menubar  *mb;
-	SDL_Renderer *r;
-	int           w;
+	inst->style.draw_menubar(inst);
+}
 
-	mb = inst->menubar;
+void
+CTK_RenderWidget(CTK_Instance       *inst,
+                 const CTK_WidgetId  widget)
+{
+	SDL_Renderer *r = NULL;
+
 	r = SDL_GetRenderer(inst->win);
-	SDL_GetRenderOutputSize(r, &w, NULL);
+	SDL_DestroyTexture(inst->texture[widget]);
+	inst->texture[widget] = SDL_CreateTexture(r,
+	                                          CTK_PIXELFORMAT,
+	                                          CTK_TEXTUREACCESS,
+	                                          inst->rect[widget].w,
+	                                          inst->rect[widget].h);
 
-	frect.x = 0;
-	frect.y = 0;
-	frect.w = w;
-	frect.h = mb->h;
-	SDL_SetRenderDrawColor(r,
-	                       inst->style.menubar_bg_clr.r,
-	                       inst->style.menubar_bg_clr.g,
-	                       inst->style.menubar_bg_clr.b,
-	                       inst->style.menubar_bg_clr.a);
-	SDL_RenderFillRect(r, &frect);
-
-	cascade_x = 1;
-	for (i = 0; i < mb->cascades; i++) {
-		if (i == mb->hovered_casc ||
-		    i == mb->focused_casc) {
-			frect.x = cascade_x;
-			frect.y = 1;
-			frect.w = inst->style.menubar_cascade_padding_left +
-			          mb->cascade_w[i] +
-			          inst->style.menubar_cascade_padding_right +
-			          2;
-			frect.h = mb->h - 2;
-			SDL_SetRenderDrawColor(r,
-					       inst->style.menubar_cascade_bg_hovered_clr.r,
-					       inst->style.menubar_cascade_bg_hovered_clr.g,
-					       inst->style.menubar_cascade_bg_hovered_clr.b,
-					       inst->style.menubar_cascade_bg_hovered_clr.a);
-			SDL_RenderFillRect(r, &frect);
-		}
-
-		if (i == mb->focused_casc &&
-		    inst->style.menubar_cascade_border_focused) {
-			frect.x = cascade_x;
-			frect.y = 1;
-			frect.w = inst->style.menubar_cascade_padding_left +
-			          mb->cascade_w[i] +
-			          inst->style.menubar_cascade_padding_right +
-			          2;
-			frect.h = mb->h - 2;
-			SDL_SetRenderDrawColor(r,
-				               inst->style.menubar_border_clr.r,
-				               inst->style.menubar_border_clr.g,
-				               inst->style.menubar_border_clr.b,
-				               inst->style.menubar_border_clr.a);
-			SDL_RenderRect(r, &frect);
-		}
-
-		TTF_SetTextColor(mb->cascade[i],
-	                         inst->style.menubar_text_clr.r,
-	                         inst->style.menubar_text_clr.g,
-	                         inst->style.menubar_text_clr.b,
-	                         inst->style.menubar_text_clr.a);
-		frect.x = cascade_x + inst->style.menubar_cascade_padding_left;
-		frect.y = inst->style.menubar_cascade_padding_top;
-		frect.w = mb->cascade_w[i];
-		frect.h = mb->cascade_h[i];
-
-		CTK_RenderText(r,
-		               mb->cascade[i],
-		               frect,
-		               CTK_TEXT_ALIGNMENT_LEFT,
-		               mb->underline[i],
-		               inst->style.menubar_text_clr);
-
-		cascade_x += mb->cascade_w[i] +
-		             inst->style.menubar_cascade_padding_right +
-		             inst->style.menubar_cascade_padding_left +
-		             2;
-	}
-
-	frect.x = 0;
-	frect.y = 0;
-	frect.w = w;
-	frect.h = mb->h;
-	SDL_SetRenderDrawColor(r,
-		               inst->style.menubar_border_clr.r,
-		               inst->style.menubar_border_clr.g,
-		               inst->style.menubar_border_clr.b,
-		               inst->style.menubar_border_clr.a);
-	if (inst->style.menubar_border) {
-		SDL_RenderRect(r, &frect);
-	}
+	SDL_SetRenderTarget(r, inst->texture[widget]);
+	inst->wstyle[widget].render(inst, widget);
+	inst->redraw = true;
+	SDL_SetRenderTarget(r, NULL);
 }
 
 void
@@ -2295,7 +1673,7 @@ CTK_HandleDrag(CTK_Instance *inst,
 	if (inst->value[fw] > inst->value_max[fw])
 		inst->value[fw] = inst->value_max[fw];
 
-	CTK_CreateWidgetTexture(inst, fw);
+	CTK_RenderWidget(inst, fw);
 
 	if (NULL != inst->edit[fw])
 		inst->edit[fw](inst, fw, inst->edit_data[fw]);
@@ -2927,10 +2305,10 @@ CTK_HandleMouseMotion(CTK_Instance               *inst,
 		return;
 
 	if (inst->hovered_w < inst->widgets)
-		CTK_CreateWidgetTexture(inst, inst->hovered_w);
+		CTK_RenderWidget(inst, inst->hovered_w);
 
 	if (old_hov_wid  < inst->widgets)
-		CTK_CreateWidgetTexture(inst, old_hov_wid);
+		CTK_RenderWidget(inst, old_hov_wid);
 }
 
 void
@@ -3441,7 +2819,7 @@ CTK_SetWidgetEnabled(CTK_Instance       *inst,
 		CTK_SetWidgetFocusable(inst, widget, false);
 	}
 
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3479,7 +2857,7 @@ CTK_SetWidgetFocusable(CTK_Instance       *inst,
 		inst->focusable_ws--;
 	}
 
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3500,7 +2878,7 @@ CTK_SetWidgetText(CTK_Instance       *inst,
 	if (h > inst->rect[widget].h)
 		inst->rect[widget].h = h;
 
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3509,7 +2887,7 @@ CTK_SetWidgetTextAlignment(CTK_Instance            *inst,
                            const CTK_TextAlignment  alignment)
 {
 	inst->wstyle[widget].text_align = alignment;
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3527,7 +2905,7 @@ CTK_SetWidgetTextAndResize(CTK_Instance       *inst,
 	}
 	inst->rect[widget].w = w;
 	inst->rect[widget].h = h;
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3536,7 +2914,7 @@ CTK_SetWidgetToggle(CTK_Instance       *inst,
                     const bool          toggle)
 {
 	inst->toggle[widget] = toggle;
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3545,7 +2923,7 @@ CTK_SetWidgetUnderline(CTK_Instance       *inst,
                        const size_t        underline)
 {
 	inst->underline[widget] = underline;
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 }
 
 void
@@ -3558,7 +2936,7 @@ CTK_SetWidgetValue(CTK_Instance       *inst,
 	else
 		inst->value[widget] = value;
 
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 
 	if (NULL != inst->edit[widget]) {
 		inst->edit[widget](inst, widget, inst->edit_data[widget]);
@@ -3636,7 +3014,7 @@ CTK_ShiftWidgetTextCursor(CTK_Instance       *inst,
 	if (shift_selection)
 		inst->selection[w] = inst->cursor[w];
 
-	CTK_CreateWidgetTexture(inst, w);
+	CTK_RenderWidget(inst, w);
 }
 
 void
@@ -3725,7 +3103,7 @@ CTK_ToggleCheckbox(CTK_Instance *inst,
 	else
 		inst->toggle[widget] = true;
 
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 
 	if (NULL != inst->edit[widget]) {
 		inst->edit[widget](inst, widget, inst->edit_data[widget]);
@@ -3748,7 +3126,7 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 		if (inst->group[i] == inst->group[widget] &&
 		    i != widget) {
 			inst->toggle[i] = false;
-			CTK_CreateWidgetTexture(inst, i);
+			CTK_RenderWidget(inst, i);
 
 			if (NULL != inst->edit[i]) {
 				inst->edit[i](inst, i, inst->edit_data[i]);
@@ -3756,7 +3134,7 @@ CTK_ToggleRadiobutton(CTK_Instance *inst,
 		}
 	}
 	inst->toggle[widget] = true;
-	CTK_CreateWidgetTexture(inst, widget);
+	CTK_RenderWidget(inst, widget);
 
 	if (NULL != inst->edit[widget]) {
 		inst->edit[widget](inst, widget, inst->edit_data[widget]);

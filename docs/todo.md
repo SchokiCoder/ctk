@@ -178,6 +178,16 @@ This reinforces ownership clarity.
 - [x] add CacheId
 - [x] add MenubarCascId
 
+- [x] add theme header system and move draw functions to theme
+This also creates a header for the default theme.
+Each widget has a WidgetStyle,
+which has a function pointer for the drawing function.
+The general style struct has one for menus and menubar.
+This also merges the style header into the main header,
+thus we have a single header, except for the theme.
+
+- [ ] crash when key down while entry context menu open
+
 - [ ] move Menubar struct content into inst, eliminating the struct?
 Same reasons as above.
 
@@ -185,8 +195,6 @@ Same reasons as above.
 no more spaces for aligning, instead just using a tab
 
 - [ ] str-n functions like `strncpy` considered harmful
-
-- [ ] crash when key down while entry context menu open
 
 - [ ] rework widget spacing with margin, border, padding, content sizes
 x, y are now at upper left of the border.

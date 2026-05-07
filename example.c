@@ -3,6 +3,7 @@
  */
 
 #define CTK_IMPLEMENTATION
+#include "CTK_theme_default.h"
 #include "CTK.h"
 
 #include <stdio.h>
@@ -325,7 +326,7 @@ main(int    argc,
 	}
 
 	snprintf(title, BUFLEN, CTK_EXAMPLE_NAME " v%s", version);
-	inst = CTK_CreateInstance(title, 640, 480, 0);
+	inst = CTK_CreateInstance(title, 640, 480, 0, CTK_THEME_DEFAULT);
 	if (NULL == inst) {
 		fprintf(stderr, "Could not create CTK Instance\n");
 		fprintf(stderr, "%s\n", SDL_GetError());

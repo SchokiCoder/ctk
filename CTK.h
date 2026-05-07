@@ -1615,12 +1615,19 @@ void
 CTK_FocusMenu(CTK_Instance     *inst,
               const CTK_MenuId  m)
 {
+	size_t i;
+
 	if (SDL_TextInputActive(inst->win)) {
 		SDL_StopTextInput(inst->win);
 		inst->txt_input_suspended = true;
 	}
 
-	inst->menu[m].focused_cmd = 0;
+	for (i = 0; i < inst->menu[m].cmds; i++) {
+		inst->menu[m].focused_cmd = i;
+		if (inst->menu[m].enabled[i]) {
+			break;
+		}
+	}
 	inst->visible_menu = m;
 	inst->redraw = true;
 }
